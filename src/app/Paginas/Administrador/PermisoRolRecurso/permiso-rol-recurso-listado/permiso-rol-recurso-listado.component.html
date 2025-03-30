@@ -1,0 +1,78 @@
+<app-navbar></app-navbar>
+<app-sidebar></app-sidebar>
+
+<div class="container-fluid mt-4">
+  <div class="row">
+    <div class="col-lg-2 d-none d-lg-block"></div>
+
+    <div class="col-12 col-lg-10">
+      <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h4 class="mb-0"><i class="bi bi-clipboard"></i> Listado de Permisos</h4>
+          <button class="btn btn-light text-primary fw-bold" (click)="NavegarCrear('/permiso-rol-recurso-crear')">
+            <i class="bi bi-plus-lg"></i> Crear Nuevo
+          </button>
+        </div>
+
+        <div class="card-body">
+          <div class="mb-3">
+            <input type="text" class="form-control" placeholder="Buscar..." [(ngModel)]="FiltroTexto">
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-hover table-bordered align-middle">
+              <thead class="table-dark">
+                <tr class="text-center">
+                  <th>#</th>
+                  <th>Rol</th>
+                  <th>Permiso</th>
+                  <th>Recurso</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let dato of DatosPaginados(); let i = index">
+                  <td class="text-center fw-bold">{{ (PaginaActual - 1) * ElementosPorPagina + i + 1 }}</td>
+                  <td>{{ dato.Rol?.NombreRol }}</td>
+                  <td>{{ dato.Permiso?.NombrePermiso }}</td>
+                  <td>{{ dato.Recurso?.NombreRecurso }}</td>
+                  <td class="text-center">
+                    <span class="badge" [ngClass]="dato.Estatus === 1 ? 'bg-success' : 'bg-danger'">
+                      {{ dato.Estatus === 1 ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-danger" (click)="Eliminar(dato.CodigoRol, dato.CodigoPermiso, dato.CodigoRecurso)">
+                        <i class="bi bi-trash"></i> Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <nav>
+            <ul class="pagination justify-content-center">
+              <li class="page-item" [class.disabled]="PaginaActual === 1">
+                <button class="page-link" (click)="CambiarPagina(PaginaActual - 1)">
+                  <i class="bi bi-chevron-left"></i> Anterior
+                </button>
+              </li>
+              <li *ngFor="let pag of TotalPaginas()" class="page-item" [class.active]="PaginaActual === pag">
+                <button class="page-link" (click)="CambiarPagina(pag)">{{ pag }}</button>
+              </li>
+              <li class="page-item" [class.disabled]="PaginaActual === TotalPaginas().length">
+                <button class="page-link" (click)="CambiarPagina(PaginaActual + 1)">
+                  Siguiente <i class="bi bi-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div> 
+      </div> 
+    </div> 
+  </div> 
+</div> 

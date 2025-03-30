@@ -1,0 +1,27 @@
+<nav class="navbar">
+    <!-- Botón de hamburguesa solo para pantallas pequeñas -->
+    <button class="hamburger-btn" (click)="toggleSidebar()">
+      <i class="bi bi-list"></i> <!-- Icono de menú hamburguesa -->
+    </button>
+    
+    <!-- Contenedor del logo -->
+    <div class="logo-container">
+      <img src="LogoProSystem.png" alt="Logo" class="logo">
+      <span class="brand">ProSystem S.A.</span>
+    </div>
+  </nav>
+  
+  <!-- Sidebar solo visible en pantallas pequeñas -->
+  <div class="sidebar" [class.active]="sidebarVisible">
+    <ul>
+      <li><a (click)="navegar('/empresa-listado')">Empresa</a></li>
+      <li><a (click)="navegar('/rol-listado')">Rol</a></li>
+      <li><a (click)="navegar('/usuario-listado')">Usuario</a></li>
+      <li><a (click)="navegar('/permiso-listado')">Permiso</a></li>
+      <li><a (click)="navegar('/recurso-listado')">Recurso</a></li>
+      <li><a (click)="navegar('/permiso-rol-recurso-listado')">Recurso por rol y tablas</a></li>
+
+    </ul>
+    <button class="logout-btn" (click)="cerrarSesion()">Cerrar sesión</button>
+  </div>
+  

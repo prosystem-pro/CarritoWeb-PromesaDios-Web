@@ -1,0 +1,45 @@
+<app-navbar></app-navbar>
+<app-sidebar></app-sidebar>
+
+<div class="container-fluid mt-4">
+  <div class="row">
+    <div class="col-12 col-lg-10 offset-lg-2">
+      <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+          <h4><i class="bi bi-pencil-square"></i> Editar Rol</h4>
+        </div>
+
+        <div class="card-body">
+          <form (ngSubmit)="Editar()">
+            <div class="form-group mb-3">
+              <label for="CodigoRol"><i class="bi bi-card-text"></i> CodigoRol</label>
+              <input id="CodigoRol" type="text" class="form-control" [(ngModel)]="Datos.CodigoRol" name="CodigoRol" required>
+            </div>
+
+            <div class="form-group mb-3">
+              <label for="nombre"><i class="bi bi-card-text"></i> Nombre</label>
+              <input id="nombre" type="text" class="form-control" [(ngModel)]="Datos.NombreRol" name="nombre" required>
+            </div>
+
+            <div class="form-group mb-3">
+              <label for="estatus"><i class="bi bi-toggle-on"></i> Estatus</label>
+              <select id="estatus" class="form-control" [(ngModel)]="Datos.Estatus" name="estatus">
+                <option [value]="1">Activo</option>
+                <option [value]="2">Inactivo</option>
+              </select>
+            </div>
+
+            <div class="form-buttons d-flex justify-content-between">
+              <button type="submit" class="btn btn-success">
+                <i class="bi bi-check-circle"></i> Guardar Cambios
+              </button>
+              <button type="button" class="btn btn-danger" (click)="NavegarListado('/rol-listado')">
+                <i class="bi bi-x-circle"></i> Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
