@@ -1,0 +1,266 @@
+/* Base container */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f8f8f8;
+}
+
+/* Header styles */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 10px 15px;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+}
+
+.back-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+.category-title {
+  flex-grow: 1;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  background-color: #ff9800;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 50px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.cart-icon {
+  position: relative;
+  padding: 8px;
+}
+
+.cart-icon svg {
+  width: 24px;
+  height: 24px;
+  color: #333;
+}
+
+.cart-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #ff5722;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Loading and Error states */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #666;
+  animation: spin 1s ease infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error-message {
+  padding: 16px;
+  background-color: #ffebee;
+  color: #c62828;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+/* Product grid */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  padding: 10px;
+}
+
+/* Product cards */
+.product-card {
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.product-image {
+  height: 250px;
+  overflow: hidden;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-info {
+  padding: 15px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.product-name {
+  font-weight: bold;
+  font-size: 16px;
+  color: #333;
+}
+
+.product-price {
+  font-weight: bold;
+  font-size: 18px;
+  color: #333;
+}
+
+/* Quantity control */
+.quantity-control {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 8px 0;
+}
+
+.quantity-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  background-color: #5a5a5a;
+  color: white;
+  font-size: 18px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.quantity {
+  padding: 0 15px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Add to cart button */
+.add-button {
+  width: 100%;
+  padding: 8px 12px;
+  background-color: #4a3b2b;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.add-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.add-button:hover {
+  background-color: #5d4a37;
+}
+
+/* Empty state */
+.no-products {
+  text-align: center;
+  padding: 40px 0;
+  color: #666;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .category-title {
+    font-size: 20px;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .category-title {
+    font-size: 18px;
+    max-width: 250px;
+    padding: 10px 15px;
+  }
+}
+
+/* Sort/Filter controls - as shown in second image */
+.sort-controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 15px 15px;
+}
+
+.sort-button {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  font-size: 16px;
+}
+
+.sort-button svg {
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+}

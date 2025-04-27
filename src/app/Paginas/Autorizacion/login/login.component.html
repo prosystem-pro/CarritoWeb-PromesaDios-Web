@@ -1,23 +1,80 @@
-<div class="login-container">
-    <div class="login-card">
-      <h2>Iniciar Sesión</h2>
-      <form (ngSubmit)="login()">
-        <div class="form-group">
-          <label for="nombreUsuario">Usuario:</label>
-          <input type="text" id="nombreUsuario" [(ngModel)]="NombreUsuario" name="nombreUsuario" required>
+<!-- <div class="login-container">
+  <div class="login-card">
+    <h2>Iniciar Sesión</h2>
+    <form (ngSubmit)="login()">
+      <div class="form-group">
+        <label for="nombreUsuario">Usuario:</label>
+        <input type="text" id="nombreUsuario" [(ngModel)]="NombreUsuario" name="nombreUsuario" required>
+      </div>
+
+      <div class="form-group">
+        <label for="clave">Contraseña:</label>
+        <input type="password" id="clave" [(ngModel)]="Clave" name="clave" required>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button type="submit" class="btn">Iniciar Sesión</button>
+    </form>
+  </div>
+</div> -->
+
+<div class="contenedor-fluido pagina-login p-0 m-0">
+  <div class="row g-0 h-100">
+    <div class="col-md-6 d-none d-md-block banner-login">
+      <img src="imagenLogoLogin.jpg" class="img-fluid h-100 w-100" alt="Promesa de Dios Panadería & Repostería">
+    </div>
+
+    <div class="col-md-6 contenedor-formulario-login">
+      <div class="contenedor-trigo-abajo">
+        <img src="trigoAbajo.png" class="trigo-abajo" alt="Trigo decorativo">
+      </div>
+
+      <div class="formulario-login">
+        <div class="text-center mb-4">
+          <div class="contenedor-icono-usuario">
+            <i class="bi bi-person-fill"></i>
+          </div>
+          <h4 class="titulo-login">INICIAR SESIÓN</h4>
         </div>
-  
-        <div class="form-group">
-          <label for="clave">Contraseña:</label>
-          <input type="password" id="clave" [(ngModel)]="Clave" name="clave" required>
-        </div>
-  
-        <div class="error-message" *ngIf="errorMessage">
-          {{ errorMessage }}
-        </div>
-  
-        <button type="submit" class="btn">Iniciar Sesión</button>
-      </form>
+
+        <form (ngSubmit)="login()">
+          <div class="mb-3">
+            <label for="nombreUsuario" class="etiqueta-formulario">Usuario</label>
+            <input type="text" class="control-formulario" id="nombreUsuario" [(ngModel)]="NombreUsuario"
+              name="nombreUsuario" placeholder="usr_ejemplo" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="clave" class="etiqueta-formulario">Contraseña</label>
+            <input type="password" class="control-formulario" id="clave" [(ngModel)]="Clave" name="clave"
+              placeholder="••••••••••••" required>
+          </div>
+
+          <div class=" mb-3">
+            <input class="entrada-check" type="checkbox" id="recordarUsuario">
+            <label class="etiqueta-check" for="recordarUsuario">
+              Recordar usuario
+            </label>
+          </div>
+
+          <div class="mensaje-error text-danger mb-3" *ngIf="errorMessage">
+            {{ errorMessage }}
+          </div>
+
+          <button type="submit" class="boton boton-oscuro w-100 py-2">Iniciar</button>
+
+          <div class="text-end mt-5">
+            <a href="#" class="olvido-contrasena">¿Olvidaste tu contraseña?</a>
+          </div>
+        </form>
+      </div>
+
+      <div class="contenedor-trigo-derecha">
+        <img src="trigoDerecha.png" class="trigo-derecha" alt="Trigo decorativo">
+      </div>
     </div>
   </div>
-  
+</div>

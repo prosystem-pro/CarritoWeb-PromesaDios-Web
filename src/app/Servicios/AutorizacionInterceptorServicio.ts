@@ -12,7 +12,7 @@ export const AutorizacionInterceptor: HttpInterceptorFn = (Solicitud, Siguiente)
   const Token = Servicio.ObtenerToken();
 
   if (Token) {
-    console.log('Token adjuntado:', Token);
+    // console.log('Token adjuntado:', Token);
     Solicitud = Solicitud.clone({
       setHeaders: {
         Authorization: `Bearer ${Token}`
@@ -25,7 +25,7 @@ export const AutorizacionInterceptor: HttpInterceptorFn = (Solicitud, Siguiente)
       if (Error.status === 401) {
         console.warn('Token expirado o no válido');
         Servicio.EliminarToken();
-        console.log('Depuración - Redireccionando al login');
+        // console.log('Depuración - Redireccionando al login');
         router.navigate(['/login']); 
       }
       return throwError(() => Error);

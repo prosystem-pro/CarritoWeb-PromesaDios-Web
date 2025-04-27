@@ -21,10 +21,20 @@ import { RecursoCrearComponent } from '../app/Paginas/Administrador/Recurso/recu
 import { RecursoEditarComponent } from '../app/Paginas/Administrador/Recurso/recurso-editar/recurso-editar.component';
 import { PermisoRolRecursoListadoComponent } from '../app/Paginas/Administrador/PermisoRolRecurso/permiso-rol-recurso-listado/permiso-rol-recurso-listado.component';
 import { PermisoRolRecursoCrearComponent } from '../app/Paginas/Administrador/PermisoRolRecurso/permiso-rol-recurso-crear/permiso-rol-recurso-crear.component';
+import { NosotrosComponent } from './Paginas/Inicio/nosotros/nosotros.component';
+import { MenuCategoriaComponent } from './Paginas/Inicio/menu/menuCategoria.component';
+import { ProductosComponent } from './Componentes/productos/productos.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '', redirectTo: '/nosotros', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
+
+  //Rutas publicas
+  { path: 'nosotros', component: NosotrosComponent},
+  { path: 'clasificacion', component: MenuCategoriaComponent},
+  { path: 'productos/:codigo/:nombre', component: ProductosComponent },
+
+  //Rutas protegidas
   { path: 'menu', component: MenuComponent,canActivate: [AutorizacionRuta] },
   { path: 'navbar', component: NavbarComponent,canActivate: [AutorizacionRuta] },
   { path: 'sidebar', component: SidebarComponent,canActivate: [AutorizacionRuta] },
