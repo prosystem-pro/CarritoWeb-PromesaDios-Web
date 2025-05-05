@@ -1,5 +1,5 @@
 export interface Permiso {
-  CodigoPermiso?: number;
-  NombrePermiso?: string;
-  Estatus?: any;
+  CodigoPermiso: number;
+  NombrePermiso: string;
+  Estatus: any;
 }

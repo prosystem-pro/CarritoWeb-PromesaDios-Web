@@ -1,5 +1,5 @@
 export interface ReporteRedSocialPortada {
-  CodigoReporteRedSocialPortada?: number;
-  CodigoEmpresa?: number;
-  Estatus?: any;
+  CodigoReporteRedSocialPortada: number;
+  CodigoEmpresa: number;
+  Estatus: any;
 }

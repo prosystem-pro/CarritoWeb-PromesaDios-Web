@@ -1,5 +1,5 @@
 export interface ReporteTiempoPaginaPortada {
-  CodigoReporteTiempoPaginaPortada?: number;
-  CodigoEmpresa?: number;
-  Estatus?: any;
+  CodigoReporteTiempoPaginaPortada: number;
+  CodigoEmpresa: number;
+  Estatus: any;
 }

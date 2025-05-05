@@ -1,6 +1,6 @@
 export interface PermisoRolRecurso {
-  CodigoRol?: number;
-  CodigoPermiso?: number;
-  CodigoRecurso?: number;
-  Estatus?: any;
+  CodigoRol: number;
+  CodigoPermiso: number;
+  CodigoRecurso: number;
+  Estatus: any;
 }

@@ -1,5 +1,5 @@
 export interface ReporteVistaPortada {
-  CodigoReporteVistaPortada?: number;
-  CodigoEmpresa?: number;
-  Estatus?: any;
+  CodigoReporteVistaPortada: number;
+  CodigoEmpresa: number;
+  Estatus: any;
 }
