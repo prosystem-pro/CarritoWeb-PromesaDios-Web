@@ -103,7 +103,7 @@
 
                 <li class="nav-item">
                     <!-- Versión normal -->
-                    <a *ngIf="!modoEdicion" class="nav-link" routerLink="/contacto"
+                    <a *ngIf="!modoEdicion" class="nav-link active" (click)="navegar('/contacto')"
                         [ngStyle]="{'color': Datos?.ColorTextoContacto}">
                         {{ Datos?.TextoContacto || '' }}
                     </a>

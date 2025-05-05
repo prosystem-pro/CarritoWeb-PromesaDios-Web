@@ -1,14 +1,20 @@
 export interface ContactanosPortada {
-  CodigoContactanosPortada: number;
-  CodigoEmpresa: number;
-  NombreContactanosPortada: string;
-  ColorNombreContactanosPortada: string;
-  ColorFondoNombreContactanosPortada: string;
-  ColorFondoRedSocial: string;
-  ColorIconoAgregar: string;
-  TextoComoLlegar: string;
-  ColorTextoComoLlegar: string;
-  ColorBotonComoLlegar: string;
-  UrlImagenComoLlegar: string;
-  Estatus: any;
+  CodigoContactanosPortada?: number;
+  CodigoEmpresa?: number;
+  NombreContactanosPortada?: string;
+  ColorNombreContactanosPortada?: string;
+  ColorFondoNombreContactanosPortada?: string;
+  ColorContornoNombreContactanosPortada?: string;
+  UrlImagenContactanosPortada?: string;
+  ColorFondoRedSocial?: string;
+  ColorContornoRedSocial?: string;
+  ColorTextoRedSocial?: string;
+  ColorIconoAgregar?: string;
+  TextoComoLlegar?: string;
+  ColorTextoComoLlegar?: string;
+  ColorBotonComoLlegar?: string;
+  UrlImagenComoLlegar?: string;
+  UrlMapaComoLlegar?: string;
+  UrlMapa?: any;
+  Estatus?: any;
 }

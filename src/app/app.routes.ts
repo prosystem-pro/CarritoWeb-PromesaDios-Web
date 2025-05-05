@@ -24,6 +24,7 @@ import { PermisoRolRecursoCrearComponent } from '../app/Paginas/Administrador/Pe
 import { NosotrosComponent } from './Paginas/Inicio/nosotros/nosotros.component';
 import { MenuCategoriaComponent } from './Paginas/Inicio/menu/menuCategoria.component';
 import { ProductosComponent } from './Componentes/productos/productos.component';
+import { ContactoComponent } from './Paginas/Inicio/contacto/contacto.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/nosotros', pathMatch: 'full' },
@@ -33,6 +34,7 @@ export const routes: Routes = [
   { path: 'nosotros', component: NosotrosComponent},
   { path: 'clasificacion', component: MenuCategoriaComponent},
   { path: 'productos/:codigo/:nombre', component: ProductosComponent },
+  { path: 'contacto', component: ContactoComponent},
 
   //Rutas protegidas
   { path: 'menu', component: MenuComponent,canActivate: [AutorizacionRuta] },

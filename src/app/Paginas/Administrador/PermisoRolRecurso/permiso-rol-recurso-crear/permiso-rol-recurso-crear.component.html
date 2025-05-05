@@ -34,9 +34,11 @@
                             <label class="form-label fw-bold"><i class="bi bi-folder"></i> Recursos Disponibles</label>
                             <div class="border rounded p-3 bg-light">
                                 <div *ngFor="let recurso of Recursos" class="form-check">
-                                    <input type="checkbox" class="form-check-input" [value]="recurso.CodigoRecurso" 
-                                           (change)="ManejarSeleccionRecurso(recurso.CodigoRecurso, $event)">
-                                    <label class="form-check-label">{{ recurso.NombreRecurso }}</label>
+                                    <input type="checkbox" class="form-check-input" 
+                                    [value]="recurso.CodigoRecurso"
+                                    (change)="recurso.CodigoRecurso !== undefined ? ManejarSeleccionRecurso(recurso.CodigoRecurso, $event) : null">
+                             <label class="form-check-label">{{ recurso.NombreRecurso }}</label>
+                             
                                 </div>
                             </div>
                         </div>
