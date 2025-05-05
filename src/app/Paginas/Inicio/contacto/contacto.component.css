@@ -20,7 +20,7 @@
       }
   }
   
-  /* Tablet - entre 768px y 991px */
+  /* Tablet - entre 768px y 991px  */
   @media (min-width: 768px) and (max-width: 1204px) {
     .InputNombreContactanosPortada {
         width: 30%;
