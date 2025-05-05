@@ -1,0 +1,59 @@
+/* Estilo general (desktop/tablet grande) - desde 992px en adelante */
+@media (min-width: 1105px) {
+    .InputNombreContactanosPortada {
+        width: 100%;
+        max-width:300px ;
+        border-radius: 50%;
+        border: 1px solid #ccc;
+      }
+      .EstiloColor {
+        position: relative; top: -5px;
+      }
+      .BotonesExtras{
+        margin-top: -10px;
+      }
+      .ContornoFondoTitulo{
+        width: 67%; height: 100%;
+      }
+      .ContornoFondoRedesSociales{
+        width: 45%; height: 100%;
+      }
+  }
+  
+  /* Tablet - entre 768px y 991px */
+  @media (min-width: 768px) and (max-width: 1204px) {
+    .InputNombreContactanosPortada {
+        width: 30%;
+        border-radius: 50%;
+        border: 1px solid #ccc;
+      }
+      .EstiloColor {
+        position: relative; top: -5px;
+      }
+      .ContornoFondoTitulo{
+        width: 80%; height: 100%;
+      }
+      .ContornoFondoRedesSociales{
+        width: 55%; height: 100%;
+      }
+  }
+  
+  /* Celular - hasta 767px */
+  @media (max-width: 767px) {
+    .InputNombreContactanosPortada{
+        width: 60%;
+      }
+      .EstiloColor {
+        position: relative; top: -1px;
+      }
+      .ContornoFondoTitulo{
+        width: 100%; height: 100%;
+      }
+      .BotonesExtras{
+        margin-top: -1%;
+      }
+      .ContornoFondoRedesSociales{
+        width: 100%; height: 100%;
+      }
+  }
+  

@@ -91,7 +91,9 @@ export class UsuarioListadoComponent implements OnInit {
     this.ServicioRol.Listado().subscribe({
       next: (data: Rol[]) => {
         this.Roles = data.reduce((acc: { [key: number]: string }, rol: Rol) => {
-          acc[rol.CodigoRol] = rol.NombreRol;
+          if (rol.CodigoRol !== undefined) {
+            acc[rol.CodigoRol] = rol.NombreRol ?? '';
+          }
           return acc;
         }, {});
         this.Listado();
@@ -106,7 +108,9 @@ export class UsuarioListadoComponent implements OnInit {
     this.ServicioEmpresa.Listado().subscribe({
       next: (data: Empresa[]) => {
         this.Empresas = data.reduce((acc: { [key: number]: string }, empresa: Empresa) => {
-          acc[empresa.CodigoEmpresa] = empresa.NombreEmpresa;
+          if (empresa.CodigoEmpresa !== undefined) {
+            acc[empresa.CodigoEmpresa] = empresa.NombreEmpresa ?? '';
+          }
           return acc;
         }, {});
         this.Listado();
@@ -116,6 +120,7 @@ export class UsuarioListadoComponent implements OnInit {
       }
     });
   }
+  
 
   Eliminar(Codigo: number): void {
     if (confirm("¿Estás seguro de que deseas eliminar el registro?")) {

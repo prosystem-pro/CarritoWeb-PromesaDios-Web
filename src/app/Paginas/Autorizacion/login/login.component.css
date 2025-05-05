@@ -1,67 +1,227 @@
-.login-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh; /* Toma toda la altura de la pantalla */
-    background-color: #f4f4f4; 
+/* .login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; 
+  background-color: #f4f4f4;
+}
+
+.login-card {
+  width: 400px;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+h2 {
+  margin-bottom: 20px;
+  color: #333333;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  color: #555555;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+input:focus {
+  border-color: #007bff;
+}
+
+.error-message {
+  color: red;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn:hover {
+  background-color: #0056b3;
+} */
+
+/* Estilos generales para la página de login */
+.pagina-login {
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  background-color: #ffffff;
+}
+
+.banner-login {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.contenedor-formulario-login {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  background-color: #fff;
+}
+
+.formulario-login {
+  width: 80%;
+  max-width: 400px;
+  padding: 2rem;
+  z-index: 10;
+}
+
+.contenedor-icono-usuario {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #4b1d1d;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 1rem;
+}
+
+.contenedor-icono-usuario i {
+  font-size: 30px;
+}
+
+.titulo-login {
+  color: #4b1d1d;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
+.control-formulario {
+  width: 100%;
+  border-radius: 5px;
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+}
+
+.control-formulario:focus {
+  border-color: #4b1d1d;
+  box-shadow: 0 0 0 0.25rem rgba(75, 29, 29, 0.25);
+  outline: none;
+}
+
+.boton {
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.boton-oscuro {
+  background-color: #4b1d1d;
+  border-color: #4b1d1d;
+  color: white;
+}
+
+.boton-oscuro:hover {
+  background-color: #3a1717;
+  border-color: #3a1717;
+}
+
+.olvido-contrasena {
+  color: #666;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.olvido-contrasena:hover {
+  color: #4b1d1d;
+  text-decoration: underline;
+}
+
+.contenedor-trigo-abajo {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.trigo-abajo {
+  width: 40%;
+  height: auto;
+}
+
+.contenedor-trigo-derecha {
+  position: absolute;
+  right: 0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.trigo-derecha {
+  width: 60%;
+  height: auto;
+  float: right;
+}
+
+.entrada-check {
+  margin-right: 0.5rem;
+}
+
+.entrada-check:checked {
+  background-color: #4b1d1d;
+  border-color: #4b1d1d;
+}
+
+.entrada-check:focus {
+  border-color: #4b1d1d;
+  box-shadow: 0 0 0 0.25rem rgba(75, 29, 29, 0.25);
+}
+
+.etiqueta-check {
+  font-size: 0.9rem;
+}
+
+.etiqueta-formulario {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+@media (max-width: 767.98px) {
+  .formulario-login {
+    width: 90%;
   }
-  
-  .login-card {
-    width: 400px;
-    padding: 30px;
-    background-color: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    text-align: center;
+
+  .contenedor-trigo-abajo {
+    display: none;
+    width: 100px;
+    height: 100px;
   }
-  
-  h2 {
-    margin-bottom: 20px;
-    color: #333333;
+
+  .contenedor-trigo-derecha {
+    display: none;
+    width: 120px;
+    height: 120px;
   }
-  
-  .form-group {
-    margin-bottom: 20px;
-    text-align: left;
-  }
-  
-  label {
-    display: block;
-    margin-bottom: 8px;
-    color: #555555;
-  }
-  
-  input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    outline: none;
-    transition: border-color 0.3s;
-  }
-  
-  input:focus {
-    border-color: #007BFF;
-  }
-  
-  .error-message {
-    color: red;
-    margin-bottom: 15px;
-    font-weight: bold;
-  }
-  
-  .btn {
-    width: 100%;
-    padding: 10px;
-    background-color: #007BFF;
-    color: #ffffff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .btn:hover {
-    background-color: #0056b3;
-  }
-  
+}

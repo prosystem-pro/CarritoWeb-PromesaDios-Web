@@ -1,6 +1,6 @@
 export interface Logo {
-  CodigoLogo: number;
-  CodigoEmpresa: number;
-  NombreLogoEmpresa: string;
-  Estatus: any;
+  CodigoLogo?: number;
+  CodigoEmpresa?: number;
+  NombreLogoEmpresa?: string;
+  Estatus?: any;
 }
