@@ -241,11 +241,12 @@
     <i class="bi bi-pencil-fill text-black fs-6"></i>
   </label>
   <!-- Botón de eliminar -->
-<button class="btn btn-outline-danger btn-sm"
-style="width: 30px; height: 30px; padding: 0;"
-(click)="EliminarRedSocial(i)">
+  <button *ngIf="!MostrarListado[i]" class="btn btn-sm"
+  style="width: 30px; height: 30px; padding: 0; background-color: #dc3545; color: white; border: none;"
+  (click)="EliminarRedSocial(i)">
 <i class="bi bi-x-lg fs-6"></i>
 </button>
+
 
 
   <!-- Botón de guardar -->
