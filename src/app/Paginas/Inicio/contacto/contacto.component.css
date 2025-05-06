@@ -18,6 +18,12 @@
       .ContornoFondoRedesSociales{
         width: 45%; height: 100%;
       }
+      .ContenidoRedesSociales{
+        margin-left: 35%;
+      }
+      .FondoPantalla{
+        min-height:100%;
+      }
   }
   
   /* Tablet - entre 768px y 991px  */
@@ -36,6 +42,12 @@
       .ContornoFondoRedesSociales{
         width: 55%; height: 100%;
       }
+      .ContenidoRedesSociales{
+        margin-left: 30%;
+      }
+      .FondoPantalla{
+        min-height:60%;
+      }
   }
   
   /* Celular - hasta 767px */
@@ -47,13 +59,19 @@
         position: relative; top: -1px;
       }
       .ContornoFondoTitulo{
-        width: 100%; height: 100%;
+        width: 80%; height: 100%;
       }
       .BotonesExtras{
         margin-top: -1%;
       }
       .ContornoFondoRedesSociales{
-        width: 100%; height: 100%;
+        width: 80%; height: 100%;
+      }
+      .ContenidoRedesSociales{
+        margin-left: 18%;
+      }
+      .FondoPantalla{
+        min-height:60%;
       }
   }
   
