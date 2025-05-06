@@ -404,19 +404,21 @@
     <!-- Botón "Cómo llegar" flotante sobre el mapa -->
     <div class="position-absolute bottom-0 start-50 translate-middle-x mb-3">
       <a *ngIf="ContactanosPortada?.UrlMapaComoLlegar"
-      [href]="ContactanosPortada.UrlMapaComoLlegar"
-      target="_blank"
-      class="btn"
-      [ngStyle]="{
-        'background-color': ContactanosPortada.ColorBotonComoLlegar,
-        'color': ContactanosPortada.ColorTextoComoLlegar,
-        'padding': '10px 20px',
-        'font-weight': 'bold',
-        'border-radius': '8px',
-        'box-shadow': '0 2px 6px rgba(0,0,0,0.2)'
-      }">
-     {{ ContactanosPortada.TextoComoLlegar || 'COMO LLEGAR' }}
-   </a>
+         [href]="ContactanosPortada.UrlMapaComoLlegar"
+         target="_blank"
+         class="btn"
+         [ngStyle]="{
+           'background-color': ContactanosPortada.ColorBotonComoLlegar,
+           'color': ContactanosPortada.ColorTextoComoLlegar,
+           'padding': '14px 28px',
+           'font-size': '1.25rem',
+           'font-weight': 'bold',
+           'border-radius': '10px',
+           'box-shadow': '0 4px 8px rgba(0,0,0,0.2)'
+         }">
+        {{ ContactanosPortada.TextoComoLlegar || 'COMO LLEGAR' }}
+      </a>
     </div>
+    
   </div>
 </div>
