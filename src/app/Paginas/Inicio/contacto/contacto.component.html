@@ -240,6 +240,13 @@
          (click)="MostrarListado[i] = true">
     <i class="bi bi-pencil-fill text-black fs-6"></i>
   </label>
+  <!-- Botón de eliminar -->
+<button class="btn btn-outline-danger btn-sm"
+style="width: 30px; height: 30px; padding: 0;"
+(click)="EliminarRedSocial(i)">
+<i class="bi bi-x-lg fs-6"></i>
+</button>
+
 
   <!-- Botón de guardar -->
   <button *ngIf="MostrarListado[i]"
@@ -329,7 +336,7 @@
 <div class="w-100 position-relative">
   <!-- Botón de edición (pencil) -->
   <div *ngIf="!MostrarMapa" class="position-absolute top-0 end-0 me-3 mt-2 z-3">
-    <button class="btn p-1 d-flex align-items-center justify-content-center"
+    <button *ngIf="Permiso.PermisoSuperAdmin()" class="btn p-1 d-flex align-items-center justify-content-center"
             style="background-color: white; border: 1px solid #ccc; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.2); width: 45px; height: 45px;"
             (click)="MostrarMapa = true; ContactanosPortada.UrlMapa = ''">
       <i class="bi bi-pencil-square text-black fs-6"></i>

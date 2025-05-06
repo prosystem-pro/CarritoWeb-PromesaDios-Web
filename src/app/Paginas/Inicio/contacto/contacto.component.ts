@@ -336,5 +336,40 @@ subirImagenRedSocial(file: File, index: number | null): void {
   });
 }
 
+EliminarRedSocial(index: number) {
+  console.log('Intentando eliminar red social en índice:', index);
+
+  const red = this.RedeSocial[index];
+  const codigo = red?.CodigoRedSocial;
+
+  if (codigo === undefined) {
+    console.error('Código de red social indefinido para el índice:', index);
+    return;
+  }
+
+  console.log('Código de red social a eliminar:', codigo);
+  const confirmado = confirm('¿Estás seguro de que deseas eliminar esta red social?');
+
+  console.log('Confirmación del usuario:', confirmado);
+
+  if (confirmado) {
+    console.log('Enviando solicitud al servicio RedSocialServicio.Eliminar...');
+
+    this.RedSocialServicio.Eliminar(codigo).subscribe({
+      next: () => {
+        console.log(' Red social eliminada exitosamente del backend.');
+        this.RedeSocial.splice(index, 1);
+        console.log(' Red social eliminada de la lista local. Estado actual:', this.RedeSocial);
+      },
+      error: (error) => {
+        console.error(' Error al eliminar la red social desde el backend:', error);
+        alert('Hubo un error al eliminar la red social.');
+      }
+    });
+  } else {
+    console.log('Eliminación cancelada por el usuario.');
+  }
+}
+
 }
 
