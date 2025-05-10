@@ -3,26 +3,28 @@
   align-items: center;
   position: relative;
   width: 100%;
-  max-width: 600px;
-  height: 45px;
-  border-radius: 50px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  max-width: 90%;
+  height: 2.8rem;
+  border-radius: 2.5rem;
+  box-shadow: 0 0.125rem 0.3125rem rgba(0, 0, 0, 0.1);
+  background-color: var(--color-fondo-buscador, #f0f0f0);
 }
 
 .search-input {
   flex: 1;
   height: 100%;
-  padding: 0 20px;
+  padding: 0 5%;
   border: none;
   background: transparent;
-  font-size: 16px;
-  border-radius: 50px;
+  font-size: 1rem;
+  border-radius: 2.5rem;
   outline: none;
+  color: var(--color-texto-buscador, #000);
 }
 
 .search-button {
   position: absolute;
-  right: 10px;
+  right: 2%;
   top: 50%;
   transform: translateY(-50%);
   background: transparent;
@@ -38,21 +40,12 @@
   color: #333;
 }
 
-.div-desktop-search {
-  max-width: 600px;
-  /* max-width: max-content; */
-}
-
-.search-container {
-  background-color: var(--color-fondo-buscador, #f0f0f0);
-}
-
-.search-input {
-  color: var(--color-texto-buscador, #000);
-}
-
 .search-button img {
   content: var(--url-imagen-buscador);
+}
+
+.div-desktop-search {
+  max-width: 600px;
 }
 
 .nav-item {
@@ -63,20 +56,16 @@
 .btn-paleta {
   color: white;
   border: none;
-  padding: 5px;
+  padding: 0.3rem;
   border-radius: 50%;
   cursor: pointer;
-  width: 35px;
-  height: 35px;
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  z-index: 50;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  width: 2.5rem;
+  height: 2.5rem;
+  box-shadow: 0 0.125rem 0.3125rem rgba(0, 0, 0, 0.2);
 }
 
 .navbar-nav {
-  gap: 20px;
+  gap: 5%;
 }
 
 .nav-link.active-route {
@@ -86,11 +75,11 @@
 .nav-link.active-route::after {
   content: "";
   position: absolute;
-  bottom: -2px;
+  bottom: -0.125rem;
   left: 0;
   width: 100%;
-  height: 2px;
-  background-color: currentColor; /* Usará el mismo color del texto */
+  height: 0.125rem;
+  background-color: currentColor;
 }
 
 /* Para el botón con clase btn que también puede estar activo */
@@ -100,11 +89,11 @@
 
 @media (max-width: 576px) {
   .search-container {
-    max-width: 90%;
+    max-width: 95%;
   }
 
   .search-input {
-    font-size: 14px;
+    font-size: 0.75rem;
   }
 }
 
@@ -114,7 +103,11 @@
   }
 
   .search-container {
-    max-width: 80%;
+    max-width: 85%;
+  }
+
+  .search-button {
+    right: 2%;
   }
 }
 
@@ -132,7 +125,7 @@
   #navbarNav {
     opacity: 0.9;
     position: absolute;
-    top: 60px;
+    top: 3.75rem;
     left: 0;
     width: 100%;
     background-color: var(--color-fondo-navbar, white);
@@ -142,12 +135,11 @@
 
   .navbar-nav {
     flex-direction: column;
-    padding: 10px 0;
+    padding: 0.625rem 0;
   }
 
   .navbar-nav .nav-item {
-    padding: 5px 10px;
-    /* border-bottom: 1px solid #eee; */
+    padding: 0.3rem 5%;
   }
 
   .navbar-brand {
@@ -158,13 +150,13 @@
   .mobile-social-icons {
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 5%;
     margin-top: auto;
-    padding: 30px 0;
+    padding: 2rem 0;
   }
 
   .social-icon {
-    font-size: 24px;
+    font-size: 1.5rem;
     color: #333;
     text-decoration: none;
   }
@@ -172,6 +164,20 @@
   .mobile-social-icons,
   .navbar-brand-mov {
     display: flex !important;
+  }
+
+  .search-button {
+    position: absolute;
+    right: 2%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
   }
 }
 
@@ -203,7 +209,7 @@
   #navbarNav {
     opacity: 0.9;
     position: absolute;
-    top: 60px;
+    top: 3.75rem;
     left: 0;
     width: 100%;
     background-color: var(--color-fondo-navbar, white);
@@ -215,12 +221,11 @@
 
   .navbar-nav {
     flex-direction: column;
-    padding: 10px 0;
+    padding: 1.25rem 0;
   }
 
   .navbar-nav .nav-item {
-    padding: 5px 10px;
-    /* border-bottom: 1px solid #eee; */
+    padding: 0.625rem 5%;
   }
 
   .navbar-brand {
@@ -231,13 +236,13 @@
   .mobile-social-icons {
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 5%;
     margin-top: auto;
-    padding: 30px 0;
+    padding: 2rem 0;
   }
 
   .social-icon {
-    font-size: 24px;
+    font-size: 1.5rem;
     color: #333;
     text-decoration: none;
   }
@@ -245,6 +250,20 @@
   .mobile-social-icons,
   .navbar-brand-mov {
     display: flex !important;
+  }
+
+  .search-button {
+    position: absolute;
+    right: 2%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
   }
 }
 
@@ -324,7 +343,6 @@
 
   .navbar-nav .nav-item {
     padding: 10px 20px;
-    /* border-bottom: 1px solid #eee; */
   }
 
   .close-menu-btn {
@@ -349,17 +367,17 @@
   .mobile-social-icons {
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 5%;
     margin-top: auto;
-    padding: 30px 0;
-    width: 100vw;
+    padding: 2rem 0;
+    width: 100%;
     position: absolute;
-    bottom: 20px;
+    bottom: 5%;
     left: 0;
   }
 
   .social-icon {
-    font-size: 24px;
+    font-size: 1.5rem;
     color: #333;
     text-decoration: none;
   }
@@ -372,7 +390,6 @@
 
 /* Estilos adicionales para el modo edición */
 
-/* Contenedor para edición de elementos del nav */
 .edit-nav-item {
   padding: 5px;
   border-radius: 4px;
@@ -485,4 +502,20 @@
 .btn-success {
   background-color: #28a745;
   color: white;
+}
+
+.cart-count {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #ff5722;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
 }

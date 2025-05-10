@@ -5,12 +5,13 @@ import { ClasificacionProductoServicio } from '../../../Servicios/ClasificacionP
 import { MenuPortadaServicio } from '../../../Servicios/MenuPortadaServicio';
 import { HttpClient } from '@angular/common/http';
 import { Entorno } from '../../../Entornos/Entorno';
-import { MenuPortada } from '../../../Modelos/MenuPortada';
+import { Subscription } from 'rxjs';
 import { CarruselImagenServicio } from '../../../Servicios/CarruselImagnServicio';
 import { CarruselComponent } from '../../../Componentes/carrusel/carrusel.component';
 import { CarruselServicio } from '../../../Servicios/CarruselServicio';
 import { SvgDecoradorComponent } from '../../../Componentes/svg-decorador/svg-decorador.component';
 import { Router } from '@angular/router';
+import { ServicioCompartido } from '../../../Servicios/ServicioCompartido';
 
 @Component({
   selector: 'app-menuCategoria',
@@ -21,11 +22,13 @@ import { Router } from '@angular/router';
 export class MenuCategoriaComponent implements OnInit {
   private Url = `${Entorno.ApiUrl}`;
   private NombreEmpresa = `${Entorno.NombreEmpresa}`;
+  private textoBusquedaSubscription!: Subscription;
 
   modoEdicion = false;
   mostrarPanelColor = false;
   menuPortada: any = null;
   clasificaciones: any[] = [];
+  clasificacionesOriginales: any[] = [];
   tituloPrincipal: string = '';
   editandoTituloPrincipal: boolean = false;
   tituloPrincipalOriginal: string = '';
@@ -36,6 +39,7 @@ export class MenuCategoriaComponent implements OnInit {
   carruselData: any = null;
   detallesCarrusel: any = null;
   titulo: string = ''
+  textoBusqueda: string = '';
 
   nuevaCategoria = {
     titulo: '',
@@ -63,6 +67,7 @@ export class MenuCategoriaComponent implements OnInit {
     private carruselImagenServicio: CarruselImagenServicio,
     private menuPortadaServicio: MenuPortadaServicio,
     private router: Router,
+    private servicioCompartido: ServicioCompartido,
     private http: HttpClient
   ) { }
 
@@ -70,6 +75,17 @@ export class MenuCategoriaComponent implements OnInit {
     this.cargarMenuPortada();
     this.cargarClasificaciones();
     this.cargarDatosCarrusel();
+    this.textoBusquedaSubscription = this.servicioCompartido.textoBusqueda$.subscribe((texto) => {
+      this.textoBusqueda = texto;  // Actualizamos el texto de búsqueda
+      this.buscar();  // Hacemos la búsqueda cada vez que cambie el texto
+    });
+  }
+
+  ngOnDestroy(): void {
+    // Limpiamos la suscripción cuando el componente se destruye
+    if (this.textoBusquedaSubscription) {
+      this.textoBusquedaSubscription.unsubscribe();
+    }
   }
 
   toggleColorPanel(): void {
@@ -84,7 +100,10 @@ export class MenuCategoriaComponent implements OnInit {
           // Actualizar el título principal
           this.tituloPrincipal =
             this.menuPortada.TituloMenu || '';
-          console.log('MenuPortada cargado:', this.menuPortada);
+            this.servicioCompartido.setDatosClasificacion({
+              colorClasificacionFondo: this.menuPortada?.ColorFondoNombreClasificacion || '',
+              colorClasificacionTexto: this.menuPortada?.ColorNombreClasificacion || '',
+            });
         } else {
           console.warn('No se encontraron datos de MenuPortada');
           this.inicializarMenuPortadaSiNoExiste();
@@ -108,8 +127,8 @@ export class MenuCategoriaComponent implements OnInit {
             item.NombreClasificacionProducto.trim() !== '' &&
             item.CodigoClasificacionProducto !== 0
         );
+        this.clasificacionesOriginales = [...this.clasificaciones];
 
-        console.log('Clasificaciones cargadas:', this.clasificaciones);
         this.isLoading = false;
       },
       error: (err) => {
@@ -177,7 +196,7 @@ export class MenuCategoriaComponent implements OnInit {
   // Guarda los cambios del título principal
   guardarTituloPrincipal() {
     // Actualiza el valor del título principal
-    this.tituloPrincipal = this.tituloPrincipalTemporal;
+    this.tituloPrincipal = this.tituloPrincipalTemporal.trim();
 
     // Actualiza el título en MenuPortada
     if (this.menuPortada) {
@@ -214,7 +233,7 @@ export class MenuCategoriaComponent implements OnInit {
 
   // Guarda los cambios del título
   guardarTituloClasificacion(clasificacion: any) {
-    clasificacion.NombreClasificacionProducto = this.tituloTemporal;
+    clasificacion.NombreClasificacionProducto = this.tituloTemporal.trim();
 
     this.actualizarClasificacion(clasificacion);
 
@@ -510,6 +529,7 @@ export class MenuCategoriaComponent implements OnInit {
         this.menuPortadaServicio.Editar(this.menuPortada).subscribe({
           next: (response) => {
             console.log('MenuPortada actualizado correctamente', response);
+            this.cargarMenuPortada();
           },
           error: (error) => {
             console.error('Error al actualizar MenuPortada', error);
@@ -594,6 +614,41 @@ export class MenuCategoriaComponent implements OnInit {
 
   navegar(ruta: string, codigo: string, nombre: string) {
     this.router.navigate([ruta, codigo, nombre]);
-    console.log('Click navegar');
   }
+
+  onColorChange(color: string) {
+    this.menuPortada.ColorFondoNombreClasificacion = color;
+    this.servicioCompartido.setDatosClasificacion({
+      colorClasificacionFondo: color,
+      colorClasificacionTexto: this.menuPortada.ColorNombreClasificacion,
+    });
+  }
+
+  //Método para buscar
+  buscar(): void {
+    if (!this.textoBusqueda) {
+      this.cancelarBusqueda();
+      return; // No hacemos la búsqueda si no hay texto
+    }
+
+    const tipoBusqueda = 1;
+    const valorBusqueda = this.textoBusqueda || '';
+
+    this.clasificacionProductoServicio.BuscarClasificaciones(tipoBusqueda, valorBusqueda)
+      .subscribe({
+        next: (data) => {
+          this.clasificaciones = data;
+          console.log('Resultados de búsqueda:', this.clasificaciones);
+        },
+        error: (error) => {
+          console.error('Error al buscar clasificaciones:', error);
+        }
+      });
+  }
+
+    // Método para cancelar la búsqueda
+    cancelarBusqueda(): void {
+      this.clasificaciones = [...this.clasificacionesOriginales];  // Restauramos las clasificaciones originales
+      this.textoBusqueda = '';  // Limpiamos el campo de búsqueda
+    }
 }

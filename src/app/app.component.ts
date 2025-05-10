@@ -18,4 +18,9 @@ export class AppComponent {
   esLogin(): boolean {
     return this.router.url === '/login'; // Retorna `true` si está en la ruta de login
   }
+
+  esProductos(): boolean {
+    return this.router.url.startsWith('/productos');
+  }
+  
 }

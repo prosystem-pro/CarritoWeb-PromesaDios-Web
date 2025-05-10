@@ -1,31 +1,81 @@
-import { Component, ElementRef, Renderer2, ViewChild } from '@angular/core';
+import { Component, ElementRef, Renderer2, ViewChild, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { NavbarEstiloServicio } from '../../Servicios/NavbarEstiloServicio';
 import { NgStyle, CommonModule, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Entorno } from '../../Entornos/Entorno';
+import { ServicioCompartido } from '../../Servicios/ServicioCompartido';
+import { Subscription } from 'rxjs';
+import { CarritoComponent } from '../carrito/carrito.component';
 
 @Component({
   selector: 'app-header',
-  imports: [NgStyle, CommonModule, FormsModule, NgIf],
+  imports: [NgStyle, CommonModule, FormsModule, NgIf, CarritoComponent],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css',
-  standalone: true
+  standalone: true,
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit, OnDestroy {
   private Url = `${Entorno.ApiUrl}`;
   private NombreEmpresa = `${Entorno.NombreEmpresa}`;
+  private subscription!: Subscription;
   primaryColor: string = '';
   Datos: any = null;
   modoEdicion: boolean = false;
   datosOriginales: any = null;
+  textoBusqueda: string = '';
+  busquedaActiva: boolean = false;
+  totalItemsCarrito: number = 0;
+  mostrarCarrito = false;
   @ViewChild('navbarCollapse') navbarCollapse!: ElementRef;
-  
-  constructor(private Servicio: NavbarEstiloServicio, private router: Router, private http: HttpClient, private renderer: Renderer2) {}
+
+  constructor(
+    private Servicio: NavbarEstiloServicio,
+    private router: Router,
+    private http: HttpClient,
+    private renderer: Renderer2,
+    private servicioCompartido: ServicioCompartido
+  ) {}
+
+  buscar(): void {
+    // Verifica que haya texto de búsqueda antes de hacer la solicitud
+    if (this.textoBusqueda.trim()) {
+      this.servicioCompartido.setTextoBusqueda(this.textoBusqueda); // Actualiza el texto de búsqueda
+      this.busquedaActiva = true;
+    }
+  }
+
+  cancelarBusqueda(): void {
+    // Verifica que haya texto de búsqueda antes de hacer la solicitud
+    if (this.textoBusqueda.trim()) {
+      this.servicioCompartido.setTextoBusqueda(""); // Actualiza el texto de búsqueda
+      this.busquedaActiva = false;
+      this.textoBusqueda = "";
+    }
+  }
 
   ngOnInit(): void {
     this.Listado();
+    this.subscription = this.servicioCompartido.carritoVaciado$.subscribe(() => {
+      this.obtenerTotalItemsCarrito();
+    });
+    this.obtenerTotalItemsCarrito();
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
+  obtenerTotalItemsCarrito(): void {
+    const carritoGuardado = localStorage.getItem('carrito');
+    if (carritoGuardado) {
+      const carrito = JSON.parse(carritoGuardado);
+      const totalItems = carrito.reduce((total: number, item: any) => total + (item.cantidad || 1), 0);
+      this.totalItemsCarrito = totalItems;
+    } else {
+      this.totalItemsCarrito = 0;
+    }
   }
 
   toggleModoEdicion(): void {
@@ -55,14 +105,13 @@ export class HeaderComponent {
       this.Datos.ColorTextoContacto = colorSeleccionado;
     }
   }
-  
 
   guardarCambios(): void {
     if (this.Datos) {
-      const datosActualizados = {...this.Datos};
+      const datosActualizados = { ...this.Datos };
 
-    datosActualizados.ColorTextoMenu = datosActualizados.ColorTextoInicio;
-    datosActualizados.ColorTextoContacto = datosActualizados.ColorTextoInicio;
+      datosActualizados.ColorTextoMenu = datosActualizados.ColorTextoInicio;
+      datosActualizados.ColorTextoContacto = datosActualizados.ColorTextoInicio;
 
       this.Servicio.Editar(datosActualizados).subscribe({
         next: (response) => {
@@ -74,7 +123,7 @@ export class HeaderComponent {
         error: (error) => {
           console.error('Error al guardar los cambios', error);
           alert('Error al guardar los cambios. Por favor, intente de nuevo.');
-        }
+        },
       });
     } else {
       console.error('No hay datos disponibles para actualizar');
@@ -86,23 +135,47 @@ export class HeaderComponent {
       next: (data) => {
         this.Datos = data[0];
         this.actualizarEstilosCSS();
+        this.servicioCompartido.setDatosHeader({
+          urlImagenCarrito: this.Datos.UrlImagenCarrito,
+          textoBuscador: this.Datos.TextoBuscador,
+          urlImagenLupa: this.Datos.UrlImagenBuscador,
+        }
+        );
       },
       error: (error) => {
-        console.error("Error al cargar los datos", error);
-      }
+        console.error('Error al cargar los datos', error);
+      },
     });
   }
 
   actualizarEstilosCSS(): void {
-    document.documentElement.style.setProperty('--color-fondo-buscador', this.Datos?.ColorFondoBuscador || '#f0f0f0');
-    document.documentElement.style.setProperty('--color-texto-buscador', this.Datos?.ColorTextoBuscador || '#000');
-    document.documentElement.style.setProperty('--color-fondo-navbar', this.Datos?.ColorFondoNavbar || 'white');
-    document.documentElement.style.setProperty('--url-imagen-buscador', `url(${this.Datos?.UrlImagenBuscador})`);
+    document.documentElement.style.setProperty(
+      '--color-fondo-buscador',
+      this.Datos?.ColorFondoBuscador || '#f0f0f0'
+    );
+    document.documentElement.style.setProperty(
+      '--color-texto-buscador',
+      this.Datos?.ColorTextoBuscador || '#000'
+    );
+    document.documentElement.style.setProperty(
+      '--color-fondo-navbar',
+      this.Datos?.ColorFondoNavbar || 'white'
+    );
+    document.documentElement.style.setProperty(
+      '--url-imagen-buscador',
+      `url(${this.Datos?.UrlImagenBuscador})`
+    );
   }
 
   actualizarEstilosBuscador(): void {
-    document.documentElement.style.setProperty('--color-fondo-buscador', this.Datos?.ColorFondoBuscador || '#f0f0f0');
-    document.documentElement.style.setProperty('--color-texto-buscador', this.Datos?.ColorTextoBuscador || '#000');
+    document.documentElement.style.setProperty(
+      '--color-fondo-buscador',
+      this.Datos?.ColorFondoBuscador || '#f0f0f0'
+    );
+    document.documentElement.style.setProperty(
+      '--color-texto-buscador',
+      this.Datos?.ColorTextoBuscador || '#000'
+    );
   }
 
   actualizarLogo(event: any): void {
@@ -124,7 +197,10 @@ export class HeaderComponent {
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.Datos.UrlImagenBuscador = e.target.result;
-        document.documentElement.style.setProperty('--url-imagen-buscador', `url(${e.target.result})`);
+        document.documentElement.style.setProperty(
+          '--url-imagen-buscador',
+          `url(${e.target.result})`
+        );
       };
       reader.readAsDataURL(file);
 
@@ -156,52 +232,67 @@ export class HeaderComponent {
     formData.append('CampoPropio', 'CodigoNavbar');
     formData.append('NombreCampoImagen', campoDestino);
 
-    this.http.post(`${this.Url}subir-imagen`, formData)
-      .subscribe({
-        next: (response: any) => {
-          alert('Cargando imagen...');
-          console.log('Imagen subida correctamente', response);
-          
-          if (response && response.Entidad && response.Entidad[campoDestino]) {
-            this.Datos[campoDestino] = response.Entidad[campoDestino];
-            
-            if (campoDestino === 'UrlImagenBuscador') {
-              document.documentElement.style.setProperty('--url-imagen-buscador', `url(${response.Entidad[campoDestino]})`);
-            }
-            
-            const datosActualizados = {...this.Datos};
+    this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
+      next: (response: any) => {
+        alert('Cargando imagen...');
+        console.log('Imagen subida correctamente', response);
 
-            this.Servicio.Editar(datosActualizados).subscribe({
-              next: (updateResponse) => {
-                console.log('Campo de imagen actualizado en el modelo Navbar', updateResponse);
-                this.modoEdicion = false;
-              },
-              error: (updateError) => {
-                console.error('Error al actualizar el campo de imagen en el modelo Navbar', updateError);
-              }
-            });
-          } else {
-            const imageUrl = response.UrlImagenPortada || 
-                           response.url || 
-                           (response.Entidad ? response.Entidad.UrlImagenPortada : null);
-            
-            if (imageUrl) {
-              this.Datos[campoDestino] = imageUrl;
-              console.log(`URL de imagen actualizada: ${campoDestino} = ${imageUrl}`);
-            } else {
-              console.warn('No se pudo obtener la URL de la imagen de la respuesta', response);
-            }
+        if (response && response.Entidad && response.Entidad[campoDestino]) {
+          this.Datos[campoDestino] = response.Entidad[campoDestino];
+
+          if (campoDestino === 'UrlImagenBuscador') {
+            document.documentElement.style.setProperty(
+              '--url-imagen-buscador',
+              `url(${response.Entidad[campoDestino]})`
+            );
           }
-        },
-        error: (error) => {
-          console.error('Error al subir la imagen', error);
-          alert('Error al subir la imagen. Por favor, intente de nuevo.');
+
+          const datosActualizados = { ...this.Datos };
+
+          this.Servicio.Editar(datosActualizados).subscribe({
+            next: (updateResponse) => {
+              console.log(
+                'Campo de imagen actualizado en el modelo Navbar',
+                updateResponse
+              );
+              this.modoEdicion = false;
+            },
+            error: (updateError) => {
+              console.error(
+                'Error al actualizar el campo de imagen en el modelo Navbar',
+                updateError
+              );
+            },
+          });
+        } else {
+          const imageUrl =
+            response.UrlImagenPortada ||
+            response.url ||
+            (response.Entidad ? response.Entidad.UrlImagenPortada : null);
+
+          if (imageUrl) {
+            this.Datos[campoDestino] = imageUrl;
+            console.log(
+              `URL de imagen actualizada: ${campoDestino} = ${imageUrl}`
+            );
+          } else {
+            console.warn(
+              'No se pudo obtener la URL de la imagen de la respuesta',
+              response
+            );
+          }
         }
-      });
+      },
+      error: (error) => {
+        console.error('Error al subir la imagen', error);
+        alert('Error al subir la imagen. Por favor, intente de nuevo.');
+      },
+    });
   }
 
   cerrarNavbarSiEsMovil() {
-    if (window.innerWidth < 992) { // 992px = Bootstrap breakpoint for lg
+    if (window.innerWidth < 992) {
+      // 992px = Bootstrap breakpoint for lg
       const el = this.navbarCollapse.nativeElement;
       this.renderer.removeClass(el, 'show'); // Cierra el menú colapsado
     }
@@ -217,16 +308,18 @@ export class HeaderComponent {
   }
 
   openColorPicker(): void {
-    const colorInput = document.getElementById('colorPicker') as HTMLInputElement;
+    const colorInput = document.getElementById(
+      'colorPicker'
+    ) as HTMLInputElement;
     colorInput.click();
   }
 
   changeColor(event: Event): void {
     const color = (event.target as HTMLInputElement).value;
-    
+
     // Actualizar la propiedad CSS para cambio visual inmediato
     document.documentElement.style.setProperty('--color-fondo-navbar', color);
-    
+
     // Actualizar el objeto local Datos
     if (this.Datos) {
       this.Datos.ColorFondoNavbar = color;
@@ -234,4 +327,9 @@ export class HeaderComponent {
       console.error('No hay datos disponibles para actualizar');
     }
   }
+
+    //Método para ver el carrito
+    alternarCarrito() {
+      this.mostrarCarrito = !this.mostrarCarrito;
+    }
 }

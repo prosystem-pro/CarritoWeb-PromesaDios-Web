@@ -43,4 +43,9 @@ export class ClasificacionProductoServicio {
   CrearEditar(Datos: ClasificacionProducto): Observable<any> {
     return this.http.post(`${this.Url}/creareditar`, Datos, { headers: this.obtenerHeaders() });
   }
+
+  // Nuevo método para buscar clasificaciones
+  BuscarClasificaciones(tipoBusqueda: number, valorBusqueda: string): Observable<any> {
+    return this.http.get(`${this.Url}/buscar/${tipoBusqueda}/${valorBusqueda}`, { headers: this.obtenerHeaders() });
+  }
 }

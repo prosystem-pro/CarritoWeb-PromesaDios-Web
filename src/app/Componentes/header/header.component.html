@@ -21,19 +21,23 @@
                 <!-- Versión normal del buscador -->
                 <input *ngIf="!modoEdicion" type="text" class="search-input"
                     [placeholder]="Datos?.TextoBuscador || 'Buscar...'"
-                    [ngStyle]="{'color': Datos?.ColorTextoBuscador, 'background-color': Datos?.ColorFondoBuscador}">
+                    [ngStyle]="{'color': Datos?.ColorTextoBuscador, 'background-color': Datos?.ColorFondoBuscador}"
+                    [(ngModel)]="textoBusqueda" (keyup.enter)="buscar()">
 
                 <!-- Versión editable del placeholder del buscador -->
                 <input *ngIf="modoEdicion" type="text" class="search-input edit-mode" [(ngModel)]="Datos.TextoBuscador"
                     placeholder="Texto del buscador"
                     [ngStyle]="{'color': Datos?.ColorTextoBuscador, 'background-color': Datos?.ColorFondoBuscador}">
 
-                <button class="search-button" type="submit">
-                    <img [src]="Datos?.UrlImagenBuscador" alt="Buscar" width="20">
-                    <!-- Editor de imagen del buscador en modo edición -->
+                <button class="search-button" type="button" (click)="busquedaActiva ? cancelarBusqueda() : buscar()">
+                    <img *ngIf="!busquedaActiva" [src]="Datos?.UrlImagenBuscador" alt="Buscar" width="20">
+                    <span *ngIf="busquedaActiva" class="cancel-icon">✕</span>
                     <div *ngIf="modoEdicion" class="mt-1 img-editor">
-                        <input type="file" class="form-control form-control-sm"
-                            (change)="actualizarImagenBuscador($event)" accept="image/*">
+                        <label for="imagenBuscador" style="margin-bottom: 0; cursor: pointer;">
+                            <i class="bi bi-image"></i>
+                        </label>
+                        <input id="imagenBuscador" type="file" (change)="actualizarImagenBuscador($event)"
+                            accept="image/*" style="display: none;">
                     </div>
                 </button>
             </div>
@@ -167,16 +171,17 @@
                 <!-- Versión normal del buscador desktop -->
                 <input *ngIf="!modoEdicion" type="text" class="search-input"
                     [placeholder]="Datos?.TextoBuscador || 'Buscar...'"
-                    [ngStyle]="{'color': Datos?.ColorTextoBuscador, 'background-color': Datos?.ColorFondoBuscador}">
+                    [ngStyle]="{'color': Datos?.ColorTextoBuscador, 'background-color': Datos?.ColorFondoBuscador}"
+                    [(ngModel)]="textoBusqueda" (keyup.enter)="buscar()">
 
                 <!-- Versión editable del buscador desktop -->
                 <input *ngIf="modoEdicion" type="text" class="search-input edit-mode" [(ngModel)]="Datos.TextoBuscador"
                     placeholder="Texto del buscador"
                     [ngStyle]="{'color': Datos?.ColorTextoBuscador, 'background-color': Datos?.ColorFondoBuscador}">
 
-                <button class="search-button" type="submit">
-                    <img [src]="Datos?.UrlImagenBuscador" alt="Buscar" width="20">
-                    <!-- Editor de imagen del buscador en modo edición desktop -->
+                <button class="search-button" type="button" (click)="busquedaActiva ? cancelarBusqueda() : buscar()">
+                    <img *ngIf="!busquedaActiva" [src]="Datos?.UrlImagenBuscador" alt="Buscar" width="20">
+                    <span *ngIf="busquedaActiva" class="cancel-icon">✕</span>
                     <div *ngIf="modoEdicion" class="mt-1 img-editor">
                         <label for="imagenBuscador" style="margin-bottom: 0; cursor: pointer;">
                             <i class="bi bi-image"></i>
@@ -187,7 +192,8 @@
                 </button>
             </div>
             <!-- Versión normal del carrito -->
-            <div *ngIf="!modoEdicion" class="carrito-container">
+            <div *ngIf="!modoEdicion" class="carrito-container" (click)="alternarCarrito()">
+                <span class="cart-count">{{totalItemsCarrito || 0}}</span>
                 <img [src]="Datos?.UrlImagenCarrito" alt="Carrito" width="30">
             </div>
 
@@ -228,6 +234,8 @@
 
             <!-- Input de color oculto -->
             <input type="color" #colorPicker id="colorPicker" style="display: none;" (input)="changeColor($event)">
+
+            <app-carrito *ngIf="mostrarCarrito" (cerrarCarrito)="alternarCarrito()"></app-carrito>
         </div>
     </div>
 </header>
