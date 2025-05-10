@@ -216,16 +216,20 @@ export class ProductosComponent implements OnInit, OnDestroy {
   }
   
   ordenarProductos(): void {
+    if (!this.productos) return;
+  
     this.ordenAscendente = !this.ordenAscendente;
-    
+  
     this.productos.sort((a, b) => {
-      if (this.ordenAscendente) {
-        return a.NombreProducto.localeCompare(b.NombreProducto);
-      } else {
-        return b.NombreProducto.localeCompare(a.NombreProducto);
-      }
+      const nombreA = a?.NombreProducto || '';
+      const nombreB = b?.NombreProducto || '';
+  
+      return this.ordenAscendente
+        ? nombreA.localeCompare(nombreB)
+        : nombreB.localeCompare(nombreA);
     });
   }
+  
 
   // ============= MÉTODOS PARA MODO EDICIÓN =============
   
@@ -250,10 +254,14 @@ export class ProductosComponent implements OnInit, OnDestroy {
   
   // ---- Edición del nombre de un producto ----
   
-  iniciarEdicionNombre(producto: ProductoConCantidad): void {
-    // Cerrar cualquier otra edición abierta
+  iniciarEdicionNombre(producto: ProductoConCantidad | null): void {
     this.cancelarEdicionPrecio(null);
-    
+  
+    if (!producto || !producto.CodigoProducto || !producto.NombreProducto) {
+      console.warn('Producto inválido al intentar editar nombre:', producto);
+      return;
+    }
+  
     this.editandoNombre = producto.CodigoProducto;
     this.nombreOriginal = producto.NombreProducto;
     this.nombreTemporal = producto.NombreProducto;
@@ -299,16 +307,20 @@ export class ProductosComponent implements OnInit, OnDestroy {
   
   // ---- Edición del precio de un producto ----
   
-  iniciarEdicionPrecio(producto: ProductoConCantidad): void {
-    // Cerrar cualquier otra edición abierta
+  iniciarEdicionPrecio(producto: ProductoConCantidad | null): void {
     this.cancelarEdicionNombre(null);
-    
+  
+    if (!producto || !producto.CodigoProducto || !producto.Moneda || !producto.Precio) {
+      console.warn('Producto inválido al intentar editar precio:', producto);
+      return;
+    }
+  
     this.editandoPrecio = producto.CodigoProducto;
     this.precioTemp = {
       moneda: producto.Moneda,
       valor: producto.Precio
     };
-    
+  
     // Guardar el precio original para poder restaurarlo si se cancela
     this.precioOriginal = `${producto.Moneda} ${producto.Precio}`;
   }
@@ -384,7 +396,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
     formData.append('CarpetaPrincipal', this.NombreEmpresa);
     formData.append('SubCarpeta', 'Producto');
     formData.append('CodigoVinculado', this.codigoClasificacion.toString());
-    formData.append('CodigoPropio', producto.CodigoProducto.toString());
+    formData.append('CodigoPropio', (producto.CodigoProducto ?? '').toString());
     formData.append('CampoVinculado', 'CodigoClasificacionProducto');
     formData.append('CampoPropio', 'CodigoProducto');
     formData.append('NombreCampoImagen', 'UrlImagen');
@@ -462,13 +474,16 @@ export class ProductosComponent implements OnInit, OnDestroy {
   }
   
   esFormularioValido(): boolean {
+    if (!this.nuevoProducto || !this.nuevoProducto.NombreProducto || !this.nuevoProducto.Precio) {
+      return false;
+    }
+    
     return (
       this.nuevoProducto.NombreProducto.trim() !== '' &&
       this.nuevoProducto.Precio > 0 &&
       this.nuevaImagenFile !== null
     );
   }
-  
   guardarNuevoProducto(): void {
     if (!this.esFormularioValido()) {
       alert('Por favor, complete todos los campos y seleccione una imagen');
@@ -547,6 +562,11 @@ export class ProductosComponent implements OnInit, OnDestroy {
   // ---- Eliminar producto ----
   
   eliminarProducto(producto: ProductoConCantidad): void {
+    if (!producto.CodigoProducto) {
+      alert('El producto no tiene un código válido.');
+      return;
+    }
+    
     if (confirm(`¿Está seguro que desea eliminar el producto "${producto.NombreProducto}"?`)) {
       this.productoServicio.Eliminar(producto.CodigoProducto).subscribe({
         next: (response) => {
@@ -574,13 +594,12 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
   buscarEnTiempoReal(): void {
     if (this.terminoBusqueda.length === 0) {
-      this.resultadosBusqueda = [];
       return;
     }
-
+  
     const termino = this.terminoBusqueda.toLowerCase();
     this.resultadosBusqueda = this.productosOriginales.filter(producto => 
-      producto.NombreProducto.toLowerCase().includes(termino)
+      producto.NombreProducto?.toLowerCase().includes(termino) ?? false
     );
   }
 

@@ -8,10 +8,12 @@
                     [placeholder]="DatosHeader.textoBuscador" (keyup)="buscarEnTiempoReal()" (keyup.enter)="buscar()"
                     (focus)="mostrarResultados = true" (blur)="ocultarResultados()">
 
-                <button class="boton-buscador" (click)="busquedaActiva ? cancelarBusqueda() : buscar()">
+                <button class="boton-buscador" (click)="busquedaActiva ? cancelarBusqueda() : buscar()"
+                    [disabled]="terminoBusqueda.trim().length === 0">
                     <img *ngIf="!busquedaActiva" [src]="DatosHeader.urlImagenLupa" alt="Buscar" width="20">
                     <span *ngIf="busquedaActiva" class="cancel-icon">✕</span>
                 </button>
+
 
                 <!-- Dropdown de resultados -->
                 <div class="dropdown-resultados"
