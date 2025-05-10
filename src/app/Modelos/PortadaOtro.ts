@@ -4,7 +4,7 @@ export interface PortadaOtro {
   NombrePortadaOtro?: string;
   ColorNombrePortadaOtro?: string;
   ColorFondoNombrePortadaOtro?: string;
-  Descripcion?: string;
+  Descripcion?: any;
   ColorDescripcion?: string;
   ColorDescripcionOtro?: string;
   Estatus?: any;

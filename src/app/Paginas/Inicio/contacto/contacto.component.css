@@ -1,4 +1,4 @@
-/* Estilo general (desktop/tablet grande) - desde 992px en adelante */
+/* PC */
 @media (min-width: 1105px) {
     .InputNombreContactanosPortada {
         width: 100%;
@@ -19,14 +19,17 @@
         width: 45%; height: 100%;
       }
       .ContenidoRedesSociales{
-        margin-left: 35%;
+        margin-left: 34%;
+      }
+      .TamañoContenidoRedesSociales{
+        width: 100%; height: 100%
       }
       .FondoPantalla{
         min-height:100%;
       }
   }
   
-  /* Tablet - entre 768px y 991px  */
+  /* Tablet */
   @media (min-width: 768px) and (max-width: 1204px) {
     .InputNombreContactanosPortada {
         width: 30%;
@@ -43,17 +46,22 @@
         width: 55%; height: 100%;
       }
       .ContenidoRedesSociales{
-        margin-left: 30%;
+        margin-left: 27%;
+      }
+      .TamañoContenidoRedesSociales{
+        width: 100%; height: 100%
       }
       .FondoPantalla{
         min-height:60%;
       }
   }
   
-  /* Celular - hasta 767px */
-  @media (max-width: 767px) {
+  /* Celular tamaños normales */
+  @media (min-width: 500px) and (max-width: 767px) {
     .InputNombreContactanosPortada{
         width: 60%;
+        border-radius: 50%;
+        border: 1px solid #ccc;
       }
       .EstiloColor {
         position: relative; top: -1px;
@@ -68,10 +76,80 @@
         width: 80%; height: 100%;
       }
       .ContenidoRedesSociales{
-        margin-left: 18%;
+        margin-left: 20%;
+      }
+      .TamañoContenidoRedesSociales{
+        width: 100%; height: 100%
       }
       .FondoPantalla{
         min-height:60%;
+      }
+  }
+    /* Celular pequeños */
+  @media (min-width: 321px) and (max-width: 490px) {
+    .InputNombreContactanosPortada{
+        width: 60%;
+        border-radius: 50%;
+        border: 1px solid #ccc;
+      }
+      .EstiloColor {
+        position: relative; top: -1px;
+      }
+      .ContornoFondoTitulo{
+      width: 80%; height: 100%;
+      }
+      .BotonesExtras{
+        margin-top: -1%;
+      }
+      .ContornoFondoRedesSociales{
+        width: 80%; height: 100%;
+      }
+      .ContenidoRedesSociales{
+        margin-left: 15%;
+      }
+      .TamañoContenidoRedesSociales{
+        width: 100%; height: 100%
+      }
+      .FondoPantalla{
+        min-height:60%;
+      }
+  }
+      /* Celular muy pequeños */
+  @media (max-width: 320px) {
+    .InputNombreContactanosPortada{
+        width: 60%;
+        border-radius: 50%;
+        border: 1px solid #ccc;
+      }
+      .EstiloColor {
+        position: relative; top: -1px;
+      }
+      .ContornoFondoTitulo{
+       width: 90%; height: 80%;
+      }
+      .BotonesExtras{
+        margin-top: -1%;
+      }
+      .ContornoFondoRedesSociales{
+        width: 90%; height: 50px;
+      }
+      .ContenidoRedesSociales{
+        margin-left: 9%;
+      }
+      .TamañoImagenRedSocial{
+        width: 70%; height: 30px;
+      }
+      .TamañoLetraRedSocial{
+        margin-left: -18px;
+      }
+      .FondoPantalla{
+        min-height:60%;
+      }
+      .TextoComoLlegar{
+        font-size: 10px
+      }
+      .DiseñoMapa{
+        width: 200px;
       }
   }
   

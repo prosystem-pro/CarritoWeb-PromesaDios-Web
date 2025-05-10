@@ -25,6 +25,7 @@ import { NosotrosComponent } from './Paginas/Inicio/nosotros/nosotros.component'
 import { MenuCategoriaComponent } from './Paginas/Inicio/menu/menuCategoria.component';
 import { ProductosComponent } from './Componentes/productos/productos.component';
 import { ContactoComponent } from './Paginas/Inicio/contacto/contacto.component';
+import { OtroComponent } from './Paginas/Inicio/otro/otro.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/nosotros', pathMatch: 'full' },
@@ -35,6 +36,7 @@ export const routes: Routes = [
   { path: 'clasificacion', component: MenuCategoriaComponent},
   { path: 'productos/:codigo/:nombre', component: ProductosComponent },
   { path: 'contacto', component: ContactoComponent},
+  { path: 'otro', component: OtroComponent},
 
   //Rutas protegidas
   { path: 'menu', component: MenuComponent,canActivate: [AutorizacionRuta] },

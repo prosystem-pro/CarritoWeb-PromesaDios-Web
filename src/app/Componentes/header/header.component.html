@@ -118,7 +118,8 @@
                 <li class="nav-item">
                     <!-- Versión normal -->
                     <a *ngIf="!modoEdicion" class="btn rounded-pill"
-                        [ngClass]="{'active-route': estaRutaActiva('/recetas')}"
+                        (click)="navegar('/otro')"
+                        [ngClass]="{'active-route': estaRutaActiva('/otro')}"
                         [ngStyle]="{'color': Datos?.ColortextoOtro, 'background-color': Datos?.ColorFondoOtro}">
                         {{ Datos?.TextoOtro || '' }}
                     </a>

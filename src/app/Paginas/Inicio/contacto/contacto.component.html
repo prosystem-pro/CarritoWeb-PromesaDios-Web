@@ -173,9 +173,9 @@
         <!-- Imagen con link (si existe) y cámara sobre ella -->
         <div class="d-flex align-items-center position-relative ContenidoRedesSociales"
              style="width: 50px; height: 50px; ">
-          <a *ngIf="red.Link; else imagenSinLink"
+          <a *ngIf="red.Link; else imagenSinLink cla" class="TamañoImagenRedSocial"
              [href]="red.Link" target="_blank"
-             style="width: 100%; height: 100%; display: block; border-radius: 50%;">
+             style="display: block; border-radius: 50%;">
             <img
               *ngIf="red.UrlImagen"
               [src]="red.UrlImagen"
@@ -204,13 +204,13 @@
           <ng-container *ngIf="!MostrarListado[i]">
             <a *ngIf="red.Link"
                [href]="red.Link" target="_blank"
-               class="fw-semibold fs-5"
+               class="fw-semibold  TamañoLetraRedSocial"
                [style.color]="ContactanosPortada.ColorTextoRedSocial"
                style="text-decoration: none;">
               {{ red.NombreRedSocial }}
             </a>
             <span *ngIf="!red.Link"
-                  class="fw-semibold fs-5"
+                  class="fw-semibold  TamañoLetraRedSocial"
                   [style.color]="ContactanosPortada.ColorTextoRedSocial">
               {{ red.NombreRedSocial }}
             </span>
@@ -344,7 +344,7 @@
   </div>
 
   <!-- Panel de edición del enlace del mapa -->
-  <div *ngIf="MostrarMapa" class="position-absolute top-0 end-0 me-3 mt-2 bg-white rounded-3 shadow-lg z-3 p-3 border" style="width: 320px;">
+  <div *ngIf="MostrarMapa" class="position-absolute top-0 end-0 me-3 mt-2 bg-white rounded-3 shadow-lg z-3 p-3 border DiseñoMapa" >
     <h6 class="fw-bold text-primary mb-3 d-flex align-items-center">
       <i class="bi bi-geo-alt-fill me-2 text-danger"></i> Editar ubicación
     </h6>
@@ -388,6 +388,7 @@
       </button>
     </div>
   </div>
+
   <!-- Contenedor del mapa y botón "Cómo llegar" -->
   <div class="position-relative">
     <div class="d-flex justify-content-center" *ngIf="MapaSeguro">
@@ -406,12 +407,10 @@
       <a *ngIf="ContactanosPortada?.UrlMapaComoLlegar"
          [href]="ContactanosPortada.UrlMapaComoLlegar"
          target="_blank"
-         class="btn"
+         class="btn TextoComoLlegar"
          [ngStyle]="{
            'background-color': ContactanosPortada.ColorBotonComoLlegar,
            'color': ContactanosPortada.ColorTextoComoLlegar,
-           'padding': '14px 28px',
-           'font-size': '1.25rem',
            'font-weight': 'bold',
            'border-radius': '10px',
            'box-shadow': '0 4px 8px rgba(0,0,0,0.2)'
