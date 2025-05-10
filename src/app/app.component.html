@@ -1,3 +1,3 @@
-<app-header *ngIf="!esLogin()" />
+<app-header *ngIf="!esLogin() && !esProductos()" />
 <router-outlet></router-outlet>
-<app-footer *ngIf="!esLogin()" />
+<app-footer *ngIf="!esLogin() && !esProductos()" />

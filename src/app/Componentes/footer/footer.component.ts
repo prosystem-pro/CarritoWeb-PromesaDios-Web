@@ -140,7 +140,6 @@ export class FooterComponent implements OnInit {
             
             if (imageUrl) {
               this.footerData[campoDestino] = imageUrl;
-              console.log(`URL de imagen actualizada: ${campoDestino} = ${imageUrl}`);
             } else {
               console.warn('No se pudo obtener la URL de la imagen de la respuesta', response);
             }

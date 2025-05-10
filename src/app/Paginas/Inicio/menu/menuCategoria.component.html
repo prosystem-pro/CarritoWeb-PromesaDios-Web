@@ -1,34 +1,36 @@
 <app-svg-decorador />
 <section class="principal">
     <div class="trigo-izquierda">
-        <img [src]="menuPortada?.UrlImagenPortadaIzquierdo" alt="Izquierda" class="img-fluid">
-        <button *ngIf="modoEdicion" class="btn btn-sm btn-light trigo-edit-button" style="top: 0; left: 0;"
+        <img [src]="menuPortada?.UrlImagenPortadaIzquierdo" alt="Izquierda" class="img-fluid" />
+        <button *ngIf="modoEdicion" class="btn btn-sm btn-light trigo-edit-button" style="top: 0; left: 0"
             title="Cambiar imagen">
-            <label for="trigoIzquierdoUpload" style="margin-bottom: 0; cursor: pointer;">
+            <label for="trigoIzquierdoUpload" style="margin-bottom: 0; cursor: pointer">
                 <i class="bi bi-image"></i>
             </label>
             <input id="trigoIzquierdoUpload" type="file" accept="image/*"
-                (change)="actualizarImagenPortadaIzquierda($event)" style="display: none;">
+                (change)="actualizarImagenPortadaIzquierda($event)" style="display: none" />
         </button>
     </div>
     <div class="trigo-derecho">
-        <img [src]="menuPortada?.UrlImagenPortadaDerecho" alt="Derecho" class="img-fluid">
-        <button *ngIf="modoEdicion" class="btn btn-sm btn-light trigo-edit-button" style="top: 0; right: 0;"
+        <img [src]="menuPortada?.UrlImagenPortadaDerecho" alt="Derecho" class="img-fluid" />
+        <button *ngIf="modoEdicion" class="btn btn-sm btn-light trigo-edit-button" style="top: 0; right: 0"
             title="Cambiar imagen">
-            <label for="trigoDerechoUpload" style="margin-bottom: 0; cursor: pointer;">
+            <label for="trigoDerechoUpload" style="margin-bottom: 0; cursor: pointer">
                 <i class="bi bi-image"></i>
             </label>
             <input id="trigoDerechoUpload" type="file" accept="image/*"
-                (change)="actualizarImagenPortadaDerecha($event)" style="display: none;">
+                (change)="actualizarImagenPortadaDerecha($event)" style="display: none" />
         </button>
     </div>
 
     <div class="container principal-contenido">
         <!-- Botón para entrar/salir del modo edición -->
         <button (click)="toggleModoEdicion()" class="btn edit-main-button btn-edit"
-            [ngClass]="{'btn-success': modoEdicion, 'btn-light': !modoEdicion}">
-            <i class="bi" [ngClass]="{'bi-pencil-square': !modoEdicion, 'bi-check-lg': modoEdicion}"
-                [style.color]="modoEdicion ? '#ffffff' : '#000000'"></i>
+            [ngClass]="{ 'btn-success': modoEdicion, 'btn-light': !modoEdicion }">
+            <i class="bi" [ngClass]="{
+          'bi-pencil-square': !modoEdicion,
+          'bi-check-lg': modoEdicion
+        }" [style.color]="modoEdicion ? '#ffffff' : '#000000'"></i>
         </button>
 
         <!-- Título editable -->
@@ -42,7 +44,7 @@
             <!-- Botones de acción para guardar/cancelar (solo visibles cuando se está editando el título) -->
             <div *ngIf="modoEdicion && editandoTituloPrincipal"
                 class="edit-actions position-absolute start-50 translate-middle-x d-flex justify-content-center"
-                style="top: calc(100% + 5px); width: 100%;">
+                style="top: calc(100% + 5px); width: 100%">
                 <button class="btn btn-sm btn-success me-2" title="Guardar cambios" (click)="guardarTituloPrincipal()">
                     <i class="bi bi-check-lg"></i>
                 </button>
@@ -55,14 +57,14 @@
             <!-- Icono de edición para iniciar la edición (visible solo en modo edición) -->
             <button *ngIf="modoEdicion && !editandoTituloPrincipal"
                 class="edit-btn-title position-absolute top-50 start-50 translate-middle" title="Editar título"
-                style="margin-top: 35px;" (click)="iniciarEdicionTituloPrincipal()">
+                style="margin-top: 35px" (click)="iniciarEdicionTituloPrincipal()">
                 <i class="bi bi-pencil-fill"></i>
             </button>
         </div>
 
         <!-- Panel de configuración de colores (visible solo en modo edición) -->
         <div *ngIf="modoEdicion && menuPortada && mostrarPanelColor" class="position-fixed bottom-0 end-0 p-3"
-            style="z-index: 1050; max-width: 350px; right: 10px; bottom: 10px;">
+            style="z-index: 1050; max-width: 350px; right: 10px; bottom: 10px">
             <div class="card shadow p-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="mb-0">Personalización</h5>
@@ -77,7 +79,7 @@
                     <div class="d-flex">
                         <input type="color" class="form-control form-control-color me-2"
                             [(ngModel)]="menuPortada.ColorTituloMenu"
-                            (change)="cambiarColorTitulo(menuPortada.ColorTituloMenu)">
+                            (change)="cambiarColorTitulo(menuPortada.ColorTituloMenu)" />
                         <div class="color-presets d-flex flex-wrap align-items-center">
                             <button *ngFor="let color of coloresPredefinidos" class="color-preset-btn me-1"
                                 [style.background-color]="color" (click)="cambiarColorTitulo(color)"></button>
@@ -88,12 +90,17 @@
                 <div class="mb-3">
                     <label class="form-label d-flex justify-content-between">
                         <span>Color del contorno</span>
-                        <small class="text-muted">{{ menuPortada.ColorContornoImagenClasificacion }}</small>
+                        <small class="text-muted">{{
+                            menuPortada.ColorContornoImagenClasificacion
+                            }}</small>
                     </label>
                     <div class="d-flex">
                         <input type="color" class="form-control form-control-color me-2"
-                            [(ngModel)]="menuPortada.ColorContornoImagenClasificacion"
-                            (change)="cambiarColorContorno(menuPortada.ColorContornoImagenClasificacion)">
+                            [(ngModel)]="menuPortada.ColorContornoImagenClasificacion" (change)="
+                cambiarColorContorno(
+                  menuPortada.ColorContornoImagenClasificacion
+                )
+              " />
                         <div class="color-presets d-flex flex-wrap align-items-center">
                             <button *ngFor="let color of coloresPredefinidos" class="color-preset-btn me-1"
                                 [style.background-color]="color" (click)="cambiarColorContorno(color)"></button>
@@ -104,12 +111,18 @@
                 <div class="mb-3">
                     <label class="form-label d-flex justify-content-between">
                         <span>Color de fondo de botones</span>
-                        <small class="text-muted">{{ menuPortada.ColorFondoNombreClasificacion }}</small>
+                        <small class="text-muted">{{
+                            menuPortada.ColorFondoNombreClasificacion
+                            }}</small>
                     </label>
                     <div class="d-flex">
-                        <input type="color" class="form-control form-control-color me-2"
-                            [(ngModel)]="menuPortada.ColorFondoNombreClasificacion"
-                            (change)="cambiarColorFondoBoton(menuPortada.ColorFondoNombreClasificacion)">
+                        <input #colorInput type="color" class="form-control form-control-color me-2"
+                            [(ngModel)]="menuPortada.ColorFondoNombreClasificacion" (change)="
+                cambiarColorFondoBoton(
+                  menuPortada.ColorFondoNombreClasificacion
+                );
+                onColorChange(colorInput.value)
+              " />
                         <div class="color-presets d-flex flex-wrap align-items-center">
                             <button *ngFor="let color of coloresPredefinidos" class="color-preset-btn me-1"
                                 [style.background-color]="color" (click)="cambiarColorFondoBoton(color)"></button>
@@ -120,12 +133,15 @@
                 <div class="mb-3">
                     <label class="form-label d-flex justify-content-between">
                         <span>Color del texto de botones</span>
-                        <small class="text-muted">{{ menuPortada.ColorNombreClasificacion }}</small>
+                        <small class="text-muted">{{
+                            menuPortada.ColorNombreClasificacion
+                            }}</small>
                     </label>
                     <div class="d-flex">
                         <input type="color" class="form-control form-control-color me-2"
-                            [(ngModel)]="menuPortada.ColorNombreClasificacion"
-                            (change)="cambiarColorTextoBoton(menuPortada.ColorNombreClasificacion)">
+                            [(ngModel)]="menuPortada.ColorNombreClasificacion" (change)="
+                cambiarColorTextoBoton(menuPortada.ColorNombreClasificacion)
+              " />
                         <div class="color-presets d-flex flex-wrap align-items-center">
                             <button *ngFor="let color of coloresPredefinidos" class="color-preset-btn me-1"
                                 [style.background-color]="color" (click)="cambiarColorTextoBoton(color)"></button>
@@ -137,8 +153,13 @@
 
         <!-- Botón flotante para abrir el panel de colores (visible solo en modo edición) -->
         <button *ngIf="modoEdicion && menuPortada"
-            class="btn btn-light rounded-circle d-flex justify-content-center align-items-center shadow"
-            style="bottom: 70px; right: 15px; width: 45px; height: 45px; z-index: 1000;" (click)="toggleColorPanel()">
+            class="btn btn-light rounded-circle d-flex justify-content-center align-items-center shadow" style="
+        bottom: 70px;
+        right: 15px;
+        width: 45px;
+        height: 45px;
+        z-index: 1000;
+      " (click)="toggleColorPanel()">
             <i class="bi bi-palette"></i>
         </button>
 
@@ -150,18 +171,18 @@
                     [style.border-color]="menuPortada?.ColorContornoImagenClasificacion">
                     <div *ngIf="!nuevaCategoria.imagenPreview"
                         class="d-flex justify-content-center align-items-center h-100 flex-column">
-                        <i class="bi bi-plus-circle-fill" style="font-size: 3rem; color: #5f5e5c;"></i>
+                        <i class="bi bi-plus-circle-fill" style="font-size: 3rem; color: #5f5e5c"></i>
                         <span class="mt-2 text-muted small">Añadir categoría</span>
                     </div>
                     <img *ngIf="nuevaCategoria.imagenPreview" [src]="nuevaCategoria.imagenPreview"
-                        class="img-fluid rounded-circle border border-5 border-white" alt="Nueva categoría">
+                        class="img-fluid rounded-circle border border-5 border-white" alt="Nueva categoría" />
                 </div>
                 <input #nuevaCategoriaFileInput type="file" class="file-input"
-                    (change)="seleccionarImagenNuevaCategoria($event)" accept="image/*">
+                    (change)="seleccionarImagenNuevaCategoria($event)" accept="image/*" />
 
                 <div class="position-relative mb-2">
                     <input type="text" class="form-control" placeholder="Nombre categoría"
-                        [(ngModel)]="nuevaCategoria.titulo">
+                        [(ngModel)]="nuevaCategoria.titulo" />
                 </div>
 
                 <button class="btn btn-success text-white w-100 fw-bold rounded-5"
@@ -176,7 +197,7 @@
                 <div class="circulo-img mb-3 custom-border position-relative"
                     [style.border-color]="menuPortada?.ColorContornoImagenClasificacion">
                     <img [src]="clasificacion.UrlImagen" [alt]="clasificacion.NombreClasificacionProducto"
-                        class="img-fluid rounded-circle border border-5 border-white">
+                        class="img-fluid rounded-circle border border-5 border-white" />
 
                     <!-- Botón de edición sobre la imagen (visible solo en modo edición) -->
                     <div *ngIf="modoEdicion" class="edit-image-overlay" (click)="fileInput.click()">
@@ -186,7 +207,7 @@
                         </div>
                     </div>
                     <input #fileInput type="file" class="file-input" (change)="cambiarImagen($event, clasificacion)"
-                        accept="image/*">
+                        accept="image/*" />
 
                     <!-- Botón para eliminar categoría (visible solo en modo edición) -->
                     <button *ngIf="modoEdicion" class="delete-btn position-absolute top-0 end-0"
@@ -197,24 +218,32 @@
 
                 <!-- Botón con título editable -->
                 <div class="position-relative">
-                    <button class="btn text-dark w-100 fw-bold rounded-5 btn-custom"
-                        (click)="navegar('/productos', clasificacion.CodigoClasificacionProducto, clasificacion.NombreClasificacionProducto)"
-                        [style.background-color]="menuPortada?.ColorFondoNombreClasificacion"
-                        [style.border-color]="menuPortada?.ColorFondoNombreClasificacion">
+                    <button class="btn text-dark w-100 fw-bold rounded-5 btn-custom" (click)="
+              !modoEdicion &&
+                navegar(
+                  '/productos',
+                  clasificacion.CodigoClasificacionProducto,
+                  clasificacion.NombreClasificacionProducto.toLowerCase()
+                )
+            " [style.background-color]="
+              menuPortada?.ColorFondoNombreClasificacion
+            " [style.border-color]="menuPortada?.ColorFondoNombreClasificacion">
                         <!-- Aquí cambiamos para almacenar el contenido original y mostrar los botones de acción -->
-                        <span #titleContent
-                            [contentEditable]="modoEdicion && editandoTitulo === clasificacion.CodigoClasificacionProducto"
-                            (input)="onTituloInput($event, clasificacion)"
-                            [style.color]="menuPortada?.ColorNombreClasificacion"
+                        <span #titleContent [contentEditable]="
+                modoEdicion &&
+                editandoTitulo === clasificacion.CodigoClasificacionProducto
+              " (input)="onTituloInput($event, clasificacion)" [style.color]="menuPortada?.ColorNombreClasificacion"
                             [attr.data-id]="clasificacion.CodigoClasificacionProducto">
                             {{ clasificacion.NombreClasificacionProducto }}
                         </span>
                     </button>
 
                     <!-- Botones de acción para guardar/cancelar (solo visibles cuando se está editando este título) -->
-                    <div *ngIf="modoEdicion && editandoTitulo === clasificacion.CodigoClasificacionProducto"
-                        class="edit-actions position-absolute start-50 translate-middle-x d-flex justify-content-center"
-                        style="top: calc(100% + 5px); width: 100%;">
+                    <div *ngIf="
+              modoEdicion &&
+              editandoTitulo === clasificacion.CodigoClasificacionProducto
+            " class="edit-actions position-absolute start-50 translate-middle-x d-flex justify-content-center"
+                        style="top: calc(100% + 5px); width: 100%">
                         <button class="btn btn-sm btn-success me-2" title="Guardar cambios"
                             (click)="guardarTituloClasificacion(clasificacion)">
                             <i class="bi bi-check-lg"></i>
@@ -226,9 +255,11 @@
                     </div>
 
                     <!-- Icono de edición para iniciar la edición (visible solo en modo edición) -->
-                    <button *ngIf="modoEdicion && editandoTitulo !== clasificacion.CodigoClasificacionProducto"
-                        class="edit-btn-title position-absolute end-0 top-50 translate-middle-y" title="Editar título"
-                        style="margin-right: -30px;" (click)="iniciarEdicionTitulo(clasificacion)">
+                    <button *ngIf="
+              modoEdicion &&
+              editandoTitulo !== clasificacion.CodigoClasificacionProducto
+            " class="edit-btn-title position-absolute end-0 top-50 translate-middle-y" title="Editar título"
+                        style="margin-right: -30px" (click)="iniciarEdicionTitulo(clasificacion)">
                         <i class="bi bi-pencil-fill"></i>
                     </button>
                 </div>
@@ -238,7 +269,7 @@
 </section>
 
 <section class="de-temporada">
-    <img [src]="menuPortada?.UrlImagenPresentacion" alt="De Temporada" class="img-fluid">
+    <img [src]="menuPortada?.UrlImagenPresentacion" alt="De Temporada" class="img-fluid" />
 
     <!-- Nuevo selector de imagen basado en el prototipo -->
     <div *ngIf="modoEdicion" class="image-upload-overlay">
@@ -248,7 +279,7 @@
                 <p>Cambiar Imagen</p>
             </div>
             <input id="temporadaUpload" type="file" accept="image/*" (change)="actualizarImagenTemporada($event)"
-                style="display: none;">
+                style="display: none" />
         </label>
     </div>
 </section>
