@@ -155,102 +155,49 @@ getSafeHtml(html: string): SafeHtml {
   return this.sanitizer.bypassSecurityTrustHtml(html);
 }
 
-// GuardarOtro(index: number): void {
-//   const item = { ...this.Otro[index] };
-
-//   const editorId = `editor-${index}`;
-//   const editor = document.getElementById(editorId);
-//   if (editor) {
-//     item.Descripcion = editor.innerHTML;
-//   }
-
-//   delete item.UrlImagen;
-
-//   this.OtroServicio.Editar(item).subscribe({
-//     next: () => {
-//       this.MostrarListado[index] = false;
-//       this.ObtenerOtro();
-//     },
-//     error: (error) => {
-//       console.error('❌ Error al guardar el item:', error);
-//     }
-//   });
-// }
-
 GuardarOtro(index: number | null): void {
-  console.log('📥 Iniciando GuardarOtro con index:', index);
   let item: any;
 
   if (index !== null) {
-    console.log('✏️ Modo edición con índice:', index);
     item = { ...this.Otro[index] };
-
     const editorId = `editor-${index}`;
     const editor = document.getElementById(editorId);
     if (editor) {
       item.Descripcion = editor.innerHTML;
-      console.log('📝 Descripción capturada (edición):', item.Descripcion);
-    } else {
-      console.warn('⚠️ No se encontró el editor con ID:', editorId);
     }
-
   } else {
-    console.log('🆕 Modo nuevo item (index null)');
-    item = { ...this.Otro }; // Usamos el objeto temporal completo
-
-    // Capturar contenido del editor nuevo
+    item = { ...this.Otro };
     const editor = document.getElementById('editor-nuevo');
     if (editor) {
       item.Descripcion = editor.innerHTML;
-      console.log('📝 Descripción capturada (nuevo):', item.Descripcion);
-    } else {
-      console.warn('⚠️ No se encontró el editor con ID: editor-nuevo');
     }
-
     if (this.CodigoTemporal) {
       item.CodigoOtro = this.CodigoTemporal;
-      console.log('🔁 Editando con CodigoTemporal:', this.CodigoTemporal);
-    } else {
-      console.log('🆕 Creando nuevo item (sin CodigoTemporal)');
     }
   }
 
   delete item.UrlImagen;
-  console.log('📤 Objeto final listo para enviar:', item);
 
   if (index !== null || (this.CodigoTemporal && this.CodigoTemporal !== '')) {
-    console.log('🚀 Enviando a servicio EDITAR');
     this.OtroServicio.Editar(item).subscribe({
       next: () => {
-        console.log('✅ Edición exitosa');
         this.MostrarAgregarOtro = false;
         this.ObtenerOtro();
-        if (index !== null) {
-        }
       },
-      error: (error) => {
-        console.error('❌ Error al editar el item:', error);
-      }
+      error: () => {}
     });
   } else {
-    console.log('🚀 Enviando a servicio CREAR');
     this.OtroServicio.Crear(item).subscribe({
       next: () => {
-        console.log('✅ Creación exitosa');
         this.UrlImagenTemporal = '';
         this.CodigoTemporal = '';
         this.MostrarAgregarOtro = false;
         this.ObtenerOtro();
       },
-      error: (error) => {
-        console.error('❌ Error al crear el item:', error);
-      }
+      error: () => {}
     });
   }
 }
-
-
-
 
 FormatoTexto(comando: string, valor?: string): void {
   document.execCommand(comando, false, valor);
@@ -260,9 +207,6 @@ CambiarTamanoTexto(event: Event): void {
   this.FormatoTexto('fontSize', valor);
 }
 
-
-
-
 ActualizarImagenOtro(event: any, index: number | null, permiso: string | null = null): void {
   const file: File = event.target.files[0];
   if (file) {
@@ -270,11 +214,9 @@ ActualizarImagenOtro(event: any, index: number | null, permiso: string | null = 
   }
 }
 
-
 subirImagen(file: File, CampoDestino: string, index: number | null, permiso: string | null): void {
   const nombreEmpresa = this.NombreEmpresa ?? 'defaultCompanyName';
 
-  console.log('📤 Iniciando subida de imagen...');
   this.EmpresaServicio.ConseguirPrimeraEmpresa().subscribe({
     next: (empresa) => {
       if (!empresa) {
@@ -294,14 +236,12 @@ subirImagen(file: File, CampoDestino: string, index: number | null, permiso: str
       formData.append('CampoPropio', 'CodigoOtro');
       formData.append('NombreCampoImagen', CampoDestino);
 
-      console.log('🧾 Contenido de FormData antes de enviar:');
       formData.forEach((valor, clave) => {
         console.log(`${clave}:`, valor);
       });
 
       this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
         next: (res: any) => {
-          console.log('✅ Respuesta del servidor:', res);
           alert('Imagen subida correctamente.');
 
           const UrlImagen = res?.Entidad?.UrlImagen;
@@ -311,26 +251,22 @@ subirImagen(file: File, CampoDestino: string, index: number | null, permiso: str
           this.CodigoTemporal = Temporal;
 
           if (!permiso) {
-            console.log('🔄 Ejecutando this.ObtenerOtro() porque permiso es null');
             this.ObtenerOtro();
           } else {
-            console.log('⛔ No se ejecuta this.ObtenerOtro() porque permiso =', permiso);
           }
         },
         error: (err) => {
-          console.error('❌ Error al subir la imagen:', err);
+          console.error('Error al subir la imagen:', err);
           alert('Error al subir la imagen. Intente de nuevo.');
         }
       });
     },
     error: (err) => {
-      console.error('❌ Error al obtener empresa:', err);
+      console.error('Error al obtener empresa:', err);
       alert('No se pudo obtener la empresa. Intenta nuevamente.');
     }
   });
 }
-
-
 
 EliminarRedSocial(index: number) {
   const red = this.Otro[index];
@@ -351,7 +287,6 @@ EliminarRedSocial(index: number) {
     });
   }
 }
-
 
 
 }
