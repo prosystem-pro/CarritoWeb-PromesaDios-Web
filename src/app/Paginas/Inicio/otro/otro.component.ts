@@ -13,6 +13,7 @@ import { EmpresaServicio } from '../../../Servicios/EmpresaServicio';
 import { OtroServicio } from '../../../Servicios/OtroServicio';
 import { PermisoServicio } from '../../../Autorizacion/AutorizacionPermiso';
 import { Entorno } from '../../../Entornos/Entorno';
+import { AlertaServicio } from '../../../Servicios/Alerta-Servicio'; 
 
 
 @Component({
@@ -40,6 +41,7 @@ export class OtroComponent {
       public Permiso: PermisoServicio,
       private http: HttpClient,
       private sanitizer: DomSanitizer,
+      private AlertaServicio: AlertaServicio 
     ) {}
 
     ngOnInit(): void {
@@ -47,7 +49,7 @@ export class OtroComponent {
       this.ObtenerOtro();
     }
 //CODIGO DE PORTADA OTRO
-    ObtenerPortadaOtro(): void {
+  ObtenerPortadaOtro(): void {
   this.PortadaOtroServicio.Listado().subscribe({
     next: (data: PortadaOtro[]) => {
       if (data && data.length > 0) {
@@ -61,9 +63,10 @@ export class OtroComponent {
           ColorDescripcion: '#000000',
           ColorDescripcionOtro: '#ffffff',
         };
+        this.AlertaServicio.MostrarAlerta('No se encontraron registros. Se utilizarán valores predeterminados.');
       }
     },
-    error: () => {
+    error: (error) => {
       this.PortadaOtro = {
         NombrePortadaOtro: 'Título predeterminado',
         ColorNombrePortadaOtro: '#000000',
@@ -72,54 +75,60 @@ export class OtroComponent {
         ColorDescripcion: '#000000',
         ColorDescripcionOtro: '#ffffff',
       };
+      this.AlertaServicio.MostrarError(error, 'No se pudo obtener la información');
     }
   });
-    }
+}
+
     
-    GuardarPortadaOtro(): void {
-      if (!this.PortadaOtro?.CodigoPortadaOtro) {
-        this.EmpresaServicio.Listado().subscribe({
-          next: (empresas: any[]) => {
-            if (empresas && empresas.length > 0) {
-              const CodigoEmpresa = empresas[0].CodigoEmpresa;
-              this.PortadaOtro!.CodigoEmpresa = CodigoEmpresa;
-              this.PortadaOtroServicio.Crear(this.PortadaOtro).subscribe({
-                next: () => {
-                  this.ObtenerPortadaOtro();
-                  this.MostrarPortadaOtro = false;
-                },
-                error: (error) => {
-                  console.error('Error al crear el registro de PortadaOtro:', error);
-                }
-              });
-            } else {
-              console.error('No se encontraron empresas para asignar el CódigoEmpresa');
+GuardarPortadaOtro(): void {
+  if (!this.PortadaOtro?.CodigoPortadaOtro) {
+    this.EmpresaServicio.Listado().subscribe({
+      next: (empresas: any[]) => {
+        if (empresas && empresas.length > 0) {
+          const CodigoEmpresa = empresas[0].CodigoEmpresa;
+          this.PortadaOtro!.CodigoEmpresa = CodigoEmpresa;
+
+          this.PortadaOtroServicio.Crear(this.PortadaOtro).subscribe({
+            next: () => {
+              this.AlertaServicio.MostrarExito('El registro se creó correctamente.');
+              this.ObtenerPortadaOtro();
+              this.MostrarPortadaOtro = false;
+            },
+            error: (error) => {
+              this.AlertaServicio.MostrarError(error, 'No se pudo crear el registro.');
             }
-          },
-          error: (error) => {
-            console.error('Error al obtener el CódigoEmpresa desde el servicio:', error);
-          }
-        });
-        return;
-      }
-    
-      this.PortadaOtroServicio.Editar(this.PortadaOtro).subscribe({
-        next: () => {
-          this.MostrarPortadaOtro = false;
-          this.ObtenerPortadaOtro();
-        },
-        error: (error) => {
-          console.error('Error al guardar los datos en el backend:', error);
+          });
+
+        } else {
+          this.AlertaServicio.MostrarAlerta('No se encontraron datos para continuar con la operación.');
         }
-      });
+      },
+      error: (error) => {
+        this.AlertaServicio.MostrarError(error, 'No se pudo obtener la información necesaria.');
+      }
+    });
+    return;
+  }
+
+  this.PortadaOtroServicio.Editar(this.PortadaOtro).subscribe({
+    next: () => {
+      this.AlertaServicio.MostrarExito('El registro se actualizó correctamente.');
+      this.MostrarPortadaOtro = false;
+      this.ObtenerPortadaOtro();
+    },
+    error: (error) => {
+      this.AlertaServicio.MostrarError(error, 'No se pudo actualizar el registro.');
     }
+  });
+}
 
 
 
 
 //CODIGO DE OTRO
 
-  ngAfterViewChecked(): void {
+ngAfterViewChecked(): void {
   this.Otro.forEach((item, index) => {
     if (this.MostrarListado[index]) {
       const editor = document.getElementById(`editor-${index}`);
@@ -129,6 +138,7 @@ export class OtroComponent {
     }
   });
 }
+
 
 ObtenerOtro(): void {
   this.OtroServicio.Listado().subscribe({
@@ -147,6 +157,7 @@ ObtenerOtro(): void {
     error: () => {
       this.Otro = [];
       this.MostrarListado = [];
+      this.AlertaServicio.MostrarAlerta('No se pudieron obtener los datos.');
     }
   });
 }
@@ -183,8 +194,11 @@ GuardarOtro(index: number | null): void {
       next: () => {
         this.MostrarAgregarOtro = false;
         this.ObtenerOtro();
+        this.AlertaServicio.MostrarExito('Los datos se actualizaron correctamente.');
       },
-      error: () => {}
+      error: () => {
+        this.AlertaServicio.MostrarError('No se pudieron guardar los datos.');
+      }
     });
   } else {
     this.OtroServicio.Crear(item).subscribe({
@@ -193,8 +207,11 @@ GuardarOtro(index: number | null): void {
         this.CodigoTemporal = '';
         this.MostrarAgregarOtro = false;
         this.ObtenerOtro();
+        this.AlertaServicio.MostrarExito('El registro se creó correctamente.');
       },
-      error: () => {}
+      error: () => {
+        this.AlertaServicio.MostrarError('No se pudieron guardar los datos.');
+      }
     });
   }
 }
@@ -211,8 +228,11 @@ ActualizarImagenOtro(event: any, index: number | null, permiso: string | null = 
   const file: File = event.target.files[0];
   if (file) {
     this.subirImagen(file, 'UrlImagen', index, permiso);
+  } else {
+    this.AlertaServicio.MostrarAlerta('No se seleccionó ningún archivo.');
   }
 }
+
 
 subirImagen(file: File, CampoDestino: string, index: number | null, permiso: string | null): void {
   const nombreEmpresa = this.NombreEmpresa ?? 'defaultCompanyName';
@@ -220,7 +240,7 @@ subirImagen(file: File, CampoDestino: string, index: number | null, permiso: str
   this.EmpresaServicio.ConseguirPrimeraEmpresa().subscribe({
     next: (empresa) => {
       if (!empresa) {
-        alert('No se encontró ninguna empresa.');
+        this.AlertaServicio.MostrarAlerta('No se encontró el dato solicitado.');
         return;
       }
 
@@ -236,13 +256,9 @@ subirImagen(file: File, CampoDestino: string, index: number | null, permiso: str
       formData.append('CampoPropio', 'CodigoOtro');
       formData.append('NombreCampoImagen', CampoDestino);
 
-      formData.forEach((valor, clave) => {
-        console.log(`${clave}:`, valor);
-      });
-
       this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
         next: (res: any) => {
-          alert('Imagen subida correctamente.');
+          this.AlertaServicio.MostrarAlerta('El registro se actualizó correctamente.');
 
           const UrlImagen = res?.Entidad?.UrlImagen;
           this.UrlImagenTemporal = UrlImagen;
@@ -252,41 +268,46 @@ subirImagen(file: File, CampoDestino: string, index: number | null, permiso: str
 
           if (!permiso) {
             this.ObtenerOtro();
-          } else {
           }
         },
         error: (err) => {
           console.error('Error al subir la imagen:', err);
-          alert('Error al subir la imagen. Intente de nuevo.');
+          this.AlertaServicio.MostrarAlerta('Hubo un error al procesar la solicitud. Intente de nuevo.');
         }
       });
     },
     error: (err) => {
       console.error('Error al obtener empresa:', err);
-      alert('No se pudo obtener la empresa. Intenta nuevamente.');
+      this.AlertaServicio.MostrarAlerta('No se pudo obtener el dato solicitado. Intente nuevamente.');
     }
   });
 }
 
-EliminarRedSocial(index: number) {
-  const red = this.Otro[index];
-  const codigo = red?.CodigoOtro;
+
+EliminarOtro(index: number): void {
+  const item = this.Otro[index];
+  const codigo = item?.CodigoOtro;
 
   if (codigo === undefined) return;
 
-  const confirmado = confirm('¿Estás seguro de que deseas eliminar esta red social?');
-
-  if (confirmado) {
-    this.OtroServicio.Eliminar(codigo).subscribe({
-      next: () => {
-        this.Otro.splice(index, 1);
-      },
-      error: () => {
-        alert('Hubo un error al eliminar la red social.');
-      }
-    });
-  }
+  this.AlertaServicio.Confirmacion(
+    '¿Estás seguro?',
+    'Esta acción eliminará el registro de forma permanente.',
+    'Sí, eliminar',
+    'Cancelar'
+  ).then(confirmado => {
+    if (confirmado) {
+      this.OtroServicio.Eliminar(codigo).subscribe({
+        next: () => {
+          this.Otro.splice(index, 1);
+          this.AlertaServicio.MostrarExito('Registro eliminado correctamente.');
+        },
+        error: (err) => {
+          this.AlertaServicio.MostrarError(err, 'Error al eliminar');
+        }
+      });
+    }
+  });
 }
-
 
 }
