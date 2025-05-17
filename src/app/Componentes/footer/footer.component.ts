@@ -5,6 +5,8 @@ import { FooterServicio } from '../../Servicios/FooterServicio';
 import { HttpClient } from '@angular/common/http';
 import { Entorno } from '../../Entornos/Entorno';
 import { ServicioCompartido } from '../../Servicios/ServicioCompartido';
+import { RedSocialServicio } from '../../Servicios/RedSocialServicio';
+import { RedSocial } from '../../Modelos/RedSocial';
 
 @Component({
   selector: 'app-footer',
@@ -21,15 +23,30 @@ export class FooterComponent implements OnInit {
   error = false;
   modoEdicion: boolean = false;
   datosOriginales: any = null;
+  RedeSocial: RedSocial[] = [];
 
   constructor(
     private footerServicio: FooterServicio,
     private http: HttpClient,
-    private servicioCompartido: ServicioCompartido
+    private servicioCompartido: ServicioCompartido,
+    private redSocialServicio: RedSocialServicio
   ) {}
 
   ngOnInit(): void {
     this.cargarDatosFooter();
+    this.cargarRedesSociales();
+  }
+
+  cargarRedesSociales(): void {
+    this.redSocialServicio.Listado().subscribe({
+      next: (data: RedSocial[]) => {
+        this.RedeSocial = data;
+        console.log('Redes sociales cargadas:', this.RedeSocial);
+      },
+      error: (error) => {
+        console.error('Error al obtener redes sociales:', error);
+      }
+    });
   }
 
   cargarDatosFooter(): void {

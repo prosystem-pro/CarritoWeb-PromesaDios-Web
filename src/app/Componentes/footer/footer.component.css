@@ -97,7 +97,7 @@ input[type="color"] {
 
 .btn-edicion-general {
   position: absolute;
-  bottom: 10px;
+  bottom: 1px;
   right: 10px;
   z-index: 1000;
   border-radius: 50%;
@@ -119,4 +119,10 @@ label[for="logoUploadMobile"] {
   width: 100%;
   height: 100%;
   cursor: pointer;
+}
+
+@media (max-width: 767.98px) {
+  .copyright-section {
+    display: none !important;
+  }
 }
