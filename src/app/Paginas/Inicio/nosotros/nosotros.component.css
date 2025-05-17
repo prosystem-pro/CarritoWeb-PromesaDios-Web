@@ -217,6 +217,14 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
+.reproductor {
+  width: 55%;
+  height: 600px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 @media (min-width: 768px) {
   .trigo-izquierda,
   .trigo-derecho {
@@ -229,8 +237,9 @@
   .trigo-derecho {
     width: 220px;
   }
-  .promo-text {
-    font-size: 1.6rem;
+  .reproductor {
+    width: 55%;
+    height: 560px;
   }
 }
 
@@ -243,6 +252,11 @@
   .trigo-derecho {
     width: 100px;
     bottom: 55%; /* Ajuste para móviles */
+  }
+
+  .reproductor {
+    width: 80%;
+    height: 350px;
   }
 }
 
@@ -296,6 +310,11 @@
   .trigo-derecho {
     width: 100px;
     bottom: 50%; /* Ajuste para móviles */
+  }
+
+  .reproductor {
+    width: 100%;
+    height: 260px;
   }
 }
 
