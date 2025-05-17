@@ -1,3 +1,7 @@
+.cursive-font {
+  font-family: "Brush Script MT", cursive;
+}
+
 html,
 body {
   margin: 0;

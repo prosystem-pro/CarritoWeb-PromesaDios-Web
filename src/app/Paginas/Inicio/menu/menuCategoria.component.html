@@ -287,8 +287,8 @@
 <!-- Placeholder para sección "Productos Destacados" -->
 <section class="featured-products d-flex flex-wrap justify-content-center gap-4 py-5">
     <div class="container py-3">
-        <app-carrusel [items]="detallesCarrusel" [title]="titulo" titleClass="cursive-font text-dark" [autoplay]="true"
-            [autoplayInterval]="5000">
+        <app-carrusel *ngIf="datosListos" [items]="detallesCarrusel" [title]="titulo" [codigoCarrusel]="codigoCarrusel"
+            titleClass="cursive-font text-dark" [autoplay]="true" [autoplayInterval]="5000">
         </app-carrusel>
     </div>
 </section>
