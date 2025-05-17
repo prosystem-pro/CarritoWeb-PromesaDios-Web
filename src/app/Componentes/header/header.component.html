@@ -148,8 +148,10 @@
             </ul>
 
             <div class="mobile-social-icons mx-auto">
-                <a href="#" class="social-icon"><i class="bi bi-whatsapp"></i></a>
-                <a href="#" class="social-icon"><i class="bi bi-facebook"></i></a>
+                <a *ngFor="let red of RedeSocial" class="social-icon" [href]="'https://' + red.Link" target="_blank"
+                    rel="noopener noreferrer">
+                    <img [src]="red.UrlImagen" [alt]="red.NombreRedSocial" width="45" height="45" />
+                </a>
             </div>
         </div>
 
@@ -224,6 +226,11 @@
                     'bi-pencil-square': !modoEdicion,
                     'text-danger': modoEdicion
                 }" [style.color]="modoEdicion ? '#ffffff' : '#000000'"></i>
+            </button>
+
+            <!-- Botón para cerrar sesión -->
+            <button *ngIf="!modoEdicion" class="btn btn-sm me-2" title="Cerrar sesión" (click)="cerrarSesion()">
+                <i class="bi bi-box-arrow-right"></i>
             </button>
 
 

@@ -184,7 +184,6 @@
   .mobile-social-icons {
     display: flex;
     justify-content: center;
-    gap: 5%;
     margin-top: auto;
     padding: 2rem 0;
   }
@@ -271,7 +270,6 @@
   .mobile-social-icons {
     display: flex;
     justify-content: center;
-    gap: 5%;
     margin-top: auto;
     padding: 2rem 0;
   }
@@ -402,7 +400,6 @@
   .mobile-social-icons {
     display: flex;
     justify-content: center;
-    gap: 5%;
     margin-top: auto;
     padding: 2rem 0;
     width: 100%;

@@ -21,7 +21,6 @@ export class LoginServicio {
         next: (Respuesta: any) => {
           if (Respuesta) {
             this.GuardarToken('authToken', Respuesta.Token);
-            this.GuardarToken('rol', Respuesta.usuario.NombreRol);
           }
           observer.next(Respuesta);
           observer.complete();

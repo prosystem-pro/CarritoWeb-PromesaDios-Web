@@ -59,5 +59,5 @@ export const routes: Routes = [
   { path: 'recurso-editar/:Codigo', component: RecursoEditarComponent,canActivate: [AutorizacionRuta] },
   { path: 'permiso-rol-recurso-listado', component: PermisoRolRecursoListadoComponent,canActivate: [AutorizacionRuta] },
   { path: 'permiso-rol-recurso-crear', component: PermisoRolRecursoCrearComponent,canActivate: [AutorizacionRuta] },
-  { path: '**', redirectTo: 'login' },
+  { path: '**', redirectTo: 'nosotros' },
 ];

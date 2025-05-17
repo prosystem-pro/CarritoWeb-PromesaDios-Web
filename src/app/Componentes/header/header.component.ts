@@ -8,6 +8,8 @@ import { Entorno } from '../../Entornos/Entorno';
 import { ServicioCompartido } from '../../Servicios/ServicioCompartido';
 import { Subscription } from 'rxjs';
 import { CarritoComponent } from '../carrito/carrito.component';
+import { RedSocialServicio } from '../../Servicios/RedSocialServicio';
+import { RedSocial } from '../../Modelos/RedSocial';
 
 @Component({
   selector: 'app-header',
@@ -28,6 +30,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   busquedaActiva: boolean = false;
   totalItemsCarrito: number = 0;
   mostrarCarrito = false;
+  RedeSocial: RedSocial[] = [];
   @ViewChild('navbarCollapse') navbarCollapse!: ElementRef;
 
   constructor(
@@ -35,8 +38,34 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private router: Router,
     private http: HttpClient,
     private renderer: Renderer2,
-    private servicioCompartido: ServicioCompartido
+    private servicioCompartido: ServicioCompartido,
+    private redSocialServicio: RedSocialServicio
   ) {}
+
+  ngOnInit(): void {
+    this.Listado();
+    this.cargarRedesSociales();
+    this.subscription = this.servicioCompartido.carritoVaciado$.subscribe(() => {
+      this.obtenerTotalItemsCarrito();
+    });
+    this.obtenerTotalItemsCarrito();
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
+  cargarRedesSociales(): void {
+    this.redSocialServicio.Listado().subscribe({
+      next: (data: RedSocial[]) => {
+        this.RedeSocial = data;
+        console.log('Redes sociales cargadas:', this.RedeSocial);
+      },
+      error: (error) => {
+        console.error('Error al obtener redes sociales:', error);
+      }
+    });
+  }
 
   buscar(): void {
     // Verifica que haya texto de búsqueda antes de hacer la solicitud
@@ -53,18 +82,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.busquedaActiva = false;
       this.textoBusqueda = "";
     }
-  }
-
-  ngOnInit(): void {
-    this.Listado();
-    this.subscription = this.servicioCompartido.carritoVaciado$.subscribe(() => {
-      this.obtenerTotalItemsCarrito();
-    });
-    this.obtenerTotalItemsCarrito();
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 
   obtenerTotalItemsCarrito(): void {
@@ -329,7 +346,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
     //Método para ver el carrito
-    alternarCarrito() {
-      this.mostrarCarrito = !this.mostrarCarrito;
-    }
+  alternarCarrito() {
+    this.mostrarCarrito = !this.mostrarCarrito;
+  }
+
+  cerrarSesion() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('colorClasificacion');
+    localStorage.removeItem('colorClasificacionTexto');
+    this.router.navigate(['/login']);
+  }
 }
