@@ -7,6 +7,7 @@ import { CarruselImagenServicio } from '../../Servicios/CarruselImagnServicio';
 import { Subscription } from 'rxjs';
 import { Carrusel } from '../../Modelos/Carrusel';
 import { CarruselServicio } from '../../Servicios/CarruselServicio';
+import { AlertaServicio } from '../../Servicios/Alerta-Servicio';
 
 interface CarruselItem {
   CodigoCarruselImagen: number;
@@ -87,7 +88,8 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
     private http: HttpClient,
     private carruselImagenServicio: CarruselImagenServicio,
     private cdr: ChangeDetectorRef,
-    private carruselServicio: CarruselServicio
+    private carruselServicio: CarruselServicio,
+    private alertaServicio: AlertaServicio
   ) {}
   
   ngOnInit(): void {
@@ -124,7 +126,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-    cargarDatosCarrusel(): void {
+  cargarDatosCarrusel(): void {
     this.carruselServicio.ObtenerPorCodigo(this.codigoCarrusel)
       .subscribe({
         next: (data) => {
@@ -404,7 +406,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
 
   subirImagenCarrusel(): void {
     if (!this.nuevaImagen.imagen || typeof this.nuevaImagen.imagen === 'string') {
-      console.error('No hay archivo para subir');
+      this.alertaServicio.MostrarError('No hay archivo para subir');
       return;
     }
 
@@ -423,7 +425,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
     const subscription = this.http.post(`${this.Url}subir-imagen`, formData)
       .subscribe({
         next: (response: any) => {
-          console.log('Imagen subida correctamente', response);
+          this.alertaServicio.MostrarExito('Imagen subida correctamente');
           this.cargandoImagen = false;
 
           // Crear un nuevo objeto para añadir al carrusel
@@ -446,8 +448,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
           }, 100);
         },
         error: (error) => {
-          console.error('Error al subir la imagen', error);
-          alert('Error al subir la imagen. Por favor, intente de nuevo.');
+          this.alertaServicio.MostrarError('Error al subir la imagen. Por favor, intente de nuevo.');
           this.cargandoImagen = false;
           this.cdr.detectChanges();
         }
@@ -515,7 +516,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
   // Actualizar imagen en el servidor
   actualizarImagenCarrusel(): void {
     if (!this.imagenEdicion.imagen) {
-      console.error('No hay archivo para actualizar');
+      this.alertaServicio.MostrarAlerta('No hay archivo para actualizar');
       return;
     }
     
@@ -534,7 +535,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
     const subscription = this.http.post(`${this.Url}subir-imagen`, formData)
       .subscribe({
         next: (response: any) => {
-          console.log('Imagen actualizada correctamente', response);
+          this.alertaServicio.MostrarExito('Imagen actualizada correctamente');
           this.cargandoImagen = false;
           
           // Actualizar el ítem en el array
@@ -555,8 +556,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
           this.cdr.detectChanges();
         },
         error: (error) => {
-          console.error('Error al actualizar la imagen', error);
-          alert('Error al actualizar la imagen. Por favor, intente de nuevo.');
+          this.alertaServicio.MostrarError('Error al actualizar la imagen. Por favor, intente de nuevo.');
           this.cargandoImagen = false;
           this.cdr.detectChanges();
         }
@@ -567,17 +567,22 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
     
   // Eliminar una imagen del carrusel
   eliminarImagen(item: CarruselItem): void {
-    if (confirm('¿Está seguro que desea eliminar esta imagen?')) {
+  this.alertaServicio.Confirmacion(
+    '¿Está seguro que desea eliminar esta imagen?',
+    'Esta acción no se puede deshacer.'
+  ).then((confirmado) => {
+    if (confirmado) {
       const codigoCarruselImagen = item.CodigoCarruselImagen;
-      
+
       const subscription = this.carruselImagenServicio.Eliminar(codigoCarruselImagen).subscribe({
         next: (response) => {
-          console.log('Imagen eliminada correctamente', response);
-          
+          this.alertaServicio.MostrarExito('Imagen eliminada correctamente');
+
           // Eliminar el ítem del array local
-          this.items = this.items.filter((img: CarruselItem) => 
-            img.CodigoCarruselImagen !== codigoCarruselImagen);
-          
+          this.items = this.items.filter((img: CarruselItem) =>
+            img.CodigoCarruselImagen !== codigoCarruselImagen
+          );
+
           // Actualizar el carrusel
           setTimeout(() => {
             this.setupCarousel();
@@ -585,28 +590,28 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
           }, 100);
         },
         error: (error) => {
-          console.error('Error al eliminar la imagen', error);
-          alert('Error al eliminar la imagen. Por favor, intente de nuevo.');
+          this.alertaServicio.MostrarError(error, 'Error al eliminar la imagen');
         }
       });
-      
+
       this.subscriptions.push(subscription);
     }
-  }
-  
+  });
+}
+
   // Verificar si un ítem está en edición
   esItemEnEdicion(item: CarruselItem): boolean {
     return !!this.itemEnEdicion && this.itemEnEdicion.CodigoCarruselImagen === item.CodigoCarruselImagen;
   }
 
-    activarEdicionTitulo(): void {
+  activarEdicionTitulo(): void {
     this.tituloTemporal = this.title;
     this.editandoTitulo = true;
   }
 
   guardarTitulo(): void {
     if (!this.carruselActual) {
-      console.error('No hay un carrusel cargado para editar');
+      this.alertaServicio.MostrarError('No hay un carrusel cargado para editar');
       return;
     }
 
@@ -617,11 +622,10 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
         next: (response) => {
           this.title = this.tituloTemporal;
           this.editandoTitulo = false;
-          console.log('Título actualizado con éxito:', response);
+          this.alertaServicio.MostrarExito('Título actualizado correctamente');
         },
         error: (error) => {
-          console.error('Error al actualizar el título:', error);
-          // Opcional: mostrar un mensaje de error al usuario
+          this.alertaServicio.MostrarError('Error al actualizar el título');
         }
       });
   }

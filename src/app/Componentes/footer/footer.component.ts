@@ -7,6 +7,7 @@ import { Entorno } from '../../Entornos/Entorno';
 import { ServicioCompartido } from '../../Servicios/ServicioCompartido';
 import { RedSocialServicio } from '../../Servicios/RedSocialServicio';
 import { RedSocial } from '../../Modelos/RedSocial';
+import { AlertaServicio } from '../../Servicios/Alerta-Servicio';
 
 @Component({
   selector: 'app-footer',
@@ -29,7 +30,8 @@ export class FooterComponent implements OnInit {
     private footerServicio: FooterServicio,
     private http: HttpClient,
     private servicioCompartido: ServicioCompartido,
-    private redSocialServicio: RedSocialServicio
+    private redSocialServicio: RedSocialServicio,
+    private alertaServicio: AlertaServicio
   ) {}
 
   ngOnInit(): void {
@@ -41,10 +43,8 @@ export class FooterComponent implements OnInit {
     this.redSocialServicio.Listado().subscribe({
       next: (data: RedSocial[]) => {
         this.RedeSocial = data;
-        console.log('Redes sociales cargadas:', this.RedeSocial);
       },
       error: (error) => {
-        console.error('Error al obtener redes sociales:', error);
       }
     });
   }
@@ -73,13 +73,15 @@ export class FooterComponent implements OnInit {
       document.body.classList.add('modoEdicion');
     } else {
       // Preguntar si desea guardar los cambios
-      if (confirm('¿Desea guardar los cambios?')) {
-        this.guardarCambios();
-      } else {
-        // Restaurar datos originales si cancela
-        this.footerData = JSON.parse(JSON.stringify(this.datosOriginales));
-        this.servicioCompartido.setColorFooter(this.footerData?.ColorFooter);
-      }
+      this.alertaServicio.Confirmacion('¿Desea guardar los cambios?').then((confirmado) => {
+        if (confirmado) {
+          this.guardarCambios();
+        } else {
+          // Restaurar datos originales si cancela
+          this.footerData = JSON.parse(JSON.stringify(this.datosOriginales));
+          this.servicioCompartido.setColorFooter(this.footerData?.ColorFooter);
+        }
+      });
       this.modoEdicion = false;
       document.body.classList.remove('modoEdicion');
     }
@@ -91,18 +93,17 @@ export class FooterComponent implements OnInit {
 
       this.footerServicio.Editar(datosActualizados).subscribe({
         next: (response) => {
-          alert('Cambios guardados correctamente');
+          this.alertaServicio.MostrarExito('Cambios guardados correctamente');
           this.modoEdicion = false;
           document.body.classList.remove('modoEdicion');
           this.datosOriginales = null;
         },
         error: (error) => {
-          console.error('Error al guardar los cambios', error);
-          alert('Error al guardar los cambios. Por favor, intente de nuevo.');
+          this.alertaServicio.MostrarError('Error al guardar los cambios');
         }
       });
     } else {
-      console.error('No hay datos disponibles para actualizar');
+      this.alertaServicio.MostrarAlerta('No hay datos disponibles para actualizar');
     }
   }
 
@@ -133,8 +134,6 @@ export class FooterComponent implements OnInit {
     this.http.post(`${this.Url}subir-imagen`, formData)
       .subscribe({
         next: (response: any) => {
-          alert('Cargando imagen...');
-          console.log('Imagen subida correctamente', response);
           
           if (response && response.Entidad && response.Entidad[campoDestino]) {
             this.footerData[campoDestino] = response.Entidad[campoDestino];
@@ -143,11 +142,11 @@ export class FooterComponent implements OnInit {
 
             this.footerServicio.Editar(datosActualizados).subscribe({
               next: (updateResponse) => {
-                console.log('Campo de imagen actualizado en el modelo Footer', updateResponse);
+                this.alertaServicio.MostrarExito('Imagen actualizada correctamente');
                 this.modoEdicion = false;
               },
               error: (updateError) => {
-                console.error('Error al actualizar el campo de imagen en el modelo Footer', updateError);
+                this.alertaServicio.MostrarError('Error al actualizar la imagen');
               }
             });
           } else {
@@ -158,13 +157,12 @@ export class FooterComponent implements OnInit {
             if (imageUrl) {
               this.footerData[campoDestino] = imageUrl;
             } else {
-              console.warn('No se pudo obtener la URL de la imagen de la respuesta', response);
+              this.alertaServicio.MostrarError('Error al obtener la URL de la imagen');
             }
           }
         },
         error: (error) => {
-          console.error('Error al subir la imagen', error);
-          alert('Error al subir la imagen. Por favor, intente de nuevo.');
+          this.alertaServicio.MostrarError('Error al subir la imagen');
         }
       });
   }

@@ -11,6 +11,7 @@ import { SvgDecoradorComponent } from '../svg-decorador/svg-decorador.component'
 import { CarritoComponent } from '../carrito/carrito.component';
 import { Subscription } from 'rxjs';
 import { ClasificacionProductoServicio } from '../../Servicios/ClasificacionProductoServicio';
+import { AlertaServicio } from '../../Servicios/Alerta-Servicio';
 
 interface ProductoConCantidad extends Producto {
   cantidad?: number;
@@ -87,6 +88,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
     private productoServicio: ProductoServicio,
     private servicioCompartido: ServicioCompartido,
     private clasificacionProductoServicio: ClasificacionProductoServicio,
+    private alertaServicio: AlertaServicio,
     private http: HttpClient
   ) {
     this.actualizarTotalCarrito();
@@ -156,9 +158,8 @@ export class ProductosComponent implements OnInit, OnDestroy {
         this.cargando = false;
       },
       error: (err) => {
-        console.error('Error al cargar productos:', err);
         this.error =
-          'No se pudieron cargar los productos. Contacte al administrador.';
+        'No se pudieron cargar los productos. Contacte al administrador.';
         this.cargando = false;
       },
     });
@@ -188,7 +189,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
         }
       },
       error: (err) => {
-        console.error('Error al cargar clasificación:', err);
+        this.alertaServicio.MostrarError(err, 'Error al cargar clasificación');
       },
     });
   }
@@ -235,6 +236,8 @@ export class ProductosComponent implements OnInit, OnDestroy {
         cantidad: producto.cantidad || 1,
       });
     }
+
+    this.alertaServicio.MostrarToast('El producto se agregó al carrito', 'success');
 
     // Guardar el carrito actualizado
     localStorage.setItem('carrito', JSON.stringify(carrito));
@@ -306,7 +309,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
   guardarNombre(producto: ProductoConCantidad): void {
     if (!this.nombreTemporal || this.nombreTemporal.trim() === '') {
-      alert('El nombre del producto no puede estar vacío');
+      this.alertaServicio.MostrarAlerta('El nombre del producto no puede estar vacío');
       return;
     }
 
@@ -316,12 +319,12 @@ export class ProductosComponent implements OnInit, OnDestroy {
     // Llamar al servicio para actualizar en la base de datos
     this.productoServicio.Editar(producto).subscribe({
       next: (response) => {
-        alert('Nombre del producto actualizado correctamente');
+        this.alertaServicio.MostrarExito('Nombre del producto actualizado correctamente');
         this.editandoNombre = null;
       },
       error: (error) => {
         console.error('Error al actualizar nombre', error);
-        alert('Error al actualizar el nombre del producto');
+        this.alertaServicio.MostrarError(error, 'Error al actualizar nombre');
         // Restaurar el nombre original en caso de error
         producto.NombreProducto = this.nombreOriginal;
         this.editandoNombre = null;
@@ -371,12 +374,12 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
   guardarPrecio(producto: ProductoConCantidad): void {
     if (!this.precioTemp.moneda || this.precioTemp.moneda.trim() === '') {
-      alert('La moneda no puede estar vacía');
+      this.alertaServicio.MostrarAlerta('La moneda no puede estar vacía');
       return;
     }
 
     if (this.precioTemp.valor <= 0) {
-      alert('El precio debe ser mayor que cero');
+      this.alertaServicio.MostrarAlerta('El precio debe ser mayor que cero');
       return;
     }
 
@@ -388,12 +391,11 @@ export class ProductosComponent implements OnInit, OnDestroy {
     this.productoServicio.Editar(producto).subscribe({
       next: (response) => {
         console.log('Precio actualizado correctamente', response);
-        alert('Precio del producto actualizado correctamente');
+        this.alertaServicio.MostrarExito('Precio del producto actualizado correctamente');
         this.editandoPrecio = null;
       },
       error: (error) => {
-        console.error('Error al actualizar precio', error);
-        alert('Error al actualizar el precio del producto');
+        this.alertaServicio.MostrarError(error, 'Error al actualizar precio');
 
         // Restaurar valores originales
         const partes = this.precioOriginal.match(/([^\d]*)(\d+(?:\.\d+)?)/);
@@ -447,27 +449,22 @@ export class ProductosComponent implements OnInit, OnDestroy {
     formData.append('CampoPropio', 'CodigoProducto');
     formData.append('NombreCampoImagen', 'UrlImagen');
 
-    alert('Actualizando imagen...');
-
     this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
       next: (response: any) => {
-        console.log('Imagen subida correctamente', response);
-
+        
         if (response && response.Entidad && response.Entidad.UrlImagen) {
           // Actualizar la URL de la imagen en el producto
           producto.UrlImagen = response.Entidad.UrlImagen;
-          alert('Imagen actualizada correctamente');
+          this.alertaServicio.MostrarExito('Imagen actualizada correctamente');
         } else {
-          alert('Error al procesar la respuesta del servidor');
-          console.warn('No se pudo obtener la URL de la imagen', response);
+          this.alertaServicio.MostrarAlerta('Error al procesar la respuesta del servidor');
 
           // Recargar productos para obtener la imagen actualizada
           this.cargarProductos(this.codigoClasificacion);
         }
       },
       error: (error) => {
-        console.error('Error al subir la imagen', error);
-        alert('Error al subir la imagen. Por favor, intente de nuevo.');
+        this.alertaServicio.MostrarError(error, 'Error al subir imagen');
       },
     });
   }
@@ -537,7 +534,9 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
   guardarNuevoProducto(): void {
     if (!this.esFormularioValido()) {
-      alert('Por favor, complete todos los campos y seleccione una imagen');
+      this.alertaServicio.MostrarAlerta(
+        'Por favor, complete todos los campos y seleccione una imagen'
+      );
       return;
     }
 
@@ -546,7 +545,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
       this.nuevoProducto.NombreProducto &&
       this.existeProductoConMismoNombre(this.nuevoProducto.NombreProducto)
     ) {
-      alert(
+      this.alertaServicio.MostrarAlerta(
         'Ya existe un producto con el mismo nombre. Por favor, elija otro nombre.'
       );
       return;
@@ -569,7 +568,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
     formData.append('CampoPropio', 'CodigoProducto');
     formData.append('NombreCampoImagen', 'UrlImagen');
 
-    alert('Creando producto...');
+    // alert('Creando producto...');
 
     this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
       next: (response: any) => {
@@ -593,18 +592,14 @@ export class ProductosComponent implements OnInit, OnDestroy {
           // 4. Llamar al servicio para actualizar los datos
           this.productoServicio.Editar(productoActualizado).subscribe({
             next: (editResponse) => {
-              console.log('Producto completado correctamente', editResponse);
-              alert('Producto creado exitosamente');
+              this.alertaServicio.MostrarExito('Producto creado correctamente');
 
               // 5. Recargar productos y cerrar formulario
               this.cargarProductos(this.codigoClasificacion);
               this.cancelarNuevoProducto();
             },
             error: (editError) => {
-              console.error('Error al completar datos del producto', editError);
-              alert(
-                'El producto se creó pero hubo un error al actualizar sus datos. Por favor edítelo manualmente.'
-              );
+              this.alertaServicio.MostrarError(editError, 'Error al actualizar datos del producto');
 
               // Recargar de todas formas y cerrar formulario
               this.cargarProductos(this.codigoClasificacion);
@@ -612,13 +607,11 @@ export class ProductosComponent implements OnInit, OnDestroy {
             },
           });
         } else {
-          alert('Error al procesar la respuesta del servidor');
-          console.warn('No se pudo obtener el código del producto', response);
+          this.alertaServicio.MostrarAlerta('Error al procesar la respuesta del servidor');
         }
       },
       error: (error) => {
-        console.error('Error al subir la imagen y crear el producto', error);
-        alert('Error al crear el producto. Por favor, intente de nuevo.');
+        this.alertaServicio.MostrarError(error, 'Error al subir imagen y crear producto');
       },
     });
   }
@@ -637,34 +630,32 @@ export class ProductosComponent implements OnInit, OnDestroy {
   // ---- Eliminar producto ----
 
   eliminarProducto(producto: ProductoConCantidad): void {
-    if (!producto.CodigoProducto) {
-      alert('El producto no tiene un código válido.');
-      return;
-    }
+  if (!producto.CodigoProducto) {
+    this.alertaServicio.MostrarAlerta('El producto no tiene un código válido.');
+    return;
+  }
 
-    if (
-      confirm(
-        `¿Está seguro que desea eliminar el producto "${producto.NombreProducto}"?`
-      )
-    ) {
-      this.productoServicio.Eliminar(producto.CodigoProducto).subscribe({
+  this.alertaServicio.Confirmacion(
+    `¿Está seguro que desea eliminar el producto "${producto.NombreProducto}"?`,
+    'Esta acción no se puede deshacer.'
+  ).then((confirmado) => {
+    if (confirmado) {
+      this.productoServicio.Eliminar(producto.CodigoProducto!).subscribe({
         next: (response) => {
-          console.log('Producto eliminado correctamente', response);
+          this.alertaServicio.MostrarExito('Producto eliminado correctamente');
 
           // Eliminar de la lista local
           this.productos = this.productos.filter(
             (p) => p.CodigoProducto !== producto.CodigoProducto
           );
-
-          alert('Producto eliminado correctamente');
         },
         error: (error) => {
-          console.error('Error al eliminar el producto', error);
-          alert('Error al eliminar el producto. Por favor, intente de nuevo.');
+          this.alertaServicio.MostrarError(error, 'Error al eliminar el producto');
         },
       });
     }
-  }
+  });
+}
 
   buscar(): void {
     this.buscarEnTiempoReal();

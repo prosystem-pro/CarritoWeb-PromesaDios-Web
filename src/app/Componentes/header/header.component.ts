@@ -10,6 +10,7 @@ import { Subscription } from 'rxjs';
 import { CarritoComponent } from '../carrito/carrito.component';
 import { RedSocialServicio } from '../../Servicios/RedSocialServicio';
 import { RedSocial } from '../../Modelos/RedSocial';
+import { AlertaServicio } from '../../Servicios/Alerta-Servicio';
 
 @Component({
   selector: 'app-header',
@@ -39,7 +40,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private renderer: Renderer2,
     private servicioCompartido: ServicioCompartido,
-    private redSocialServicio: RedSocialServicio
+    private redSocialServicio: RedSocialServicio,
+    private AlertaServicio: AlertaServicio
   ) {}
 
   ngOnInit(): void {
@@ -59,10 +61,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.redSocialServicio.Listado().subscribe({
       next: (data: RedSocial[]) => {
         this.RedeSocial = data;
-        console.log('Redes sociales cargadas:', this.RedeSocial);
       },
       error: (error) => {
-        console.error('Error al obtener redes sociales:', error);
       }
     });
   }
@@ -103,13 +103,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
       document.body.classList.add('modoEdicion');
     } else {
       // Preguntar si desea guardar los cambios
-      if (confirm('¿Desea guardar los cambios?')) {
-        this.guardarCambios();
-      } else {
-        // Restaurar datos originales si cancela
-        this.Datos = JSON.parse(JSON.stringify(this.datosOriginales));
-        this.actualizarEstilosCSS();
-      }
+      this.AlertaServicio.Confirmacion('¿Desea guardar los cambios?').then((confirmado) => {
+        if (confirmado) {
+          this.guardarCambios();
+        } else {
+          // Restaurar datos originales si cancela
+          this.Datos = JSON.parse(JSON.stringify(this.datosOriginales));
+          this.actualizarEstilosCSS();
+        }
+      });
       this.modoEdicion = false;
       document.body.classList.remove('modoEdicion');
     }
@@ -132,14 +134,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
       this.Servicio.Editar(datosActualizados).subscribe({
         next: (response) => {
-          alert('Cambios guardados correctamente');
+          this.AlertaServicio.MostrarExito('Cambios guardados correctamente');
           this.modoEdicion = false;
           document.body.classList.remove('modoEdicion');
           this.datosOriginales = null;
         },
         error: (error) => {
           console.error('Error al guardar los cambios', error);
-          alert('Error al guardar los cambios. Por favor, intente de nuevo.');
+          this.AlertaServicio.MostrarAlerta('Error al guardar los cambios. Por favor, intente de nuevo.');
         },
       });
     } else {
@@ -251,8 +253,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
       next: (response: any) => {
-        alert('Cargando imagen...');
-        console.log('Imagen subida correctamente', response);
+        this.AlertaServicio.MostrarAlerta('Cargando imagen...', 'Por favor, espere');
 
         if (response && response.Entidad && response.Entidad[campoDestino]) {
           this.Datos[campoDestino] = response.Entidad[campoDestino];
@@ -268,17 +269,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
           this.Servicio.Editar(datosActualizados).subscribe({
             next: (updateResponse) => {
-              console.log(
-                'Campo de imagen actualizado en el modelo Navbar',
-                updateResponse
-              );
               this.modoEdicion = false;
             },
             error: (updateError) => {
-              console.error(
-                'Error al actualizar el campo de imagen en el modelo Navbar',
-                updateError
-              );
+              this.AlertaServicio.MostrarError(updateError, 'Error al actualizar el campo de imagen');
             },
           });
         } else {
@@ -289,20 +283,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
           if (imageUrl) {
             this.Datos[campoDestino] = imageUrl;
-            console.log(
-              `URL de imagen actualizada: ${campoDestino} = ${imageUrl}`
-            );
+            this.AlertaServicio.MostrarExito('Imagen subida correctamente');
           } else {
-            console.warn(
-              'No se pudo obtener la URL de la imagen de la respuesta',
-              response
-            );
+            this.AlertaServicio.MostrarAlerta('No se pudo obtener la URL de la imagen');
           }
         }
       },
       error: (error) => {
-        console.error('Error al subir la imagen', error);
-        alert('Error al subir la imagen. Por favor, intente de nuevo.');
+        this.AlertaServicio.MostrarError(error, 'Error al subir la imagen Por favor, intente de nuevo.');
       },
     });
   }

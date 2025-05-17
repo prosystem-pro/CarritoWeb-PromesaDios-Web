@@ -13,6 +13,7 @@ import { SvgDecoradorComponent } from '../../../Componentes/svg-decorador/svg-de
 import { Router } from '@angular/router';
 import { ServicioCompartido } from '../../../Servicios/ServicioCompartido';
 import { EmpresaServicio } from '../../../Servicios/EmpresaServicio';
+import { AlertaServicio } from '../../../Servicios/Alerta-Servicio';
 
 @Component({
   selector: 'app-menuCategoria',
@@ -74,6 +75,7 @@ export class MenuCategoriaComponent implements OnInit {
     private router: Router,
     private servicioCompartido: ServicioCompartido,
     private empresaServicio: EmpresaServicio,
+    private alertaServicio: AlertaServicio,
     private http: HttpClient
   ) { }
 
@@ -261,7 +263,7 @@ export class MenuCategoriaComponent implements OnInit {
     this.actualizarClasificacion(clasificacion);
 
     this.editandoTitulo = null;
-    console.log('Título guardado:', clasificacion.NombreClasificacionProducto);
+    this.alertaServicio.MostrarExito('Título guardado correctamente', 'Éxito');
   }
 
   // Cancela la edición y restaura el valor original
@@ -342,8 +344,6 @@ export class MenuCategoriaComponent implements OnInit {
     this.http.post(`${this.Url}subir-imagen`, formData)
       .subscribe({
         next: (response: any) => {
-          alert('Cargando imagen...');
-          console.log('Imagen subida correctamente', response);
 
           if (response && response.Entidad && response.Entidad[campoDestino]) {
             this.menuPortada[campoDestino] = response.Entidad[campoDestino];
@@ -352,18 +352,17 @@ export class MenuCategoriaComponent implements OnInit {
 
             this.menuPortadaServicio.Editar(datosActualizados).subscribe({
               next: (updateResponse) => {
-                console.log('Campo de imagen actualizado en el modelo EmpresaPortada', updateResponse);
+                this.alertaServicio.MostrarExito('Imagen actualizada correctamente', 'Éxito');
                 this.modoEdicion = false;
               },
               error: (updateError) => {
-                console.error('Error al actualizar el campo de imagen en el modelo EmpresaPortada', updateError);
+                this.alertaServicio.MostrarError(updateError, 'Error al actualizar la imagen');
               }
             });
           }
         },
         error: (error) => {
-          console.error('Error al subir la imagen', error);
-          alert('Error al subir la imagen. Por favor, intente de nuevo.');
+          this.alertaServicio.MostrarError(error, 'Error al subir la imagen');
         }
       });
   }
@@ -381,11 +380,10 @@ export class MenuCategoriaComponent implements OnInit {
       formData.append('CampoPropio', 'CodigoClasificacionProducto');
       formData.append('NombreCampoImagen', 'UrlImagen');
 
-      alert('Creando nueva categoría...');
+      // alert('Creando nueva categoría...');
 
       this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
         next: (response: any) => {
-          console.log('Imagen subida correctamente', response);
 
           if (response && response.Entidad) {
             // Actualizar con el nombre de la categoría
@@ -402,11 +400,7 @@ export class MenuCategoriaComponent implements OnInit {
               .Editar(nuevaClasificacion)
               .subscribe({
                 next: (updateResponse) => {
-                  console.log(
-                    'Categoría actualizada con el nombre',
-                    updateResponse
-                  );
-                  alert('Nueva categoría creada correctamente');
+                  this.alertaServicio.MostrarExito('Nueva categoría creada correctamente', 'Éxito');
 
                   // Recargar clasificaciones
                   this.cargarClasificaciones();
@@ -415,21 +409,18 @@ export class MenuCategoriaComponent implements OnInit {
                   this.resetNuevaCategoria();
                 },
                 error: (updateError) => {
-                  console.error('Error al actualizar el nombre', updateError);
-                  alert('Error al actualizar el nombre de la categoría');
+                  this.alertaServicio.MostrarError(updateError, 'Error al crear la categoría');
 
                   // Recargar clasificaciones de todos modos
                   this.cargarClasificaciones();
                 },
               });
           } else {
-            alert('Error al procesar la respuesta del servidor');
-            console.warn('No se pudo obtener la entidad', response);
+            this.alertaServicio.MostrarError('Error al procesar la respuesta del servidor', 'Error');
           }
         },
         error: (error) => {
-          console.error('Error al subir la imagen', error);
-          alert('Error al subir la imagen. Por favor, intente de nuevo.');
+          this.alertaServicio.MostrarError(error, 'Error al subir la imagen. Por favor, intente de nuevo.');
         },
       });
     }
@@ -479,44 +470,41 @@ export class MenuCategoriaComponent implements OnInit {
   actualizarClasificacion(clasificacion: any): void {
     this.clasificacionProductoServicio.Editar(clasificacion).subscribe({
       next: (response) => {
-        console.log('Clasificación actualizada correctamente', response);
-        alert('Categoría actualizada correctamente');
       },
       error: (error) => {
-        console.error('Error al actualizar la clasificación', error);
-        alert('Error al actualizar la categoría');
       },
     });
   }
 
   // Elimina una clasificación
-  eliminarCategoria(clasificacion: any) {
-    if (confirm('¿Estás seguro de que deseas eliminar esta categoría?')) {
-      this.clasificacionProductoServicio
-        .Eliminar(clasificacion.CodigoClasificacionProducto)
-        .subscribe({
-          next: (response) => {
-            console.log('Clasificación eliminada correctamente', response);
+  eliminarCategoria(clasificacion: any): void {
+    this.alertaServicio.Confirmacion(
+      '¿Estás seguro de que deseas eliminar esta categoría?',
+      'Esta acción no se puede deshacer.'
+    ).then((confirmado) => {
+      if (confirmado) {
+        this.clasificacionProductoServicio
+          .Eliminar(clasificacion.CodigoClasificacionProducto)
+          .subscribe({
+            next: (response) => {
+              this.alertaServicio.MostrarExito('Categoría eliminada correctamente');
 
-            // Eliminar de la lista local
-            const index = this.clasificaciones.findIndex(
-              (c) =>
-                c.CodigoClasificacionProducto ===
-                clasificacion.CodigoClasificacionProducto
-            );
+              // Eliminar de la lista local
+              const index = this.clasificaciones.findIndex(
+                (c) =>
+                  c.CodigoClasificacionProducto === clasificacion.CodigoClasificacionProducto
+              );
 
-            if (index !== -1) {
-              this.clasificaciones.splice(index, 1);
-            }
-
-            alert('Categoría eliminada correctamente');
-          },
-          error: (error) => {
-            console.error('Error al eliminar la clasificación', error);
-            alert('Error al eliminar la categoría');
-          },
-        });
-    }
+              if (index !== -1) {
+                this.clasificaciones.splice(index, 1);
+              }
+            },
+            error: (error) => {
+              this.alertaServicio.MostrarError(error, 'Error al eliminar la categoría');
+            },
+          });
+      }
+    });
   }
 
   // Resetea el formulario de nueva categoría

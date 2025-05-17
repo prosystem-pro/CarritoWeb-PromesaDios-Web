@@ -51,4 +51,23 @@ export class AlertaServicio {
   }).then(result => result.isConfirmed);
 }
 
+  MostrarToast(mensaje: string, tipo: 'success' | 'error' | 'warning' | 'info' = 'success', posicion: 'top-end' | 'top-start' | 'bottom-end' | 'bottom-start' = 'top-end'): void {
+    const Toast = Swal.mixin({
+      toast: true,
+      position: posicion,
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+      }
+    });
+
+    Toast.fire({
+      icon: tipo,
+      title: mensaje
+    });
+  }
+
 }
