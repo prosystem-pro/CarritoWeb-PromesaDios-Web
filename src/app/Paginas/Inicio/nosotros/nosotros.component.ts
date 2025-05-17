@@ -27,6 +27,7 @@ export class NosotrosComponent implements OnInit {
   // Nuevas propiedades para manejo de edición
   portadaData: any = null;
   carruselData: any = null;
+  codigoCarrusel: number = 0;
   detallesCarrusel: any = null;
   titulo: string = ''
   isLoading = true;
@@ -34,6 +35,7 @@ export class NosotrosComponent implements OnInit {
   modoEdicion: boolean = false;
   datosOriginales: any = null;
   colorFooter: string = '';
+  datosListos: boolean = false;
   private Url = `${Entorno.ApiUrl}`;
   private NombreEmpresa = `${Entorno.NombreEmpresa}`;
 
@@ -83,7 +85,8 @@ export class NosotrosComponent implements OnInit {
   cargarDatosCarrusel(): void {
     this.carruselServicio.Listado().subscribe({
       next: (data) => {
-        this.carruselData = data[0];
+        this.carruselData = data[0] || [];
+        this.codigoCarrusel = this.carruselData.CodigoCarrusel;
         this.titulo = this.carruselData.NombreCarrusel;
   
         // Ahora llamamos a ListadoCarrusel usando el código obtenido
@@ -91,8 +94,11 @@ export class NosotrosComponent implements OnInit {
           this.carruselImagenServicio.ListadoCarrusel(this.carruselData.CodigoCarrusel).subscribe({
             next: (data) => {
               this.detallesCarrusel = data;
+              this.datosListos = true;
             },
             error: (err) => {
+              this.detallesCarrusel = [];
+              this.datosListos = true;
               console.error('Error al obtener detalles del carrusel:', err);
             }
           });

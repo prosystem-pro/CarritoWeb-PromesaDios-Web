@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { Entorno } from '../../Entornos/Entorno';
 import { CarruselImagenServicio } from '../../Servicios/CarruselImagnServicio';
 import { Subscription } from 'rxjs';
+import { Carrusel } from '../../Modelos/Carrusel';
+import { CarruselServicio } from '../../Servicios/CarruselServicio';
 
 interface CarruselItem {
   CodigoCarruselImagen: number;
@@ -40,6 +42,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly Url = `${Entorno.ApiUrl}`;
   private readonly NombreEmpresa = `${Entorno.NombreEmpresa}`;
   @Input() items: CarruselItem[] = [];
+  @Input() codigoCarrusel: number = 0;
   @Input() title: string = '¡Los productos más destacados!';
   @Input() titleClass: string = 'cursive-font text-dark';
   @Input() autoplay: boolean = false;
@@ -60,6 +63,9 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
   cargandoImagen = false;
   itemEnEdicion: CarruselItem | null = null;
   private subscriptions: Subscription[] = [];
+  editandoTitulo: boolean = false;
+  tituloTemporal: string = '';
+  carruselActual: Carrusel | null = null;
 
   nuevaImagen: NuevaImagen = {
     id: '',
@@ -80,11 +86,15 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
     private el: ElementRef, 
     private http: HttpClient,
     private carruselImagenServicio: CarruselImagenServicio,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private carruselServicio: CarruselServicio
   ) {}
   
   ngOnInit(): void {
     this.checkScreenSize();
+    if (this.codigoCarrusel > 0) {
+      this.cargarDatosCarrusel();
+    }
   }
 
   ngAfterViewInit(): void {
@@ -112,6 +122,19 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
         this.stopAutoplay();
       }
     }
+  }
+
+    cargarDatosCarrusel(): void {
+    this.carruselServicio.ObtenerPorCodigo(this.codigoCarrusel)
+      .subscribe({
+        next: (data) => {
+          this.carruselActual = data;
+          this.title = data.NombreCarrusel || '';
+        },
+        error: (error) => {
+          console.error('Error al cargar datos del carrusel:', error);
+        }
+      });
   }
 
   toggleModoEdicion(): void {
@@ -391,7 +414,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
     formData.append('Imagen', this.nuevaImagen.imagen);
     formData.append('CarpetaPrincipal', this.NombreEmpresa);
     formData.append('SubCarpeta', 'CarruselImagen');
-    formData.append('CodigoVinculado', this.items[0]?.CodigoCarrusel?.toString() || '0');
+    formData.append('CodigoVinculado', this.codigoCarrusel.toString());
     formData.append('CodigoPropio', '');
     formData.append('CampoVinculado', 'CodigoCarrusel');
     formData.append('CampoPropio', 'CodigoCarruselImagen');
@@ -407,7 +430,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
           const nuevaImagenCarrusel: CarruselItem = {
             UrlImagen: response.Entidad?.UrlImagen || response.url,
             CodigoCarruselImagen: response.Entidad?.CodigoCarruselImagen || 0,
-            CodigoCarrusel: this.items[0]?.CodigoCarrusel || 0
+            CodigoCarrusel: this.items[0]?.CodigoCarrusel || this.codigoCarrusel
           };
 
           // Añadir la nueva imagen al array de items
@@ -574,5 +597,37 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
   // Verificar si un ítem está en edición
   esItemEnEdicion(item: CarruselItem): boolean {
     return !!this.itemEnEdicion && this.itemEnEdicion.CodigoCarruselImagen === item.CodigoCarruselImagen;
+  }
+
+    activarEdicionTitulo(): void {
+    this.tituloTemporal = this.title;
+    this.editandoTitulo = true;
+  }
+
+  guardarTitulo(): void {
+    if (!this.carruselActual) {
+      console.error('No hay un carrusel cargado para editar');
+      return;
+    }
+
+    this.carruselActual.NombreCarrusel = this.tituloTemporal;
+    
+    this.carruselServicio.Editar(this.carruselActual)
+      .subscribe({
+        next: (response) => {
+          this.title = this.tituloTemporal;
+          this.editandoTitulo = false;
+          console.log('Título actualizado con éxito:', response);
+        },
+        error: (error) => {
+          console.error('Error al actualizar el título:', error);
+          // Opcional: mostrar un mensaje de error al usuario
+        }
+      });
+  }
+
+  cancelarEdicionTitulo(): void {
+    this.editandoTitulo = false;
+    this.tituloTemporal = '';
   }
 }

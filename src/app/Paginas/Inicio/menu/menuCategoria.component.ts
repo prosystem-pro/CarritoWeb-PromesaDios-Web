@@ -40,6 +40,8 @@ export class MenuCategoriaComponent implements OnInit {
   detallesCarrusel: any = null;
   titulo: string = ''
   textoBusqueda: string = '';
+  codigoCarrusel: number = 0;
+  datosListos: boolean = false;
 
   nuevaCategoria = {
     titulo: '',
@@ -142,7 +144,8 @@ export class MenuCategoriaComponent implements OnInit {
   cargarDatosCarrusel(): void {
     this.carruselServicio.Listado().subscribe({
       next: (data) => {
-        this.carruselData = data[1];
+        this.carruselData = data[1] || [];
+        this.codigoCarrusel = this.carruselData.CodigoCarrusel;
         this.titulo = this.carruselData.NombreCarrusel;
 
         // Ahora llamamos a ListadoCarrusel usando el código obtenido
@@ -150,8 +153,11 @@ export class MenuCategoriaComponent implements OnInit {
           this.carruselImagenServicio.ListadoCarrusel(this.carruselData.CodigoCarrusel).subscribe({
             next: (data) => {
               this.detallesCarrusel = data;
+              this.datosListos = true;
             },
             error: (err) => {
+              this.detallesCarrusel = [];
+              this.datosListos = true;
               console.error('Error al obtener detalles del carrusel:', err);
             }
           });

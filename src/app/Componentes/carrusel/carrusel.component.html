@@ -125,7 +125,27 @@
 
     <!-- Título del carrusel -->
     <div class="carousel-title">
-        <h3 [class]="titleClass">{{ title }}</h3>
-        <hr class="mx-auto" style="width: 200px;">
+        <!-- Título en modo visualización -->
+        <div *ngIf="!editandoTitulo">
+            <h3 [class]="titleClass">{{ title }}</h3>
+            <button *ngIf="modoEdicion" class="btn btn-sm btn-outline-secondary ms-2" (click)="activarEdicionTitulo()">
+                <i class="bi bi-pencil"></i>
+            </button>
+            <hr class="mx-auto" style="width: 200px;">
+        </div>
+
+        <!-- Título en modo edición -->
+        <div *ngIf="editandoTitulo" class="position-relative">
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="tituloTemporal"
+                placeholder="Título del carrusel">
+            <div class="edit-actions d-flex justify-content-center mt-1">
+                <button class="btn btn-sm btn-success me-1" title="Guardar cambios" (click)="guardarTitulo()">
+                    <i class="bi bi-check-lg"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" title="Cancelar edición" (click)="cancelarEdicionTitulo()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
     </div>
 </div>
