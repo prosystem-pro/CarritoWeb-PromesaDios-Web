@@ -12,6 +12,7 @@ import { CarruselServicio } from '../../../Servicios/CarruselServicio';
 import { SvgDecoradorComponent } from '../../../Componentes/svg-decorador/svg-decorador.component';
 import { Router } from '@angular/router';
 import { ServicioCompartido } from '../../../Servicios/ServicioCompartido';
+import { EmpresaServicio } from '../../../Servicios/EmpresaServicio';
 
 @Component({
   selector: 'app-menuCategoria',
@@ -42,6 +43,8 @@ export class MenuCategoriaComponent implements OnInit {
   textoBusqueda: string = '';
   codigoCarrusel: number = 0;
   datosListos: boolean = false;
+  empresaData: any = null;
+  codigoEmpresa: number = 0;
 
   nuevaCategoria = {
     titulo: '',
@@ -70,6 +73,7 @@ export class MenuCategoriaComponent implements OnInit {
     private menuPortadaServicio: MenuPortadaServicio,
     private router: Router,
     private servicioCompartido: ServicioCompartido,
+    private empresaServicio: EmpresaServicio,
     private http: HttpClient
   ) { }
 
@@ -77,6 +81,7 @@ export class MenuCategoriaComponent implements OnInit {
     this.cargarMenuPortada();
     this.cargarClasificaciones();
     this.cargarDatosCarrusel();
+    this.cargarDataEmpresa();
     this.textoBusquedaSubscription = this.servicioCompartido.textoBusqueda$.subscribe((texto) => {
       this.textoBusqueda = texto;  // Actualizamos el texto de búsqueda
       this.buscar();  // Hacemos la búsqueda cada vez que cambie el texto
@@ -167,6 +172,18 @@ export class MenuCategoriaComponent implements OnInit {
         console.error('Error al obtener datos de la portada:', err);
         this.error = true;
         this.isLoading = false;
+      }
+    });
+  }
+
+  cargarDataEmpresa(): void {
+    this.empresaServicio.Listado().subscribe({
+      next: (data) => {
+        this.empresaData = data[0];
+        this.codigoEmpresa = this.empresaData.CodigoEmpresa;
+      },
+      error: (err) => {
+        console.error('Error al obtener datos de la empresa:', err);
       }
     });
   }
@@ -358,7 +375,7 @@ export class MenuCategoriaComponent implements OnInit {
       formData.append('Imagen', this.nuevaCategoria.imagenFile);
       formData.append('CarpetaPrincipal', this.NombreEmpresa);
       formData.append('SubCarpeta', 'ClasificacionProducto');
-      formData.append('CodigoVinculado', this.clasificaciones[0].CodigoEmpresa);
+      formData.append('CodigoVinculado', this.codigoEmpresa.toString() || '1');
       formData.append('CodigoPropio', ''); // Vacío para que el servidor cree uno nuevo
       formData.append('CampoVinculado', 'CodigoEmpresa');
       formData.append('CampoPropio', 'CodigoClasificacionProducto');
