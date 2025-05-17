@@ -37,7 +37,7 @@
                 <ul class="nav flex-column">
                     <li class="nav-item position-relative">
                         <a class="nav-link p-1" [style.color]="footerData.ColorTextoInicio"
-                            [attr.href]="modoEdicion ? null : '#'">
+                            [attr.href]="modoEdicion ? null : '/nosotros'">
                             <span *ngIf="!modoEdicion">{{ footerData.TextoInicio }}</span>
                             <input *ngIf="modoEdicion" type="text" [(ngModel)]="footerData.TextoInicio"
                                 class="editable-input" [style.color]="footerData.ColorTextoInicio">
@@ -50,7 +50,7 @@
                     </li>
                     <li class="nav-item position-relative">
                         <a class="nav-link p-1" [style.color]="footerData.ColorTextoMenu"
-                            [attr.href]="modoEdicion ? null : '#'">
+                            [attr.href]="modoEdicion ? null : '/clasificacion'">
                             <span *ngIf="!modoEdicion">{{ footerData.TextoMenu }}</span>
                             <input *ngIf="modoEdicion" type="text" [(ngModel)]="footerData.TextoMenu"
                                 class="editable-input" [style.color]="footerData.ColorTextoMenu">
@@ -63,7 +63,7 @@
                     </li>
                     <li class="nav-item position-relative">
                         <a class="nav-link p-1" [style.color]="footerData.ColorTextoContacto"
-                            [attr.href]="modoEdicion ? null : '#'">
+                            [attr.href]="modoEdicion ? null : '/contacto'">
                             <span *ngIf="!modoEdicion">{{ footerData.TextoContacto }}</span>
                             <input *ngIf="modoEdicion" type="text" [(ngModel)]="footerData.TextoContacto"
                                 class="editable-input" [style.color]="footerData.ColorTextoContacto">
@@ -76,7 +76,7 @@
                     </li>
                     <li class="nav-item position-relative">
                         <a class="nav-link p-1" [style.color]="footerData.ColorTextoOtro"
-                            [attr.href]="modoEdicion ? null : '#'">
+                            [attr.href]="modoEdicion ? null : '/otro'">
                             <span *ngIf="!modoEdicion">{{ footerData.TextoOtro }}</span>
                             <input *ngIf="modoEdicion" type="text" [(ngModel)]="footerData.TextoOtro"
                                 class="editable-input" [style.color]="footerData.ColorTextoOtro">
@@ -208,7 +208,7 @@
                     <div class="mb-4">
                         <ul class="nav flex-column">
                             <li class="nav-item position-relative">
-                                <a class="nav-link p-1" [style.color]="footerData.ColorTextoInicio" href="#">
+                                <a class="nav-link p-1" [style.color]="footerData.ColorTextoInicio" href="/nosotros">
                                     <span *ngIf="!modoEdicion">{{ footerData.TextoInicio }}</span>
                                     <input *ngIf="modoEdicion" type="text" [(ngModel)]="footerData.TextoInicio"
                                         class="editable-input" [style.color]="footerData.ColorTextoInicio">
@@ -220,7 +220,7 @@
                                 </button>
                             </li>
                             <li class="nav-item position-relative">
-                                <a class="nav-link p-1" [style.color]="footerData.ColorTextoMenu" href="#">
+                                <a class="nav-link p-1" [style.color]="footerData.ColorTextoMenu" href="/clasificacion">
                                     <span *ngIf="!modoEdicion">{{ footerData.TextoMenu }}</span>
                                     <input *ngIf="modoEdicion" type="text" [(ngModel)]="footerData.TextoMenu"
                                         class="editable-input" [style.color]="footerData.ColorTextoMenu">
@@ -232,7 +232,7 @@
                                 </button>
                             </li>
                             <li class="nav-item position-relative">
-                                <a class="nav-link p-1" [style.color]="footerData.ColorTextoContacto" href="#">
+                                <a class="nav-link p-1" [style.color]="footerData.ColorTextoContacto" href="/contacto">
                                     <span *ngIf="!modoEdicion">{{ footerData.TextoContacto }}</span>
                                     <input *ngIf="modoEdicion" type="text" [(ngModel)]="footerData.TextoContacto"
                                         class="editable-input" [style.color]="footerData.ColorTextoContacto">
@@ -244,7 +244,7 @@
                                 </button>
                             </li>
                             <li class="nav-item position-relative">
-                                <a class="nav-link p-1" [style.color]="footerData.ColorTextoOtro" href="#">
+                                <a class="nav-link p-1" [style.color]="footerData.ColorTextoOtro" href="/otro">
                                     <span *ngIf="!modoEdicion">{{ footerData.TextoOtro }}</span>
                                     <input *ngIf="modoEdicion" type="text" [(ngModel)]="footerData.TextoOtro"
                                         class="editable-input" [style.color]="footerData.ColorTextoOtro">
