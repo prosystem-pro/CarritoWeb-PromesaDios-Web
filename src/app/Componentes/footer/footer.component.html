@@ -1,4 +1,4 @@
-<footer class="footer py-4" *ngIf="footerData" [style.background-color]="footerData.ColorFooter" style="color: white;">
+<footer class="footer py-3" *ngIf="footerData" [style.background-color]="footerData.ColorFooter" style="color: white;">
     <!-- Botón para entrar/salir del modo edición (esquina inferior derecha del footer) -->
     <div class="position-relative">
         <button (click)="toggleModoEdicion()" class="btn edit-main-button btn-edicion-general"
@@ -134,18 +134,11 @@
                         </button>
                     </div>
 
-                    <div class="d-flex justify-content-center gap-3 mb-3 position-relative">
-                        <a href="#" [style.color]="footerData.ColorTextoRedesSociales">
-                            <i class="bi bi-facebook fs-4"></i>
+                    <div class="d-flex justify-content-center position-relative">
+                        <a *ngFor="let red of RedeSocial" [href]="'https://' + red.Link" target="_blank"
+                            rel="noopener noreferrer">
+                            <img [src]="red.UrlImagen" [alt]="red.NombreRedSocial" width="45" height="45" />
                         </a>
-                        <a href="#" [style.color]="footerData.ColorTextoRedesSociales">
-                            <i class="bi bi-instagram fs-4"></i>
-                        </a>
-                        <button *ngIf="modoEdicion" class="btn btn-sm btn-light position-absolute edit-button"
-                            style="top: 0; right: -30px;">
-                            <input type="color" [(ngModel)]="footerData.ColorTextoRedesSociales"
-                                style="width: 20px; height: 20px;">
-                        </button>
                     </div>
                 </div>
             </div>
@@ -197,7 +190,7 @@
         <div class="d-md-none">
             <div class="row">
                 <!-- Primera columna: Logo y navegación -->
-                <div class="col-6">
+                <div class="col-3">
                     <!-- Logo -->
                     <div class="mb-4 position-relative">
                         <img [src]="footerData.UrlLogo || 'logo-white.png'" alt="Promesse de Dios" height="60">
@@ -267,7 +260,7 @@
                 </div>
 
                 <!-- Segunda columna: Contacto y redes sociales -->
-                <div class="col-6 text-center mt-4">
+                <div class="col-9 text-center mt-5">
                     <!-- Contacto -->
                     <div class="mb-4">
                         <div class="position-relative">
@@ -299,18 +292,11 @@
 
                     <!-- Redes sociales -->
                     <div class="mb-4">
-                        <div class="d-flex gap-2 justify-content-center position-relative">
-                            <a href="#" [style.color]="footerData.ColorTextoRedesSociales">
-                                <i class="bi bi-facebook fs-5"></i>
+                        <div class="d-flex justify-content-center position-relative">
+                            <a *ngFor="let red of RedeSocial" [href]="'https://' + red.Link" target="_blank"
+                                rel="noopener noreferrer">
+                                <img [src]="red.UrlImagen" [alt]="red.NombreRedSocial" width="45" height="45" />
                             </a>
-                            <a href="#" [style.color]="footerData.ColorTextoRedesSociales">
-                                <i class="bi bi-instagram fs-5"></i>
-                            </a>
-                            <button *ngIf="modoEdicion" class="btn btn-sm btn-light position-absolute edit-button"
-                                style="top: 0; right: -30px;">
-                                <input type="color" [(ngModel)]="footerData.ColorTextoRedesSociales"
-                                    style="width: 20px; height: 20px;">
-                            </button>
                         </div>
 
                         <div class="mt-2 position-relative" [style.color]="footerData.ColorTextoRedesSociales">
@@ -328,7 +314,7 @@
             </div>
         </div>
     </div>
-    <div class="w-100 mt-2">
+    <div class="w-100 mt-2 copyright-section d-none d-md-block">
         <div class="border-top pt-3" style="border-color: rgba(255,255,255,0.2)!important;">
             <p class="small mb-0 text-center position-relative" [style.color]="footerData.ColorDerechosDeAutor">
                 <span *ngIf="!modoEdicion">{{ footerData.DerechoDeAutor }}</span>
