@@ -484,11 +484,18 @@ export class ProductosComponent implements OnInit, OnDestroy {
       this.nuevaImagenFile !== null
     );
   }
+
   guardarNuevoProducto(): void {
     if (!this.esFormularioValido()) {
       alert('Por favor, complete todos los campos y seleccione una imagen');
       return;
     }
+
+    // Verificar si ya existe un producto con el mismo nombre
+  if (this.nuevoProducto.NombreProducto && this.existeProductoConMismoNombre(this.nuevoProducto.NombreProducto)) {
+    alert('Ya existe un producto con el mismo nombre. Por favor, elija otro nombre.');
+    return;
+  }
     
     // 1. Primero subir la imagen (esto crea el registro del producto automáticamente)
     this.subirImagenNuevoProducto();
@@ -522,8 +529,8 @@ export class ProductosComponent implements OnInit, OnDestroy {
             CodigoProducto: codigoProductoGenerado,
             CodigoClasificacionProducto: this.codigoClasificacion,
             NombreProducto: this.nuevoProducto.NombreProducto,
-            Moneda: this.nuevoProducto.Moneda,
-            Precio: this.nuevoProducto.Precio,
+            Moneda: this.nuevoProducto.Moneda || '',
+            Precio: this.nuevoProducto.Precio || 0,
             UrlImagen: response.Entidad.UrlImagen || '',
             Estatus: 1
           };
@@ -557,6 +564,15 @@ export class ProductosComponent implements OnInit, OnDestroy {
         alert('Error al crear el producto. Por favor, intente de nuevo.');
       }
     });
+  }
+
+  existeProductoConMismoNombre(nombre: string | undefined): boolean {
+    if (!nombre || nombre.trim() === '') return false;
+    
+    const nombreNormalizado = nombre.trim().toLowerCase();
+    return this.productos.some(producto => 
+      producto.NombreProducto && producto.NombreProducto.trim().toLowerCase() === nombreNormalizado
+    );
   }
   
   // ---- Eliminar producto ----
