@@ -121,7 +121,7 @@
 .product-image {
   width: 100%;
   height: 220px;
-  object-fit: cover;
+  object-fit: contain;
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
   transition: var(--carousel-transition);
@@ -329,8 +329,7 @@
   }
 
   .product-card {
-    /* width: var(--carousel-card-width-mobile); */
-    width: 220px;
+    width: var(--carousel-card-width-mobile);
   }
 
   .product-image {
@@ -400,4 +399,24 @@ button:focus-visible,
 .spinner-border {
   width: 2rem;
   height: 2rem;
+}
+
+@supports (-webkit-touch-callout: none) {
+  .product-image {
+    height: auto; /* Auto height for iOS */
+    max-height: 220px;
+    aspect-ratio: 4/3; /* Maintain aspect ratio */
+  }
+
+  @media (max-width: 768px) {
+    .product-image {
+      max-height: 180px;
+    }
+  }
+
+  @media (min-width: 992px) {
+    .product-image {
+      max-height: 240px;
+    }
+  }
 }
