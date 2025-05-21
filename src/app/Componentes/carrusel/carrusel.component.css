@@ -329,7 +329,8 @@
   }
 
   .product-card {
-    width: var(--carousel-card-width-mobile);
+    /* width: var(--carousel-card-width-mobile); */
+    width: 220px;
   }
 
   .product-image {
