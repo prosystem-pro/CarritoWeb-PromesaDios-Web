@@ -33,7 +33,8 @@
 
         <div class="container">
             <!-- Botón para entrar/salir del modo edición (similar al menuCategoria) -->
-            <button (click)="toggleModoEdicion()" class="btn edit-main-button btn-edit"
+            <button *ngIf="Permiso.PermisoAdminSuperAdmin()" (click)="toggleModoEdicion()"
+                class="btn edit-main-button btn-edit"
                 [ngClass]="{'btn-success': modoEdicion, 'btn-light': !modoEdicion}">
                 <i class="bi" [ngClass]="{'bi-pencil-square': !modoEdicion, 'bi-check-lg': modoEdicion}"
                     [style.color]="modoEdicion ? '#ffffff' : '#000000'"></i>

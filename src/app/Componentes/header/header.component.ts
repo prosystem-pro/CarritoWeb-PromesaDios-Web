@@ -11,6 +11,7 @@ import { CarritoComponent } from '../carrito/carrito.component';
 import { RedSocialServicio } from '../../Servicios/RedSocialServicio';
 import { RedSocial } from '../../Modelos/RedSocial';
 import { AlertaServicio } from '../../Servicios/Alerta-Servicio';
+import { PermisoServicio } from '../../Autorizacion/AutorizacionPermiso';
 
 @Component({
   selector: 'app-header',
@@ -41,6 +42,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private renderer: Renderer2,
     private servicioCompartido: ServicioCompartido,
     private redSocialServicio: RedSocialServicio,
+    public Permiso: PermisoServicio,
     private AlertaServicio: AlertaServicio
   ) {}
 

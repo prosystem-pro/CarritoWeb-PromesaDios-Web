@@ -1,7 +1,8 @@
 <footer class="footer py-3" *ngIf="footerData" [style.background-color]="footerData.ColorFooter" style="color: white;">
     <!-- Botón para entrar/salir del modo edición (esquina inferior derecha del footer) -->
     <div class="position-relative">
-        <button (click)="toggleModoEdicion()" class="btn edit-main-button btn-edicion-general"
+        <button *ngIf="Permiso.PermisoSuperAdmin()" (click)="toggleModoEdicion()"
+            class="btn edit-main-button btn-edicion-general"
             [ngClass]="{'btn-success': modoEdicion, 'btn-light': !modoEdicion}">
             <i class="bi" [ngClass]="{'bi-pencil-square': !modoEdicion, 'bi-check-lg': modoEdicion}"
                 [style.color]="modoEdicion ? '#ffffff' : '#000000'"></i>

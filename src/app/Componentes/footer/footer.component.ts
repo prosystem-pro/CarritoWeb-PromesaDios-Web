@@ -8,6 +8,7 @@ import { ServicioCompartido } from '../../Servicios/ServicioCompartido';
 import { RedSocialServicio } from '../../Servicios/RedSocialServicio';
 import { RedSocial } from '../../Modelos/RedSocial';
 import { AlertaServicio } from '../../Servicios/Alerta-Servicio';
+import { PermisoServicio } from '../../Autorizacion/AutorizacionPermiso';
 
 @Component({
   selector: 'app-footer',
@@ -31,6 +32,7 @@ export class FooterComponent implements OnInit {
     private http: HttpClient,
     private servicioCompartido: ServicioCompartido,
     private redSocialServicio: RedSocialServicio,
+    public Permiso: PermisoServicio,
     private alertaServicio: AlertaServicio
   ) {}
 

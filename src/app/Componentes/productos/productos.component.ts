@@ -12,6 +12,7 @@ import { CarritoComponent } from '../carrito/carrito.component';
 import { Subscription } from 'rxjs';
 import { ClasificacionProductoServicio } from '../../Servicios/ClasificacionProductoServicio';
 import { AlertaServicio } from '../../Servicios/Alerta-Servicio';
+import { PermisoServicio } from '../../Autorizacion/AutorizacionPermiso';
 
 interface ProductoConCantidad extends Producto {
   cantidad?: number;
@@ -89,6 +90,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
     private servicioCompartido: ServicioCompartido,
     private clasificacionProductoServicio: ClasificacionProductoServicio,
     private alertaServicio: AlertaServicio,
+    public Permiso: PermisoServicio,
     private http: HttpClient
   ) {
     this.actualizarTotalCarrito();

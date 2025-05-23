@@ -14,6 +14,7 @@ import { Router } from '@angular/router';
 import { ServicioCompartido } from '../../../Servicios/ServicioCompartido';
 import { EmpresaServicio } from '../../../Servicios/EmpresaServicio';
 import { AlertaServicio } from '../../../Servicios/Alerta-Servicio';
+import { PermisoServicio } from '../../../Autorizacion/AutorizacionPermiso';
 
 @Component({
   selector: 'app-menuCategoria',
@@ -76,6 +77,7 @@ export class MenuCategoriaComponent implements OnInit {
     private servicioCompartido: ServicioCompartido,
     private empresaServicio: EmpresaServicio,
     private alertaServicio: AlertaServicio,
+    public Permiso: PermisoServicio,
     private http: HttpClient
   ) { }
 

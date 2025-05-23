@@ -9,6 +9,7 @@ import { Entorno } from '../../../Entornos/Entorno';
 import { CarruselComponent } from '../../../Componentes/carrusel/carrusel.component';
 import { CarruselServicio } from '../../../Servicios/CarruselServicio';
 import { ServicioCompartido } from '../../../Servicios/ServicioCompartido';
+import { PermisoServicio } from '../../../Autorizacion/AutorizacionPermiso';
 
 @Component({
   selector: 'app-nosotros',
@@ -45,6 +46,7 @@ export class NosotrosComponent implements OnInit {
     private carruselServicio: CarruselServicio,
     private carruselImagenServicio: CarruselImagenServicio,
     private http: HttpClient,
+    public Permiso: PermisoServicio,
     private servicioCompartido: ServicioCompartido
   ) {}
 

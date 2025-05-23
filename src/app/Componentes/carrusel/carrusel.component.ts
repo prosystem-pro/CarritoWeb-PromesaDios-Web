@@ -8,6 +8,7 @@ import { Subscription } from 'rxjs';
 import { Carrusel } from '../../Modelos/Carrusel';
 import { CarruselServicio } from '../../Servicios/CarruselServicio';
 import { AlertaServicio } from '../../Servicios/Alerta-Servicio';
+import { PermisoServicio } from '../../Autorizacion/AutorizacionPermiso';
 
 interface CarruselItem {
   CodigoCarruselImagen: number;
@@ -89,6 +90,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
     private carruselImagenServicio: CarruselImagenServicio,
     private cdr: ChangeDetectorRef,
     private carruselServicio: CarruselServicio,
+    public Permiso: PermisoServicio,
     private alertaServicio: AlertaServicio
   ) {}
   

@@ -1,7 +1,8 @@
 <!-- Botón para activar/desactivar el modo edición -->
 <div class="container my-3 text-end">
-    <button type="button" (click)="toggleModoEdicion()" class="btn edit-main-button btn-edicion"
-        [ngClass]="{'btn-success': modoEdicion, 'btn-light': !modoEdicion}" aria-label="Alternar modo edición">
+    <button *ngIf="Permiso.PermisoSuperAdmin()" type="button" (click)="toggleModoEdicion()"
+        class="btn edit-main-button btn-edicion" [ngClass]="{'btn-success': modoEdicion, 'btn-light': !modoEdicion}"
+        aria-label="Alternar modo edición">
         <i class="bi" [ngClass]="{'bi-pencil-square': !modoEdicion, 'bi-check-lg': modoEdicion}"
             [style.color]="modoEdicion ? '#ffffff' : '#000000'"></i>
     </button>

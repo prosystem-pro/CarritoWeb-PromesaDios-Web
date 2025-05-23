@@ -25,7 +25,7 @@
 
     <div class="container principal-contenido">
         <!-- Botón para entrar/salir del modo edición -->
-        <button (click)="toggleModoEdicion()" class="btn edit-main-button btn-edit"
+        <button *ngIf="Permiso.PermisoSuperAdmin()" (click)="toggleModoEdicion()" class="btn edit-main-button btn-edit"
             [ngClass]="{ 'btn-success': modoEdicion, 'btn-light': !modoEdicion }">
             <i class="bi" [ngClass]="{
           'bi-pencil-square': !modoEdicion,
