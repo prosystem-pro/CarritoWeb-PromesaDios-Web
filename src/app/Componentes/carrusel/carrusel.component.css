@@ -119,6 +119,7 @@
 
 /* Estilos de imagen mejorados */
 .product-image {
+  aspect-ratio: 1/1;
   width: 100%;
   height: 220px;
   object-fit: cover;

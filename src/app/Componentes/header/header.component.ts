@@ -1,4 +1,4 @@
-import { Component, ElementRef, Renderer2, ViewChild, OnInit, OnDestroy } from '@angular/core';
+import { Component, ElementRef, Renderer2, ViewChild, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { NavbarEstiloServicio } from '../../Servicios/NavbarEstiloServicio';
 import { NgStyle, CommonModule, NgIf } from '@angular/common';
@@ -33,6 +33,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   totalItemsCarrito: number = 0;
   mostrarCarrito = false;
   RedeSocial: RedSocial[] = [];
+  esMovil: boolean = false;
   @ViewChild('navbarCollapse') navbarCollapse!: ElementRef;
 
   constructor(
@@ -53,10 +54,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.obtenerTotalItemsCarrito();
     });
     this.obtenerTotalItemsCarrito();
+    this.verificarVista();
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.verificarVista();
   }
 
   cargarRedesSociales(): void {
@@ -338,6 +345,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
     //Método para ver el carrito
   alternarCarrito() {
     this.mostrarCarrito = !this.mostrarCarrito;
+  }
+
+  verificarVista() {
+    this.esMovil = window.innerWidth <= 768 || 
+    window.innerWidth <= 991 || 
+    window.innerWidth <= 576 || 
+    window.innerWidth <= 820;
   }
 
   cerrarSesion() {
