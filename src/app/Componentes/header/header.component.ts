@@ -130,6 +130,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       const colorSeleccionado = this.Datos.ColorTextoInicio;
       this.Datos.ColorTextoMenu = colorSeleccionado;
       this.Datos.ColorTextoContacto = colorSeleccionado;
+      this.Datos.ColorTextextoReporte = colorSeleccionado;
     }
   }
 
@@ -139,6 +140,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
       datosActualizados.ColorTextoMenu = datosActualizados.ColorTextoInicio;
       datosActualizados.ColorTextoContacto = datosActualizados.ColorTextoInicio;
+      datosActualizados.ColorTextextoReporte = datosActualizados.ColorTextoInicio;
 
       this.Servicio.Editar(datosActualizados).subscribe({
         next: (response) => {
