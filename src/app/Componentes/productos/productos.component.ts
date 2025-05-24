@@ -56,6 +56,10 @@ export class ProductosComponent implements OnInit, OnDestroy {
   busquedaActiva: boolean = false;
   DatosHeader: any = null;
 
+  // Nueva variable para controlar el tipo de vista
+  esBusquedaGlobal: boolean = false;
+  textoBusquedaGlobal: string = '';
+
   // Variables para el modo edición
   modoEdicion: boolean = false;
 
@@ -101,11 +105,31 @@ export class ProductosComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.route.params.subscribe((params) => {
-      if (params['codigo']) {
-        this.codigoClasificacion = +params['codigo'];
-        this.cargarClasificacion(this.codigoClasificacion);
-        this.cargarProductos(this.codigoClasificacion);
+    // Verificar si es una búsqueda global o por categoría
+    this.route.url.subscribe(url => {
+      const rutaActual = url.map(segment => segment.path).join('/');
+      
+      if (rutaActual.includes('buscar')) {
+        // Es una búsqueda global
+        this.esBusquedaGlobal = true;
+        this.route.queryParams.subscribe(params => {
+          if (params['texto']) {
+            this.textoBusquedaGlobal = params['texto'];
+            this.terminoBusqueda = params['texto'];
+            this.nombreClasificacion = `Búsqueda: "${this.textoBusquedaGlobal}"`;
+            this.buscarProductosGlobalmente(this.textoBusquedaGlobal);
+          }
+        }); 
+      } else {
+        // Es una búsqueda por categoría (comportamiento original)
+        this.esBusquedaGlobal = false;
+        this.route.params.subscribe((params) => {
+          if (params['codigo']) {
+            this.codigoClasificacion = +params['codigo'];
+            this.cargarClasificacion(this.codigoClasificacion);
+            this.cargarProductos(this.codigoClasificacion);
+          }
+        });
       }
     });
 
@@ -143,6 +167,38 @@ export class ProductosComponent implements OnInit, OnDestroy {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+
+  // Método para búsqueda global de productos
+  buscarProductosGlobalmente(texto: string): void {
+    this.cargando = true;
+    this.error = null;
+
+    this.productoServicio.BuscarProductos(1, texto).subscribe({
+      next: (data) => {
+        // Agregar la propiedad cantidad a cada producto
+        this.productos = data.map((producto: Producto) => ({
+          ...producto,
+          cantidad: 1,
+        }));
+        this.productosOriginales = [...this.productos];
+        this.busquedaActiva = true;
+        this.cargando = false;
+        
+        if (this.productos.length === 0) {
+          this.error = `No se encontraron productos que coincidan con "${texto}"`;
+        }
+      },
+      error: (err) => {
+        if (err.status === 404) {
+          this.error = `No se encontraron productos que coincidan con "${texto}"`;
+        } else {
+          this.error = 'No se pudieron cargar los productos. Contacte al administrador.';
+        }
+        
+        this.cargando = false;
+      },
+    });
   }
 
   cargarProductos(codigo: number): void {
@@ -283,6 +339,12 @@ export class ProductosComponent implements OnInit, OnDestroy {
   // ============= MÉTODOS PARA MODO EDICIÓN =============
 
   toggleModoEdicion(): void {
+    // Solo permitir modo edición en vista de categoría, no en búsqueda global
+    if (this.esBusquedaGlobal) {
+      this.alertaServicio.MostrarAlerta('El modo edición no está disponible en la búsqueda global');
+      return;
+    }
+
     this.modoEdicion = !this.modoEdicion;
     this.crearNuevoProducto();
 
@@ -570,8 +632,6 @@ export class ProductosComponent implements OnInit, OnDestroy {
     formData.append('CampoPropio', 'CodigoProducto');
     formData.append('NombreCampoImagen', 'UrlImagen');
 
-    // alert('Creando producto...');
-
     this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
       next: (response: any) => {
         console.log('Imagen subida y producto creado inicialmente', response);
@@ -659,11 +719,21 @@ export class ProductosComponent implements OnInit, OnDestroy {
   });
 }
 
+  // Método modificado para manejar ambos tipos de búsqueda
   buscar(): void {
-    this.buscarEnTiempoReal();
-    console.log('Buscando:', this.terminoBusqueda);
-    this.productos = this.resultadosBusqueda;
-    this.busquedaActiva = true;
+    if (this.terminoBusqueda.trim()) {
+      // Si estamos en búsqueda global, hacer nueva búsqueda
+      if (this.esBusquedaGlobal) {
+        this.textoBusquedaGlobal = this.terminoBusqueda;
+        this.nombreClasificacion = `Búsqueda: "${this.textoBusquedaGlobal}"`;
+        this.buscarProductosGlobalmente(this.terminoBusqueda);
+      } else {
+        // Si estamos en vista de categoría, hacer búsqueda local
+        this.buscarEnTiempoReal();
+        this.productos = this.resultadosBusqueda;
+        this.busquedaActiva = true;
+      }
+    }
   }
 
   buscarEnTiempoReal(): void {
@@ -684,11 +754,18 @@ export class ProductosComponent implements OnInit, OnDestroy {
     this.busquedaActiva = true;
   }
 
+  // Método modificado para cancelar búsqueda
   cancelarBusqueda(): void {
     if (this.terminoBusqueda.trim()) {
-      this.busquedaActiva = false;
-      this.terminoBusqueda = '';
-      this.productos = this.productosOriginales; // Restaurar la lista original
+      if (this.esBusquedaGlobal) {
+        // Si es búsqueda global, volver a clasificaciones
+        this.router.navigate(['/clasificacion']);
+      } else {
+        // Si es vista de categoría, restaurar productos originales
+        this.busquedaActiva = false;
+        this.terminoBusqueda = '';
+        this.productos = this.productosOriginales; // Restaurar la lista original
+      }
     }
   }
 

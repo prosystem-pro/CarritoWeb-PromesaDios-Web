@@ -35,6 +35,7 @@ export const routes: Routes = [
   { path: 'nosotros', component: NosotrosComponent},
   { path: 'clasificacion', component: MenuCategoriaComponent},
   { path: 'productos/:codigo/:nombre', component: ProductosComponent },
+  { path: 'productos/buscar', component: ProductosComponent },
   { path: 'contacto', component: ContactoComponent},
   { path: 'otro', component: OtroComponent},
 

@@ -79,15 +79,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
   buscar(): void {
     // Verifica que haya texto de búsqueda antes de hacer la solicitud
     if (this.textoBusqueda.trim()) {
-      this.servicioCompartido.setTextoBusqueda(this.textoBusqueda); // Actualiza el texto de búsqueda
       this.busquedaActiva = true;
+      this.router.navigate(['/productos/buscar'], { queryParams: { texto: this.textoBusqueda } });
     }
   }
 
   cancelarBusqueda(): void {
     // Verifica que haya texto de búsqueda antes de hacer la solicitud
     if (this.textoBusqueda.trim()) {
-      this.servicioCompartido.setTextoBusqueda(""); // Actualiza el texto de búsqueda
       this.busquedaActiva = false;
       this.textoBusqueda = "";
     }
