@@ -47,4 +47,9 @@ export class ProductoServicio {
   CrearEditar(Datos: Producto): Observable<any> {
     return this.http.post(`${this.Url}/creareditar`, Datos, { headers: this.obtenerHeaders() });
   }
+
+    // Nuevo método para buscar productos
+  BuscarProductos(tipoBusqueda: number, valorBusqueda: string): Observable<any> {
+    return this.http.get(`${this.Url}/buscar/${tipoBusqueda}/${valorBusqueda}`, { headers: this.obtenerHeaders() });
+  }
 }

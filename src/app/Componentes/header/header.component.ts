@@ -1,4 +1,4 @@
-import { Component, ElementRef, Renderer2, ViewChild, OnInit, OnDestroy } from '@angular/core';
+import { Component, ElementRef, Renderer2, ViewChild, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { NavbarEstiloServicio } from '../../Servicios/NavbarEstiloServicio';
 import { NgStyle, CommonModule, NgIf } from '@angular/common';
@@ -33,6 +33,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   totalItemsCarrito: number = 0;
   mostrarCarrito = false;
   RedeSocial: RedSocial[] = [];
+  esMovil: boolean = false;
   @ViewChild('navbarCollapse') navbarCollapse!: ElementRef;
 
   constructor(
@@ -53,10 +54,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.obtenerTotalItemsCarrito();
     });
     this.obtenerTotalItemsCarrito();
+    this.verificarVista();
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.verificarVista();
   }
 
   cargarRedesSociales(): void {
@@ -72,15 +79,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
   buscar(): void {
     // Verifica que haya texto de búsqueda antes de hacer la solicitud
     if (this.textoBusqueda.trim()) {
-      this.servicioCompartido.setTextoBusqueda(this.textoBusqueda); // Actualiza el texto de búsqueda
       this.busquedaActiva = true;
+      this.router.navigate(['/productos/buscar'], { queryParams: { texto: this.textoBusqueda } });
     }
   }
 
   cancelarBusqueda(): void {
     // Verifica que haya texto de búsqueda antes de hacer la solicitud
     if (this.textoBusqueda.trim()) {
-      this.servicioCompartido.setTextoBusqueda(""); // Actualiza el texto de búsqueda
       this.busquedaActiva = false;
       this.textoBusqueda = "";
     }
@@ -124,6 +130,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       const colorSeleccionado = this.Datos.ColorTextoInicio;
       this.Datos.ColorTextoMenu = colorSeleccionado;
       this.Datos.ColorTextoContacto = colorSeleccionado;
+      this.Datos.ColorTextextoReporte = colorSeleccionado;
     }
   }
 
@@ -133,6 +140,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
       datosActualizados.ColorTextoMenu = datosActualizados.ColorTextoInicio;
       datosActualizados.ColorTextoContacto = datosActualizados.ColorTextoInicio;
+      datosActualizados.ColorTextextoReporte = datosActualizados.ColorTextoInicio;
 
       this.Servicio.Editar(datosActualizados).subscribe({
         next: (response) => {
@@ -338,6 +346,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
     //Método para ver el carrito
   alternarCarrito() {
     this.mostrarCarrito = !this.mostrarCarrito;
+  }
+
+  verificarVista() {
+    this.esMovil = window.innerWidth <= 768 || 
+    window.innerWidth <= 991 || 
+    window.innerWidth <= 576 || 
+    window.innerWidth <= 820;
   }
 
   cerrarSesion() {

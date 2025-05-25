@@ -52,7 +52,7 @@
         <!-- Menú en vista de escritorio -->
         <div #navbarCollapse class="collapse navbar-collapse" id="navbarNav">
             <a class="navbar-brand-mov d-lg-block d-flex flex-column align-items-center" href="/">
-                <img [src]="Datos?.UrlLogo" alt="Logo" height="80">
+                <img class="logoMenu" [src]="Datos?.UrlLogo" alt="Logo" height="80">
                 <!-- Editor de logo en móvil -->
                 <div *ngIf="modoEdicion" class="mt-2 logo-editor">
                     <input type="file" class="form-control form-control-sm" (change)="actualizarLogo($event)"
@@ -70,7 +70,7 @@
                 <li class="nav-item">
                     <!-- Versión normal -->
                     <a *ngIf="!modoEdicion" (click)="navegar('/nosotros')" class="nav-link"
-                        [ngClass]="{'active-route': estaRutaActiva('/nosotros')}"
+                        [ngClass]="!esMovil && estaRutaActiva('/nosotros') ? 'active-route' : ''"
                         [ngStyle]="{'color': Datos?.ColorTextoInicio}">
                         {{ Datos?.TextoInicio || '' }}
                     </a>
@@ -92,8 +92,8 @@
 
                 <li class="nav-item">
                     <!-- Versión normal -->
-                    <a *ngIf="!modoEdicion" class="nav-link active" (click)="navegar('/clasificacion')"
-                        [ngClass]="{'active-route': estaRutaActiva('/clasificacion')}"
+                    <a *ngIf="!modoEdicion" class="nav-link" (click)="navegar('/clasificacion')"
+                        [ngClass]="!esMovil && estaRutaActiva('/clasificacion') ? 'active-route' : ''"
                         [ngStyle]="{'color': Datos?.ColorTextoMenu}">
                         {{ Datos?.TextoMenu || '' }}
                     </a>
@@ -107,8 +107,8 @@
 
                 <li class="nav-item">
                     <!-- Versión normal -->
-                    <a *ngIf="!modoEdicion" class="nav-link active" (click)="navegar('/contacto')"
-                        [ngClass]="{'active-route': estaRutaActiva('/contacto')}"
+                    <a *ngIf="!modoEdicion" class="nav-link" (click)="navegar('/contacto')"
+                        [ngClass]="!esMovil && estaRutaActiva('/contacto') ? 'active-route' : ''"
                         [ngStyle]="{'color': Datos?.ColorTextoContacto}">
                         {{ Datos?.TextoContacto || '' }}
                     </a>
@@ -120,11 +120,27 @@
                     </div>
                 </li>
 
+                <li *ngIf="Permiso.PermisoAdminSuperAdmin()" class="nav-item">
+                    <!-- Versión normal -->
+                    <a *ngIf="!modoEdicion" class="nav-link" (click)="navegar('/reporte-producto')"
+                        [ngClass]="!esMovil && estaRutaActiva('/reporte-producto') ? 'active-route' : ''"
+                        [ngStyle]="{'color': Datos?.ColorTextextoReporte}">
+                        {{ Datos?.TextoReporte || '' }}
+                    </a>
+
+                    <!-- Versión editable -->
+                    <div *ngIf="modoEdicion" class="d-flex align-items-center edit-nav-item">
+                        <input [(ngModel)]="Datos.TextoReporte" class="form-control form-control-sm mt-2"
+                            placeholder="Reportes">
+                    </div>
+                </li>
+
                 <li class="nav-item">
                     <!-- Versión normal -->
-                    <a *ngIf="!modoEdicion" class="btn rounded-pill" (click)="navegar('/otro')"
-                        [ngClass]="{'active-route': estaRutaActiva('/otro')}"
-                        [ngStyle]="{'color': Datos?.ColortextoOtro, 'background-color': Datos?.ColorFondoOtro}">
+                    <a *ngIf="!modoEdicion" [class.btn]="!esMovil" [class.rounded-pill]="!esMovil"
+                        [class.nav-link]="esMovil" (click)="navegar('/otro')"
+                        [ngClass]="!esMovil && estaRutaActiva('/otro') ? 'active-route' : ''"
+                        [ngStyle]="!esMovil ? {'color': Datos?.ColortextoOtro, 'background-color': Datos?.ColorFondoOtro} : null">
                         {{ Datos?.TextoOtro || '' }}
                     </a>
 

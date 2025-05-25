@@ -42,7 +42,6 @@ export class MenuCategoriaComponent implements OnInit {
   carruselData: any = null;
   detallesCarrusel: any = null;
   titulo: string = ''
-  textoBusqueda: string = '';
   codigoCarrusel: number = 0;
   datosListos: boolean = false;
   empresaData: any = null;
@@ -86,10 +85,6 @@ export class MenuCategoriaComponent implements OnInit {
     this.cargarClasificaciones();
     this.cargarDatosCarrusel();
     this.cargarDataEmpresa();
-    this.textoBusquedaSubscription = this.servicioCompartido.textoBusqueda$.subscribe((texto) => {
-      this.textoBusqueda = texto;  // Actualizamos el texto de búsqueda
-      this.buscar();  // Hacemos la búsqueda cada vez que cambie el texto
-    });
   }
 
   ngOnDestroy(): void {
@@ -636,32 +631,4 @@ export class MenuCategoriaComponent implements OnInit {
       colorClasificacionTexto: this.menuPortada.ColorNombreClasificacion,
     });
   }
-
-  //Método para buscar
-  buscar(): void {
-    if (!this.textoBusqueda) {
-      this.cancelarBusqueda();
-      return; // No hacemos la búsqueda si no hay texto
-    }
-
-    const tipoBusqueda = 1;
-    const valorBusqueda = this.textoBusqueda || '';
-
-    this.clasificacionProductoServicio.BuscarClasificaciones(tipoBusqueda, valorBusqueda)
-      .subscribe({
-        next: (data) => {
-          this.clasificaciones = data;
-          console.log('Resultados de búsqueda:', this.clasificaciones);
-        },
-        error: (error) => {
-          console.error('Error al buscar clasificaciones:', error);
-        }
-      });
-  }
-
-    // Método para cancelar la búsqueda
-    cancelarBusqueda(): void {
-      this.clasificaciones = [...this.clasificacionesOriginales];  // Restauramos las clasificaciones originales
-      this.textoBusqueda = '';  // Limpiamos el campo de búsqueda
-    }
 }
