@@ -8,6 +8,7 @@ import { filter } from 'rxjs/operators';
 import { ReporteVistaServicio } from './Servicios/ReporteVistaServicio';
 import { HttpClient } from '@angular/common/http';
 import { ReporteTiempoPaginaServicio } from './Servicios/ReporteTiempoPaginaServicio';
+import { Entorno } from './Entornos/Entorno';
 
 
 @Component({
@@ -54,17 +55,36 @@ export class AppComponent implements OnInit {
     this.RegistrarTiempoPagina(tiempoFormato);
   }
 
-  RegistrarTiempoPagina(tiempoFormateado: string): void {
-    const Datos = {
-      TiempoPromedio: tiempoFormateado,
-      Navegador: this.ObtenerNavegador()
-    };
+  // RegistrarTiempoPagina(tiempoFormateado: string): void {
+  //   const Datos = {
+  //     TiempoPromedio: tiempoFormateado,
+  //     Navegador: this.ObtenerNavegador()
+  //   };
 
+  //   this.ReporteTiempoPaginaServicio.Crear(Datos).subscribe({
+  //     next: (Respuesta) => console.log(' Tiempo registrado con éxito:', Respuesta),
+  //     error: (Error) => console.error(' Error al registrar tiempo en página:', Error)
+  //   });
+  // }
+
+RegistrarTiempoPagina(tiempoFormateado: string): void {
+  const Datos = {
+    TiempoPromedio: tiempoFormateado,
+    Navegador: this.ObtenerNavegador()
+  };
+
+  if (Entorno.Produccion) {
+    const url = `${Entorno.ApiUrl}reportetiempopagina/crear`;
+    const blob = new Blob([JSON.stringify(Datos)], { type: 'application/json' });
+    navigator.sendBeacon(url, blob);
+  } else {
     this.ReporteTiempoPaginaServicio.Crear(Datos).subscribe({
-      next: (Respuesta) => console.log(' Tiempo registrado con éxito:', Respuesta),
-      error: (Error) => console.error(' Error al registrar tiempo en página:', Error)
+      next: (r) => console.log('Local: Tiempo registrado', r),
+      error: (e) => console.error(' Error en local', e)
     });
   }
+}
+
 
   formatearTiempo(ms: number): string {
     const totalSegundos = Math.floor(ms / 1000);
