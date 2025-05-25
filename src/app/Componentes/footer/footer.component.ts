@@ -9,6 +9,7 @@ import { RedSocialServicio } from '../../Servicios/RedSocialServicio';
 import { RedSocial } from '../../Modelos/RedSocial';
 import { AlertaServicio } from '../../Servicios/Alerta-Servicio';
 import { PermisoServicio } from '../../Autorizacion/AutorizacionPermiso';
+import { ReporteRedSocialServicio } from '../../Servicios/ReporteRedSocialServicio';
 
 @Component({
   selector: 'app-footer',
@@ -33,12 +34,48 @@ export class FooterComponent implements OnInit {
     private servicioCompartido: ServicioCompartido,
     private redSocialServicio: RedSocialServicio,
     public Permiso: PermisoServicio,
-    private alertaServicio: AlertaServicio
-  ) {}
+    private alertaServicio: AlertaServicio,
+    private ReporteRedSocialServicio: ReporteRedSocialServicio
+  ) { }
 
   ngOnInit(): void {
     this.cargarDatosFooter();
     this.cargarRedesSociales();
+  }
+
+  ReportarRedSocial(codigo: number | undefined): void {
+    if (codigo === undefined) {
+      console.warn('Código de red social no definido, no se reporta');
+      return;
+    }
+
+    const Datos = {
+      CodigoRedSocial: codigo.toString(),
+      Navegador: this.ObtenerNavegador()
+    };
+
+    this.ReporteRedSocialServicio.Crear(Datos).subscribe({
+      next: (respuesta) => console.log('Red social reportada:', respuesta),
+      error: (error) => console.error('Error al reportar red social:', error)
+    });
+  }
+
+
+
+  ObtenerNavegador(): string {
+    const AgenteUsuario = navigator.userAgent;
+
+    if (AgenteUsuario.includes('Chrome') && !AgenteUsuario.includes('Edg')) {
+      return 'Chrome';
+    } else if (AgenteUsuario.includes('Firefox')) {
+      return 'Firefox';
+    } else if (AgenteUsuario.includes('Safari') && !AgenteUsuario.includes('Chrome')) {
+      return 'Safari';
+    } else if (AgenteUsuario.includes('Edg')) {
+      return 'Edge';
+    } else {
+      return 'Desconocido';
+    }
   }
 
   cargarRedesSociales(): void {
@@ -91,7 +128,7 @@ export class FooterComponent implements OnInit {
 
   guardarCambios(): void {
     if (this.footerData) {
-      const datosActualizados = {...this.footerData};
+      const datosActualizados = { ...this.footerData };
 
       this.footerServicio.Editar(datosActualizados).subscribe({
         next: (response) => {
@@ -136,11 +173,11 @@ export class FooterComponent implements OnInit {
     this.http.post(`${this.Url}subir-imagen`, formData)
       .subscribe({
         next: (response: any) => {
-          
+
           if (response && response.Entidad && response.Entidad[campoDestino]) {
             this.footerData[campoDestino] = response.Entidad[campoDestino];
-            
-            const datosActualizados = {...this.footerData};
+
+            const datosActualizados = { ...this.footerData };
 
             this.footerServicio.Editar(datosActualizados).subscribe({
               next: (updateResponse) => {
@@ -152,10 +189,10 @@ export class FooterComponent implements OnInit {
               }
             });
           } else {
-            const imageUrl = response.UrlImagenPortada || 
-                           response.url || 
-                           (response.Entidad ? response.Entidad.UrlImagenPortada : null);
-            
+            const imageUrl = response.UrlImagenPortada ||
+              response.url ||
+              (response.Entidad ? response.Entidad.UrlImagenPortada : null);
+
             if (imageUrl) {
               this.footerData[campoDestino] = imageUrl;
             } else {
@@ -182,5 +219,5 @@ export class FooterComponent implements OnInit {
     this.footerData.ColorFooter = color;
     this.servicioCompartido.setColorFooter(color);//Comentario
   }
-  
+
 }

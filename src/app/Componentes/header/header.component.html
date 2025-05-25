@@ -165,7 +165,7 @@
 
             <div class="mobile-social-icons mx-auto">
                 <a *ngFor="let red of RedeSocial" class="social-icon" [href]="'https://' + red.Link" target="_blank"
-                    rel="noopener noreferrer">
+                    rel="noopener noreferrer" (click)="ReportarRedSocial(red.CodigoRedSocial)">
                     <img [src]="red.UrlImagen" [alt]="red.NombreRedSocial" width="45" height="45" />
                 </a>
             </div>

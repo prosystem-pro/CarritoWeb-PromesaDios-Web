@@ -12,6 +12,7 @@ import { RedSocialServicio } from '../../Servicios/RedSocialServicio';
 import { RedSocial } from '../../Modelos/RedSocial';
 import { AlertaServicio } from '../../Servicios/Alerta-Servicio';
 import { PermisoServicio } from '../../Autorizacion/AutorizacionPermiso';
+import { ReporteRedSocialServicio } from '../../Servicios/ReporteRedSocialServicio';
 
 @Component({
   selector: 'app-header',
@@ -44,8 +45,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private servicioCompartido: ServicioCompartido,
     private redSocialServicio: RedSocialServicio,
     public Permiso: PermisoServicio,
-    private AlertaServicio: AlertaServicio
-  ) {}
+    private AlertaServicio: AlertaServicio,
+    private ReporteRedSocialServicio: ReporteRedSocialServicio
+  ) { }
 
   ngOnInit(): void {
     this.Listado();
@@ -55,6 +57,39 @@ export class HeaderComponent implements OnInit, OnDestroy {
     });
     this.obtenerTotalItemsCarrito();
     this.verificarVista();
+  }
+
+  ReportarRedSocial(codigo: number | undefined): void {
+    if (codigo === undefined) {
+      console.warn('⚠️ Código de red social no definido, no se reporta');
+      return;
+    }
+
+    const Datos = {
+      CodigoRedSocial: codigo.toString(),
+      Navegador: this.ObtenerNavegador()
+    };
+
+    this.ReporteRedSocialServicio.Crear(Datos).subscribe({
+      next: (respuesta) => console.log('Red social reportada:', respuesta),
+      error: (error) => console.error('Error al reportar red social:', error)
+    });
+  }
+
+  ObtenerNavegador(): string {
+    const AgenteUsuario = navigator.userAgent;
+
+    if (AgenteUsuario.includes('Chrome') && !AgenteUsuario.includes('Edg')) {
+      return 'Chrome';
+    } else if (AgenteUsuario.includes('Firefox')) {
+      return 'Firefox';
+    } else if (AgenteUsuario.includes('Safari') && !AgenteUsuario.includes('Chrome')) {
+      return 'Safari';
+    } else if (AgenteUsuario.includes('Edg')) {
+      return 'Edge';
+    } else {
+      return 'Desconocido';
+    }
   }
 
   ngOnDestroy(): void {
@@ -343,16 +378,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-    //Método para ver el carrito
+  //Método para ver el carrito
   alternarCarrito() {
     this.mostrarCarrito = !this.mostrarCarrito;
   }
 
   verificarVista() {
-    this.esMovil = window.innerWidth <= 768 || 
-    window.innerWidth <= 991 || 
-    window.innerWidth <= 576 || 
-    window.innerWidth <= 820;
+    this.esMovil = window.innerWidth <= 768 ||
+      window.innerWidth <= 991 ||
+      window.innerWidth <= 576 ||
+      window.innerWidth <= 820;
   }
 
   cerrarSesion() {
