@@ -26,6 +26,11 @@ import { MenuCategoriaComponent } from './Paginas/Inicio/menu/menuCategoria.comp
 import { ProductosComponent } from './Componentes/productos/productos.component';
 import { ContactoComponent } from './Paginas/Inicio/contacto/contacto.component';
 import { OtroComponent } from './Paginas/Inicio/otro/otro.component';
+import { ReporteProductoComponent } from './Paginas/Inicio/reporte-producto/reporte-producto.component';
+import { HeaderReporteComponent } from './Componentes/header-reporte/header-reporte.component';
+import { ReporteVistaComponent } from './Paginas/Inicio/reporte-vista/reporte-vista.component';
+import { ReporteRedSocialComponent } from './Paginas/Inicio/reporte-red-social/reporte-red-social.component';
+import { ReporteTiempoPaginaComponent } from './Paginas/Inicio/reporte-tiempo-pagina/reporte-tiempo-pagina.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/nosotros', pathMatch: 'full' },
@@ -39,6 +44,12 @@ export const routes: Routes = [
   { path: 'otro', component: OtroComponent},
 
   //Rutas protegidas
+  { path: 'reporte-producto', component: ReporteProductoComponent,canActivate: [AutorizacionRuta] },
+  { path: 'header-reporte', component: HeaderReporteComponent,canActivate: [AutorizacionRuta] },
+  { path: 'reporte-vista', component: ReporteVistaComponent,canActivate: [AutorizacionRuta] },
+  { path: 'reporte-red-social', component: ReporteRedSocialComponent,canActivate: [AutorizacionRuta] },
+  { path: 'reporte-tiempo-pagina', component: ReporteTiempoPaginaComponent,canActivate: [AutorizacionRuta] },
+
   { path: 'menu', component: MenuComponent,canActivate: [AutorizacionRuta] },
   { path: 'navbar', component: NavbarComponent,canActivate: [AutorizacionRuta] },
   { path: 'sidebar', component: SidebarComponent,canActivate: [AutorizacionRuta] },

@@ -1,3 +1,5 @@
 <app-header *ngIf="!esLogin() && !esProductos()" />
 <router-outlet></router-outlet>
-<app-footer *ngIf="!esLogin() && !esProductos()" />
+<app-footer *ngIf="!esLogin() && !esProductos()  && !esReporteProducto() &&!esReporteVista() &&!esReporteRedSocial() &&!esReporteTiempoPagina()" />
+
+
