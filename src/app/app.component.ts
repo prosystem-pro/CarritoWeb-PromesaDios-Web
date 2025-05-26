@@ -29,50 +29,63 @@ export class AppComponent implements OnInit {
     private ReporteTiempoPaginaServicio: ReporteTiempoPaginaServicio
   ) { }
   
- ngOnInit(): void {
-    this.horaEntrada = Date.now();
+ngOnInit(): void {
+  this.horaEntrada = Date.now();
 
-    const EntradasNavegacion = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+  // Iniciar intervalo para calcular cada 60 segundos pero sin guardar
+  this.intervaloEnvio = setInterval(() => {
+    const ahora = Date.now();
+    this.tiempoAcumuladoMs = ahora - this.horaEntrada;
 
-    const EsRecarga =
-      EntradasNavegacion.length > 0
-        ? EntradasNavegacion[0].type === 'reload'
-        : performance.navigation.type === 1;
+    // Solo se calcula y formatea el tiempo, no se guarda
+    const tiempoFormateado = this.formatearTiempo(this.tiempoAcumuladoMs);
+    console.log('⏱ Tiempo acumulado:', tiempoFormateado); // solo log
+    // NO LLAMAMOS A RegistrarTiempoPagina AQUÍ
+  }, 60000); // 60000 ms = 60 segundos
 
-    const EsAccesoDirecto =
-      EntradasNavegacion.length > 0
-        ? EntradasNavegacion[0].type === 'navigate'
-        : performance.navigation.type === 0;
+  const EntradasNavegacion = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
 
-    if (EsRecarga || EsAccesoDirecto) {
-      this.ReportarVista();
-    }
+  const EsRecarga = EntradasNavegacion.length > 0
+    ? EntradasNavegacion[0].type === 'reload'
+    : performance.navigation.type === 1;
+
+  const EsAccesoDirecto = EntradasNavegacion.length > 0
+    ? EntradasNavegacion[0].type === 'navigate'
+    : performance.navigation.type === 0;
+
+  if (EsRecarga || EsAccesoDirecto) {
+    this.ReportarVista();
   }
+}
 
-  @HostListener('window:beforeunload', ['$event'])
-  registrarSalida(event: Event): void {
-    const horaSalida = Date.now();
-    const tiempoMs = horaSalida - this.horaEntrada;
-    const tiempoFormato = this.formatearTiempo(tiempoMs);
+@HostListener('window:beforeunload', ['$event'])
+registrarSalida(event: Event): void {
+  clearInterval(this.intervaloEnvio); // Limpiar el intervalo
+  const horaSalida = Date.now();
+  const tiempoMs = horaSalida - this.horaEntrada;
+  const tiempoFormato = this.formatearTiempo(tiempoMs);
+  this.RegistrarTiempoPagina(tiempoFormato); // ← Aquí sí se guarda
+}
 
-    const Datos = {
-      TiempoPromedio: tiempoFormato,
-      Navegador: this.ObtenerNavegador()
-    };
+RegistrarTiempoPagina(tiempoFormateado: string): void {
+  const Datos = {
+    TiempoPromedio: tiempoFormateado,
+    Navegador: this.ObtenerNavegador()
+  };
 
-    // Usar sendBeacon para asegurar que se envíe antes de que se cierre la pestaña
-    const url = `${Entorno.ApiUrl}reportetiempopagina/crear`;
-    const blob = new Blob([JSON.stringify(Datos)], { type: 'application/json' });
-    navigator.sendBeacon(url, blob);
-  }
+  this.ReporteTiempoPaginaServicio.Crear(Datos).subscribe({
+    next: (Respuesta) => console.log('✅ Tiempo registrado con éxito:', Respuesta),
+    error: (Error) => console.error('❌ Error al registrar tiempo en página:', Error)
+  });
+}
 
-  formatearTiempo(ms: number): string {
-    const totalSegundos = Math.floor(ms / 1000);
-    const horas = Math.floor(totalSegundos / 3600).toString().padStart(2, '0');
-    const minutos = Math.floor((totalSegundos % 3600) / 60).toString().padStart(2, '0');
-    const segundos = (totalSegundos % 60).toString().padStart(2, '0');
-    return `${horas}:${minutos}:${segundos}`;
-  }
+formatearTiempo(ms: number): string {
+  const totalSegundos = Math.floor(ms / 1000);
+  const horas = Math.floor(totalSegundos / 3600).toString().padStart(2, '0');
+  const minutos = Math.floor((totalSegundos % 3600) / 60).toString().padStart(2, '0');
+  const segundos = (totalSegundos % 60).toString().padStart(2, '0');
+  return `${horas}:${minutos}:${segundos}`;
+}
   // ngOnInit(): void {
   //   this.horaEntrada = Date.now();
 
