@@ -28,7 +28,8 @@ export class AppComponent implements OnInit {
     private ReporteVistaServicio: ReporteVistaServicio,
     private ReporteTiempoPaginaServicio: ReporteTiempoPaginaServicio
   ) { }
-  
+
+// SEGUNDA OPCION
 ngOnInit(): void {
   this.horaEntrada = Date.now();
 
@@ -74,8 +75,8 @@ RegistrarTiempoPagina(tiempoFormateado: string): void {
   };
 
   this.ReporteTiempoPaginaServicio.Crear(Datos).subscribe({
-    next: (Respuesta) => console.log('✅ Tiempo registrado con éxito:', Respuesta),
-    error: (Error) => console.error('❌ Error al registrar tiempo en página:', Error)
+    next: (Respuesta) => console.log('Tiempo registrado con éxito:', Respuesta),
+    error: (Error) => console.error('Error al registrar tiempo en página:', Error)
   });
 }
 
@@ -86,55 +87,6 @@ formatearTiempo(ms: number): string {
   const segundos = (totalSegundos % 60).toString().padStart(2, '0');
   return `${horas}:${minutos}:${segundos}`;
 }
-  // ngOnInit(): void {
-  //   this.horaEntrada = Date.now();
-
-  //   const EntradasNavegacion = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
-
-  //   const EsRecarga =
-  //     EntradasNavegacion.length > 0
-  //       ? EntradasNavegacion[0].type === 'reload'
-  //       : performance.navigation.type === 1;
-
-  //   const EsAccesoDirecto =
-  //     EntradasNavegacion.length > 0
-  //       ? EntradasNavegacion[0].type === 'navigate'
-  //       : performance.navigation.type === 0;
-
-  //   if (EsRecarga || EsAccesoDirecto) {
-  //     this.ReportarVista();
-  //   }
-  // }
-
-  // @HostListener('window:beforeunload', ['$event'])
-  // registrarSalida(event: Event): void {
-  //   const horaSalida = Date.now();
-  //   const tiempoMs = horaSalida - this.horaEntrada;
-  //   const tiempoFormato = this.formatearTiempo(tiempoMs);
-  //   this.RegistrarTiempoPagina(tiempoFormato);
-  // }
-
-  // RegistrarTiempoPagina(tiempoFormateado: string): void {
-  //   const Datos = {
-  //     TiempoPromedio: tiempoFormateado,
-  //     Navegador: this.ObtenerNavegador()
-  //   };
-
-  //   this.ReporteTiempoPaginaServicio.Crear(Datos).subscribe({
-  //     next: (Respuesta) => console.log(' Tiempo registrado con éxito:', Respuesta),
-  //     error: (Error) => console.error(' Error al registrar tiempo en página:', Error)
-  //   });
-  // }
-
-
-  // formatearTiempo(ms: number): string {
-  //   const totalSegundos = Math.floor(ms / 1000);
-  //   const horas = Math.floor(totalSegundos / 3600).toString().padStart(2, '0');
-  //   const minutos = Math.floor((totalSegundos % 3600) / 60).toString().padStart(2, '0');
-  //   const segundos = (totalSegundos % 60).toString().padStart(2, '0');
-  //   return `${horas}:${minutos}:${segundos}`;
-  // }
-
   ReportarVista(): void {
     const Datos = {
       Navegador: this.ObtenerNavegador()
