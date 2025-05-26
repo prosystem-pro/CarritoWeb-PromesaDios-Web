@@ -10,16 +10,16 @@ import { CarruselComponent } from '../../../Componentes/carrusel/carrusel.compon
 import { CarruselServicio } from '../../../Servicios/CarruselServicio';
 import { ServicioCompartido } from '../../../Servicios/ServicioCompartido';
 import { PermisoServicio } from '../../../Autorizacion/AutorizacionPermiso';
+import { AlertaServicio } from '../../../Servicios/Alerta-Servicio';
 
 @Component({
   selector: 'app-nosotros',
   imports: [CommonModule, NgIf, FormsModule, CarruselComponent],
   templateUrl: './nosotros.component.html',
   styleUrls: ['./nosotros.component.css'],
-  standalone: true
+  standalone: true,
 })
 export class NosotrosComponent implements OnInit {
-
   rawYoutubeUrl: string = '';
   sanitizedVideoUrl!: SafeResourceUrl;
   isVideoPlaying = false;
@@ -30,7 +30,7 @@ export class NosotrosComponent implements OnInit {
   carruselData: any = null;
   codigoCarrusel: number = 0;
   detallesCarrusel: any = null;
-  titulo: string = ''
+  titulo: string = '';
   isLoading = true;
   error = false;
   modoEdicion: boolean = false;
@@ -47,6 +47,7 @@ export class NosotrosComponent implements OnInit {
     private carruselImagenServicio: CarruselImagenServicio,
     private http: HttpClient,
     public Permiso: PermisoServicio,
+    private alertaServicio: AlertaServicio,
     private servicioCompartido: ServicioCompartido
   ) {}
 
@@ -56,11 +57,11 @@ export class NosotrosComponent implements OnInit {
     this.setSanitizedUrl();
     this.cargarDatosPortada();
     this.cargarDatosCarrusel();
-    this.servicioCompartido.colorFooter$.subscribe(color => {
+    this.servicioCompartido.colorFooter$.subscribe((color) => {
       this.colorFooter = color;
     });
   }
-  
+
   // Método para cargar los datos de la portada
   cargarDatosPortada(): void {
     // El ID 11 está quemado como se mencionó en tu ejemplo
@@ -68,7 +69,7 @@ export class NosotrosComponent implements OnInit {
       next: (data) => {
         this.portadaData = data[0];
         this.isLoading = false;
-        
+
         // Actualizar la URL del video si viene de la API
         if (this.portadaData.Urlvideo) {
           this.rawYoutubeUrl = this.portadaData.Urlvideo;
@@ -80,7 +81,7 @@ export class NosotrosComponent implements OnInit {
         console.error('Error al obtener datos de la portada:', err);
         this.error = true;
         this.isLoading = false;
-      }
+      },
     });
   }
 
@@ -90,30 +91,32 @@ export class NosotrosComponent implements OnInit {
         this.carruselData = data[0] || [];
         this.codigoCarrusel = this.carruselData.CodigoCarrusel;
         this.titulo = this.carruselData.NombreCarrusel;
-  
+
         // Ahora llamamos a ListadoCarrusel usando el código obtenido
         if (this.carruselData?.CodigoCarrusel) {
-          this.carruselImagenServicio.ListadoCarrusel(this.carruselData.CodigoCarrusel).subscribe({
-            next: (data) => {
-              this.detallesCarrusel = data;
-              this.datosListos = true;
-            },
-            error: (err) => {
-              this.detallesCarrusel = [];
-              this.datosListos = true;
-              console.error('Error al obtener detalles del carrusel:', err);
-            }
-          });
+          this.carruselImagenServicio
+            .ListadoCarrusel(this.carruselData.CodigoCarrusel)
+            .subscribe({
+              next: (data) => {
+                this.detallesCarrusel = data;
+                this.datosListos = true;
+              },
+              error: (err) => {
+                this.detallesCarrusel = [];
+                this.datosListos = true;
+                console.error('Error al obtener detalles del carrusel:', err);
+              },
+            });
         }
       },
       error: (err) => {
         console.error('Error al obtener datos de la portada:', err);
         this.error = true;
         this.isLoading = false;
-      }
+      },
     });
   }
-  
+
   // Método para activar/desactivar el modo edición
   toggleModoEdicion(): void {
     if (!this.modoEdicion) {
@@ -122,34 +125,39 @@ export class NosotrosComponent implements OnInit {
       this.modoEdicion = true;
       document.body.classList.add('modoEdicion');
     } else {
-      // Preguntar si desea guardar los cambios
-      if (confirm('¿Desea guardar los cambios?')) {
-        this.guardarCambios();
-      } else {
-        // Restaurar datos originales si cancela
-        this.portadaData = JSON.parse(JSON.stringify(this.datosOriginales));
-      }
-      this.modoEdicion = false;
-      document.body.classList.remove('modoEdicion');
+      // Confirmar si desea guardar los cambios usando el servicio
+      this.alertaServicio
+        .Confirmacion('¿Desea guardar los cambios?')
+        .then((confirmado) => {
+          if (confirmado) {
+            this.guardarCambios();
+          } else {
+            // Restaurar datos originales si cancela
+            this.portadaData = JSON.parse(JSON.stringify(this.datosOriginales));
+          }
+
+          // Salir del modo edición solo después de decidir
+          this.modoEdicion = false;
+          document.body.classList.remove('modoEdicion');
+        });
     }
   }
 
   // Método para guardar los cambios
   guardarCambios(): void {
     if (this.portadaData) {
-      const datosActualizados = {...this.portadaData};
+      const datosActualizados = { ...this.portadaData };
 
       this.empresaPortadaServicio.Editar(datosActualizados).subscribe({
         next: (response) => {
-          alert('Cambios guardados correctamente');
+          this.alertaServicio.MostrarExito('Cambios guardados correctamente');
           this.modoEdicion = false;
           document.body.classList.remove('modoEdicion');
           this.datosOriginales = null;
         },
         error: (error) => {
-          console.error('Error al guardar los cambios', error);
-          alert('Error al guardar los cambios. Por favor, intente de nuevo.');
-        }
+          this.alertaServicio.MostrarError(error, 'Error al guardar los cambios. Por favor, intente de nuevo.');
+        },
       });
     } else {
       console.error('No hay datos disponibles para actualizar');
@@ -204,35 +212,39 @@ export class NosotrosComponent implements OnInit {
     formData.append('CampoPropio', 'CodigoEmpresaPortada');
     formData.append('NombreCampoImagen', campoDestino);
 
-    this.http.post(`${this.Url}subir-imagen`, formData)
-      .subscribe({
-        next: (response: any) => {
-          alert('Cargando imagen...');
-          console.log('Imagen subida correctamente', response);
-          
-          if (response && response.Entidad && response.Entidad[campoDestino]) {
-            this.portadaData[campoDestino] = response.Entidad[campoDestino];
-            
-            const datosActualizados = {...this.portadaData};
+    this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
+      next: (response: any) => {
 
-            this.empresaPortadaServicio.Editar(datosActualizados).subscribe({
-              next: (updateResponse) => {
-                console.log('Campo de imagen actualizado en el modelo EmpresaPortada', updateResponse);
-                this.modoEdicion = false;
-              },
-              error: (updateError) => {
-                console.error('Error al actualizar el campo de imagen en el modelo EmpresaPortada', updateError);
-              }
-            });
-          }
-        },
-        error: (error) => {
-          console.error('Error al subir la imagen', error);
-          alert('Error al subir la imagen. Por favor, intente de nuevo.');
+        if (response && response.Entidad && response.Entidad[campoDestino]) {
+          this.portadaData[campoDestino] = response.Entidad[campoDestino];
+
+          const datosActualizados = { ...this.portadaData };
+
+          this.empresaPortadaServicio.Editar(datosActualizados).subscribe({
+            next: (updateResponse) => {
+              this.alertaServicio.MostrarExito(
+                'Campo de imagen actualizado correctamente'
+              );
+              this.modoEdicion = false;
+            },
+            error: (updateError) => {
+              this.alertaServicio.MostrarError(
+                updateError,
+                'Error al actualizar el campo de imagen. Por favor, intente de nuevo.'
+              );
+            },
+          });
         }
-      });
+      },
+      error: (error) => {
+        this.alertaServicio.MostrarError(
+          error,
+          'Error al subir la imagen. Por favor, intente de nuevo.'
+        );
+      },
+    });
   }
-  
+
   // Método para actualizar la URL del video
   actualizarVideo(): void {
     if (this.portadaData) {
@@ -243,13 +255,16 @@ export class NosotrosComponent implements OnInit {
   }
 
   extractVideoId(): void {
-    const match = this.rawYoutubeUrl.match(/(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/);
+    const match = this.rawYoutubeUrl.match(
+      /(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/
+    );
     this.videoId = match ? match[1] : '';
   }
 
   setSanitizedUrl(): void {
     const embedUrl = `https://www.youtube.com/embed/${this.videoId}?autoplay=1&rel=0&mute=1`;
-    this.sanitizedVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
+    this.sanitizedVideoUrl =
+      this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
   }
 
   get videoThumbnailUrl(): string {
