@@ -10,13 +10,13 @@ import { HttpClient } from '@angular/common/http';
 import { ReporteTiempoPaginaServicio } from './Servicios/ReporteTiempoPaginaServicio';
 import { Entorno } from './Entornos/Entorno';
 
-
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, HeaderComponent, NgIf, FooterComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
+
 export class AppComponent implements OnInit {
   title = 'CarritoWeb-Web';
   private horaEntrada: number = 0;
@@ -29,64 +29,61 @@ export class AppComponent implements OnInit {
     private ReporteTiempoPaginaServicio: ReporteTiempoPaginaServicio
   ) { }
 
-// SEGUNDA OPCION
-ngOnInit(): void {
-  this.horaEntrada = Date.now();
+  // SEGUNDA OPCION
+  ngOnInit(): void {
+    this.horaEntrada = Date.now();
 
-  // Iniciar intervalo para calcular cada 60 segundos pero sin guardar
-  this.intervaloEnvio = setInterval(() => {
-    const ahora = Date.now();
-    this.tiempoAcumuladoMs = ahora - this.horaEntrada;
+    this.intervaloEnvio = setInterval(() => {
+      const ahora = Date.now();
+      this.tiempoAcumuladoMs = ahora - this.horaEntrada;
 
-    // Solo se calcula y formatea el tiempo, no se guarda
-    const tiempoFormateado = this.formatearTiempo(this.tiempoAcumuladoMs);
-    console.log('⏱ Tiempo acumulado:', tiempoFormateado); // solo log
-    // NO LLAMAMOS A RegistrarTiempoPagina AQUÍ
-  }, 60000); // 60000 ms = 60 segundos
+      const tiempoFormateado = this.formatearTiempo(this.tiempoAcumuladoMs);
+      console.log('Tiempo acumulado:', tiempoFormateado);
+    }, 60000);
 
-  const EntradasNavegacion = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+    const EntradasNavegacion = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
 
-  const EsRecarga = EntradasNavegacion.length > 0
-    ? EntradasNavegacion[0].type === 'reload'
-    : performance.navigation.type === 1;
+    const EsRecarga = EntradasNavegacion.length > 0
+      ? EntradasNavegacion[0].type === 'reload'
+      : performance.navigation.type === 1;
 
-  const EsAccesoDirecto = EntradasNavegacion.length > 0
-    ? EntradasNavegacion[0].type === 'navigate'
-    : performance.navigation.type === 0;
+    const EsAccesoDirecto = EntradasNavegacion.length > 0
+      ? EntradasNavegacion[0].type === 'navigate'
+      : performance.navigation.type === 0;
 
-  if (EsRecarga || EsAccesoDirecto) {
-    this.ReportarVista();
+    if (EsRecarga || EsAccesoDirecto) {
+      this.ReportarVista();
+    }
   }
-}
 
-@HostListener('window:beforeunload', ['$event'])
-registrarSalida(event: Event): void {
-  clearInterval(this.intervaloEnvio); // Limpiar el intervalo
-  const horaSalida = Date.now();
-  const tiempoMs = horaSalida - this.horaEntrada;
-  const tiempoFormato = this.formatearTiempo(tiempoMs);
-  this.RegistrarTiempoPagina(tiempoFormato); // ← Aquí sí se guarda
-}
+  @HostListener('window:beforeunload', ['$event'])
+  registrarSalida(event: Event): void {
+    clearInterval(this.intervaloEnvio);
+    const horaSalida = Date.now();
+    const tiempoMs = horaSalida - this.horaEntrada;
+    const tiempoFormato = this.formatearTiempo(tiempoMs);
+    this.RegistrarTiempoPagina(tiempoFormato);
+  }
 
-RegistrarTiempoPagina(tiempoFormateado: string): void {
-  const Datos = {
-    TiempoPromedio: tiempoFormateado,
-    Navegador: this.ObtenerNavegador()
-  };
+  RegistrarTiempoPagina(tiempoFormateado: string): void {
+    const Datos = {
+      TiempoPromedio: tiempoFormateado,
+      Navegador: this.ObtenerNavegador()
+    };
 
-  this.ReporteTiempoPaginaServicio.Crear(Datos).subscribe({
-    next: (Respuesta) => console.log('Tiempo registrado con éxito:', Respuesta),
-    error: (Error) => console.error('Error al registrar tiempo en página:', Error)
-  });
-}
+    this.ReporteTiempoPaginaServicio.Crear(Datos).subscribe({
+      next: (Respuesta) => console.log('Tiempo registrado con éxito:', Respuesta),
+      error: (Error) => console.error('Error al registrar tiempo en página:', Error)
+    });
+  }
 
-formatearTiempo(ms: number): string {
-  const totalSegundos = Math.floor(ms / 1000);
-  const horas = Math.floor(totalSegundos / 3600).toString().padStart(2, '0');
-  const minutos = Math.floor((totalSegundos % 3600) / 60).toString().padStart(2, '0');
-  const segundos = (totalSegundos % 60).toString().padStart(2, '0');
-  return `${horas}:${minutos}:${segundos}`;
-}
+  formatearTiempo(ms: number): string {
+    const totalSegundos = Math.floor(ms / 1000);
+    const horas = Math.floor(totalSegundos / 3600).toString().padStart(2, '0');
+    const minutos = Math.floor((totalSegundos % 3600) / 60).toString().padStart(2, '0');
+    const segundos = (totalSegundos % 60).toString().padStart(2, '0');
+    return `${horas}:${minutos}:${segundos}`;
+  }
   ReportarVista(): void {
     const Datos = {
       Navegador: this.ObtenerNavegador()
