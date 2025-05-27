@@ -6,13 +6,15 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 import { ContactanosPortada } from '../../../Modelos/ContactanosPortada';
 import { RedSocial } from '../../../Modelos/RedSocial';
+import { RedSocialImagen } from '../../../Modelos/RedSocialImagen';
 import { Entorno } from '../../../Entornos/Entorno';
 
 import { PermisoServicio } from '../../../Autorizacion/AutorizacionPermiso';
 import { RedSocialServicio } from '../../../Servicios/RedSocialServicio';
+import { RedSocialImagenServicio } from '../../../Servicios/RedSocialImagenServicio';
 import { EmpresaServicio } from '../../../Servicios/EmpresaServicio';
 import { ContactanosPortadaServicio } from '../../../Servicios/ContactanosPortadaServicio';
-import { AlertaServicio } from '../../../Servicios/Alerta-Servicio'; 
+import { AlertaServicio } from '../../../Servicios/Alerta-Servicio';
 
 @Component({
   selector: 'app-contacto',
@@ -28,16 +30,22 @@ export class ContactoComponent implements OnInit {
   ContactanosPortada!: ContactanosPortada;
 
   MapaSeguro!: SafeResourceUrl;
-  RedeSocial: RedSocial[] = [];
+  // RedSocial: RedSocial[] = [];
+  RedSocial: any[] = [];
 
-  MostrarTitulo: boolean = false; 
+
+
+  RedeSocialImagen: RedSocialImagen[] = [];
+
+  MostrarTitulo: boolean = false;
   MostrarListado: boolean[] = [];
   MostrarCrearRedSocial: boolean = false;
-  MostrarMapa: boolean =false;
+  MostrarMapa: boolean = false;
 
   CodigoTemporal: string | null = null;
   ImagenTemporal: string | null = null;
   MapaTemporal: string = '';
+  imagenTemporalArchivo: File | null = null;
 
 
 
@@ -47,20 +55,26 @@ export class ContactoComponent implements OnInit {
     private http: HttpClient,
     private EmpresaServicio: EmpresaServicio,
     private RedSocialServicio: RedSocialServicio,
+    private RedSocialImagenServicio: RedSocialImagenServicio,
     private sanitizer: DomSanitizer,
-    private AlertaServicio: AlertaServicio 
-  ) {}
+    private AlertaServicio: AlertaServicio
+  ) { }
 
   ngOnInit(): void {
     this.ObtenerContactanosPortada();
     this.ObtenerRedesSociales();
   }
-  // SanitizarMapa(url: string): SafeResourceUrl {
-  //   return this.sanitizer.bypassSecurityTrustResourceUrl(url);
-  // }
+  MostrarImagenTemporal(): void {
+    if (!this.imagenTemporalArchivo) return;
 
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.ImagenTemporal = e.target.result;
+    };
+    reader.readAsDataURL(this.imagenTemporalArchivo);
+  }
 
-ObtenerContactanosPortada(): void {
+  ObtenerContactanosPortada(): void {
     this.ServicioContactanosPortada.Listado().subscribe({
       next: (data) => {
         if (data && data.length > 0) {
@@ -103,215 +117,271 @@ ObtenerContactanosPortada(): void {
     });
   }
 
-GuardarContactanosPortada(): void {
-  const textoMapa = this.ContactanosPortada.UrlMapa || '';
+  GuardarContactanosPortada(): void {
+    const textoMapa = this.ContactanosPortada.UrlMapa || '';
 
-  if (textoMapa) {
-    if (!textoMapa.startsWith('https://')) {
-      this.AlertaServicio.MostrarAlerta('Por favor, introduce una URL válida que comience con "https://".');
-      return;
+    if (textoMapa) {
+      if (!textoMapa.startsWith('https://')) {
+        this.AlertaServicio.MostrarAlerta('Por favor, introduce una URL válida que comience con "https://".');
+        return;
+      }
+
+      const urlBase = textoMapa.split('"')[0];
+      const terminaMal = /[>'"iframe\s]$/.test(urlBase);
+
+      if (terminaMal) {
+        this.AlertaServicio.MostrarAlerta('La URL no debe terminar con >, comillas o "iframe".');
+        return;
+      }
+
+      this.ContactanosPortada.UrlMapa = textoMapa.trim();
+    } else {
+      delete this.ContactanosPortada.UrlMapa;
     }
 
-    const urlBase = textoMapa.split('"')[0];
-    const terminaMal = /[>'"iframe\s]$/.test(urlBase);
+    delete this.ContactanosPortada.UrlImagenContactanosPortada;
 
-    if (terminaMal) {
-      this.AlertaServicio.MostrarAlerta('La URL no debe terminar con >, comillas o "iframe".');
-      return;
-    }
-
-    this.ContactanosPortada.UrlMapa = textoMapa.trim();
-  } else {
-    delete this.ContactanosPortada.UrlMapa;
-  }
-
-  delete this.ContactanosPortada.UrlImagenContactanosPortada;
-
-  Object.keys(this.ContactanosPortada).forEach(key => {
-    const valor = (this.ContactanosPortada as any)[key];
-    if (valor === '' || valor === null || valor === undefined) {
-      delete (this.ContactanosPortada as any)[key];
-    }
-  });
-
-  const esEdicion = this.ContactanosPortada.CodigoContactanosPortada;
-
-  if (esEdicion) {
-    this.ServicioContactanosPortada.Editar(this.ContactanosPortada).subscribe({
-      next: () => {
-        this.MostrarTitulo = false;
-        this.AlertaServicio.MostrarExito('Los datos se editaron correctamente.');
-        this.ObtenerContactanosPortada();
-      },
-      error: (error) => {
-        this.AlertaServicio.MostrarError(error, 'Error al editar los datos');
+    Object.keys(this.ContactanosPortada).forEach(key => {
+      const valor = (this.ContactanosPortada as any)[key];
+      if (valor === '' || valor === null || valor === undefined) {
+        delete (this.ContactanosPortada as any)[key];
       }
     });
-  } else {
-    this.ServicioContactanosPortada.Crear(this.ContactanosPortada).subscribe({
-      next: () => {
-        this.MostrarTitulo = false;
-        this.AlertaServicio.MostrarExito('El registro se guardó correctamente.');
-        this.ObtenerContactanosPortada();
-      },
-      error: (error) => {
-        this.AlertaServicio.MostrarError(error, 'Error al guardar los datos');
-      }
-    });
-  }
-}
 
+    const esEdicion = this.ContactanosPortada.CodigoContactanosPortada;
 
-ActualizarImagenContactanosPortada(event: any): void {
-  const file = event.target.files[0];
-  if (file) {
-    this.subirImagen(file, 'UrlImagenContactanosPortada');
-  } else {
-    this.AlertaServicio.MostrarAlerta('No se seleccionó ningún archivo.');
-  }
-}
-
-
-subirImagen(file: File, CampoDestino: string): void {
-  const nombreEmpresa = this.NombreEmpresa ?? 'defaultCompanyName'; 
-
-  this.EmpresaServicio.ConseguirPrimeraEmpresa().subscribe({
-    next: (empresa) => {
-      if (!empresa) {
-        this.AlertaServicio.MostrarAlerta('No se encontró ninguna empresa.');
-        return;  
-      }
-
-      const formData = new FormData();
-      const CodigoContactanosPortada = (this.ContactanosPortada?.CodigoContactanosPortada ?? '').toString();
-
-      formData.append('Imagen', file);
-      formData.append('CarpetaPrincipal', nombreEmpresa);
-      formData.append('SubCarpeta', 'ContactanosPortada');
-      formData.append('CodigoVinculado', empresa.CodigoEmpresa.toString());
-      formData.append('CodigoPropio', CodigoContactanosPortada);
-      formData.append('CampoVinculado', 'CodigoEmpresa');
-      formData.append('CampoPropio', 'CodigoContactanosPortada');
-      formData.append('NombreCampoImagen', CampoDestino);
-
-      this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
+    if (esEdicion) {
+      this.ServicioContactanosPortada.Editar(this.ContactanosPortada).subscribe({
         next: () => {
-          this.AlertaServicio.MostrarExito('Imagen subida correctamente.');
+          this.MostrarTitulo = false;
+          this.AlertaServicio.MostrarExito('Los datos se editaron correctamente.');
           this.ObtenerContactanosPortada();
         },
-        error: (err) => {
-          this.AlertaServicio.MostrarError(err, 'Error al subir la imagen');
+        error: (error) => {
+          this.AlertaServicio.MostrarError(error, 'Error al editar los datos');
         }
       });
-    },
-    error: (err) => {
-      this.AlertaServicio.MostrarError(err, 'No se pudo obtener la empresa');
+    } else {
+      this.ServicioContactanosPortada.Crear(this.ContactanosPortada).subscribe({
+        next: () => {
+          this.MostrarTitulo = false;
+          this.AlertaServicio.MostrarExito('El registro se guardó correctamente.');
+          this.ObtenerContactanosPortada();
+        },
+        error: (error) => {
+          this.AlertaServicio.MostrarError(error, 'Error al guardar los datos');
+        }
+      });
     }
-  });
-}
-
-//Código relacionado a Redes Sociales
-ObtenerRedesSociales(): void {
-  this.RedSocialServicio.Listado().subscribe({
-    next: (data: RedSocial[]) => {
-      this.RedeSocial = data;
-    },
-    error: (error) => {
-      this.AlertaServicio.MostrarError(error, 'Error al obtener los datos');
-    }
-  });
-}
-
-
-EditarRedSocial(index: number): void {
-  const redEditada = this.RedeSocial[index];
-
-  if (!redEditada || !redEditada.NombreRedSocial || !redEditada.Link) {
-    this.AlertaServicio.MostrarAlerta('Debe completar todos los campos antes de guardar.');
-    return;
   }
 
-  delete redEditada.UrlImagen;
 
-  this.RedSocialServicio.Editar(redEditada).subscribe({
-    next: () => {
-      this.AlertaServicio.MostrarExito('Registro actualizado correctamente.');
-      this.MostrarListado[index] = false;
-      this.ObtenerRedesSociales();
-    },
-    error: (err) => {
-      this.AlertaServicio.MostrarError(err, 'Hubo un error al guardar los cambios');
+  ActualizarImagenContactanosPortada(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.subirImagen(file, 'UrlImagenContactanosPortada');
+    } else {
+      this.AlertaServicio.MostrarAlerta('No se seleccionó ningún archivo.');
     }
-  });
-}
-
-
-CrearRedSocial(nombre: string, link: string) {
-  if (!nombre.trim() || !link.trim()) {
-    this.AlertaServicio.MostrarAlerta('Debe completar todos los campos antes de guardar.');
-    return;
   }
 
-  if (!this.CodigoTemporal && this.RedeSocial.length >= 8) {
-    this.AlertaServicio.MostrarAlerta(' Ya existen 8 registros en BD, no está permitido superar esa cantidad.');
-    return;
+
+  subirImagen(file: File, CampoDestino: string): void {
+    const nombreEmpresa = this.NombreEmpresa ?? 'defaultCompanyName';
+
+    this.EmpresaServicio.ConseguirPrimeraEmpresa().subscribe({
+      next: (empresa) => {
+        if (!empresa) {
+          this.AlertaServicio.MostrarAlerta('No se encontró ninguna empresa.');
+          return;
+        }
+
+        const formData = new FormData();
+        const CodigoContactanosPortada = (this.ContactanosPortada?.CodigoContactanosPortada ?? '').toString();
+
+        formData.append('Imagen', file);
+        formData.append('CarpetaPrincipal', nombreEmpresa);
+        formData.append('SubCarpeta', 'ContactanosPortada');
+        formData.append('CodigoVinculado', empresa.CodigoEmpresa.toString());
+        formData.append('CodigoPropio', CodigoContactanosPortada);
+        formData.append('CampoVinculado', 'CodigoEmpresa');
+        formData.append('CampoPropio', 'CodigoContactanosPortada');
+        formData.append('NombreCampoImagen', CampoDestino);
+
+        this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
+          next: () => {
+            this.AlertaServicio.MostrarExito('Imagen subida correctamente.');
+            this.ObtenerContactanosPortada();
+          },
+          error: (err) => {
+            this.AlertaServicio.MostrarError(err, 'Error al subir la imagen');
+          }
+        });
+      },
+      error: (err) => {
+        this.AlertaServicio.MostrarError(err, 'No se pudo obtener la empresa');
+      }
+    });
   }
 
-  const Datos = {
-    NombreRedSocial: nombre,
-    Link: link,
-    CodigoRedSocial: this.CodigoTemporal ?? null
+  //Código relacionado a Redes Sociales
+  ObtenerRedesSociales(): void {
+    this.RedSocialServicio.Listado('Contacto').subscribe({
+      next: (data: RedSocial[]) => {
+        this.RedSocial = data;
+      },
+      error: (error) => {
+        this.AlertaServicio.MostrarError(error, 'Error al obtener los datos');
+      }
+    });
+  }
+
+  //Código relacionado a Redes Sociales
+  // ObtenerRedesSocialesImagen(): void {
+  //   this.RedSocialImagenServicio.Listado().subscribe({
+  //     next: (data: RedSocial[]) => {
+  //       this.RedeSocialImagen = data;
+  //     },
+  //     error: (error) => {
+  //       this.AlertaServicio.MostrarError(error, 'Error al obtener los datos');
+  //     }
+  //   });
+  // }
+DesactivarRedSocial(index: number, event: Event): void {
+  const input = event.target as HTMLInputElement;
+  const estaActivo = input.checked; // true si activado, false si desactivado
+  const Estatus = estaActivo ? 1 : 2;
+
+  const red = this.RedSocial[index] || { CodigoRedSocial: '', Imagenes: [] };
+  
+  const CodigoRedSocial = red.CodigoRedSocial?.toString() || '';
+
+  const datosEditar = {
+    CodigoRedSocial,
+    Estatus
   };
 
-  if (this.CodigoTemporal) {
-    this.RedSocialServicio.Editar(Datos).subscribe({
-      next: () => {
-        this.AlertaServicio.MostrarExito('Registro editada correctamente.');
-        this.ObtenerRedesSociales();
-        this.CodigoTemporal = null;
-        this.ImagenTemporal = null;
-      },
-      error: (error) => {
-        this.AlertaServicio.MostrarError(error, 'Error al editar el registro');
-      }
-    });
-  } else {
-    this.RedSocialServicio.Crear(Datos).subscribe({
-      next: () => {
-        this.AlertaServicio.MostrarExito('Registro creado correctamente.');
-        this.ObtenerRedesSociales();
-        this.ImagenTemporal = null;
-      },
-      error: (error) => {
-        this.AlertaServicio.MostrarError(error, 'Error al crear el registro');
-      }
-    });
-  }
+  this.RedSocialServicio.Editar(datosEditar).subscribe({
+    next: () => {
+      // Opcional: actualizar UI, mostrar alerta, etc.
+      this.AlertaServicio.MostrarExito('Estado actualizado correctamente');
+      this.ObtenerRedesSociales(); // si quieres recargar
+    },
+    error: (err) => {
+      this.AlertaServicio.MostrarError(err, 'Error al actualizar el estado');
+    }
+  });
 }
 
 
-ActualizarImagenRedSocial(event: any, index: number | null): void {
-  const file = event.target.files[0];
-  if (!file) return;
+  EditarRedSocial(index: number): void {
+    const redEditada = this.RedSocial[index];
 
-  if (this.RedeSocial.length >= 8) {
-    this.AlertaServicio.MostrarAlerta('Ya existen 8 registros en BD, no está permitido superar esa cantidad.');
-    return;
+    if (!redEditada || !redEditada.NombreRedSocial || !redEditada.Link) {
+      this.AlertaServicio.MostrarAlerta('Debe completar todos los campos antes de guardar.');
+      return;
+    }
+
+    delete redEditada.UrlImagen;
+
+    this.RedSocialServicio.Editar(redEditada).subscribe({
+      next: () => {
+        this.AlertaServicio.MostrarExito('Registro actualizado correctamente.');
+        this.MostrarListado[index] = false;
+        this.ObtenerRedesSociales();
+      },
+      error: (err) => {
+        this.AlertaServicio.MostrarError(err, 'Hubo un error al guardar los cambios');
+      }
+    });
   }
 
-  if (index !== null && this.RedeSocial[index]) {
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      this.RedeSocial[index].UrlImagen = e.target.result;
-    };
-    reader.readAsDataURL(file);
+
+  CrearRedSocial(nombre: string, link: string) {
+    if (!nombre.trim() || !link.trim()) {
+      this.AlertaServicio.MostrarAlerta('Debe completar todos los campos antes de guardar.');
+      return;
+    }
+
+    if (this.RedSocial.length >= 8) {
+      this.AlertaServicio.MostrarAlerta('Ya existen 8 registros en BD, no está permitido superar esa cantidad.');
+      return;
+    }
+
+    // Paso 1: Obtener empresa primero
+    this.EmpresaServicio.Listado().subscribe({
+      next: (empresas: any[]) => {
+        if (!empresas || empresas.length === 0) {
+          this.AlertaServicio.MostrarAlerta('No se encontró ninguna empresa.');
+          return;
+        }
+
+        const empresa = empresas[0];
+        const CodigoEmpresa = empresa.CodigoEmpresa;
+
+        const Datos = {
+          NombreRedSocial: nombre,
+          Link: link,
+          CodigoEmpresa: CodigoEmpresa
+        };
+
+        this.RedSocialServicio.Crear(Datos).subscribe({
+          next: (res: any) => {
+            this.CodigoTemporal = res?.entidad?.CodigoRedSocial || null;
+
+            if (this.imagenTemporalArchivo) {
+              this.subirImagenRedSocial(this.imagenTemporalArchivo, null);
+              this.imagenTemporalArchivo = null;
+            }
+          },
+          error: (error) => {
+            this.AlertaServicio.MostrarError(error, 'Error al crear el registro');
+          }
+        });
+      },
+      error: (error) => {
+        this.AlertaServicio.MostrarError(error, 'Error al obtener los datos de empresa');
+      }
+    });
   }
 
-  this.subirImagenRedSocial(file, index);
-}
 
 
-subirImagenRedSocial(file: File, index: number | null): void {
+  ActualizarImagenRedSocial(event: any, index: number | null): void {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (this.RedSocial.length >= 8) {
+      this.AlertaServicio.MostrarAlerta('Ya existen 8 registros en BD, no está permitido superar esa cantidad.');
+      return;
+    }
+
+    if (index !== null && this.RedSocial[index]) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.RedSocial[index].UrlImagen = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    this.subirImagenRedSocial(file, index);
+  }
+  ActualizarImagenRedSocialTemporal(event: any, index: number | null): void {
+    const file = event.target.files[0];
+    if (!file) return;
+    this.imagenTemporalArchivo = file;
+    this.MostrarImagenTemporal()
+
+    if (index !== null && this.RedSocial[index]) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.RedSocial[index].UrlImagen = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+
+  subirImagenRedSocial(file: File, index: number | null): void {
   this.EmpresaServicio.ConseguirPrimeraEmpresa().subscribe({
     next: (empresa) => {
       if (!empresa) {
@@ -319,32 +389,51 @@ subirImagenRedSocial(file: File, index: number | null): void {
         return;
       }
 
-      const red = index !== null && this.RedeSocial[index]
-        ? this.RedeSocial[index]
+      const red = index !== null && this.RedSocial[index]
+        ? this.RedSocial[index]
         : { CodigoRedSocial: '' };
 
-      const CodigoRedSocialActual = red.CodigoRedSocial?.toString() || '';
-      const EsEdicion = !!CodigoRedSocialActual;
+      const CodigoRedSocial = red.CodigoRedSocial?.toString() || '';
+      const CodigoRedSocialImagen = red?.Imagenes?.[0]?.CodigoRedSocialImagen?.toString() || '';
 
       const formData = new FormData();
       formData.append('Imagen', file);
       formData.append('CarpetaPrincipal', this.NombreEmpresa);
-      formData.append('SubCarpeta', 'RedSocial');
-      formData.append('CodigoVinculado', empresa.CodigoEmpresa);
-      formData.append('CodigoPropio', CodigoRedSocialActual);
-      formData.append('CampoVinculado', 'CodigoEmpresa');
-      formData.append('CampoPropio', 'CodigoRedSocial');
+      formData.append('SubCarpeta', 'RedSocialImagen');
+      formData.append('CodigoVinculado', this.CodigoTemporal?.toString() || CodigoRedSocial || '');
+      formData.append('CodigoPropio', CodigoRedSocialImagen);
+      formData.append('CampoVinculado', 'CodigoRedSocial');
+      formData.append('CampoPropio', 'CodigoRedSocialImagen');
       formData.append('NombreCampoImagen', 'UrlImagen');
 
       this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
         next: (res: any) => {
-          this.AlertaServicio.MostrarExito('Imagen actualizada correctamente.');
+          const entidad = res?.Entidad;
 
-          const urlImagen = res?.Entidad?.UrlImagen;
-          this.ImagenTemporal = urlImagen;
+          if (entidad?.UrlImagen) {
+            this.ImagenTemporal = entidad.UrlImagen;
+          }
 
-          if (!EsEdicion && res?.Entidad?.CodigoRedSocial) {
-            this.CodigoTemporal = res.Entidad.CodigoRedSocial;
+          const codigoImagen = entidad?.CodigoRedSocialImagen;
+          const codigoVinculo = entidad?.CodigoRedSocial;
+
+          if (codigoImagen) {
+            const datosEditar = {
+              CodigoRedSocialImagen: codigoImagen,
+              CodigoRedSocial: codigoVinculo,
+              Ubicacion: 'Contacto'
+            };
+            this.RedSocialImagenServicio.Editar(datosEditar).subscribe({
+              next: () => {
+                this.AlertaServicio.MostrarExito('Registrado correctamente');
+                this.ObtenerRedesSociales();
+                this.imagenTemporalArchivo = null;
+                this.ImagenTemporal = '';
+              },
+              error: (err) => {
+                console.error('Error al actualizar RedSocialImagen:', err);
+              }
+            });
           }
         },
         error: (err) => {
@@ -361,31 +450,32 @@ subirImagenRedSocial(file: File, index: number | null): void {
 }
 
 
-EliminarRedSocial(index: number): void {
-  const red = this.RedeSocial[index];
-  const codigo = red?.CodigoRedSocial;
 
-  if (codigo === undefined) return;
+  EliminarRedSocial(index: number): void {
+    const red = this.RedSocial[index];
+    const codigo = red?.CodigoRedSocial;
 
-  this.AlertaServicio.Confirmacion(
-    '¿Estás seguro?',
-    'Esta acción eliminará el registro de forma permanente.',
-    'Sí, eliminar',
-    'Cancelar'
-  ).then(confirmado => {
-    if (confirmado) {
-      this.RedSocialServicio.Eliminar(codigo).subscribe({
-        next: () => {
-          this.RedeSocial.splice(index, 1);
-          this.AlertaServicio.MostrarExito('Registro eliminada correctamente.');
-        },
-        error: (err) => {
-          this.AlertaServicio.MostrarError(err, 'Error al eliminar');
-        }
-      });
-    }
-  });
-}
+    if (codigo === undefined) return;
+
+    this.AlertaServicio.Confirmacion(
+      '¿Estás seguro?',
+      'Esta acción eliminará el registro de forma permanente.',
+      'Sí, eliminar',
+      'Cancelar'
+    ).then(confirmado => {
+      if (confirmado) {
+        this.RedSocialServicio.Eliminar(codigo).subscribe({
+          next: () => {
+            this.RedSocial.splice(index, 1);
+            this.AlertaServicio.MostrarExito('Registro eliminada correctamente.');
+          },
+          error: (err) => {
+            this.AlertaServicio.MostrarError(err, 'Error al eliminar');
+          }
+        });
+      }
+    });
+  }
 
 
 

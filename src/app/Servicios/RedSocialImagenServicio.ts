@@ -6,17 +6,14 @@ import { Entorno } from '../Entornos/Entorno';
 @Injectable({
   providedIn: 'root'
 })
-export class RedSocialServicio {
-  private Url = `${Entorno.ApiUrl}redsocial`; 
+export class RedSocialImagenServicio {
+  private Url = `${Entorno.ApiUrl}redsocialimagen`; 
 
   constructor(private http: HttpClient) {}
 
-Listado(filtro: string = ''): Observable<any> {
-  const url = filtro ? `${this.Url}/listado/${filtro}` : `${this.Url}/listado`;
-  return this.http.get(url);
-}
-
-
+  Listado(): Observable<any> {
+    return this.http.get(`${this.Url}/listado`);
+  }
   
   Crear(Datos: any): Observable<any> {
     return this.http.post(`${this.Url}/crear`, Datos);
@@ -27,7 +24,7 @@ Listado(filtro: string = ''): Observable<any> {
   }
 
   Editar(Datos: any): Observable<any> {
-    return this.http.put(`${this.Url}/editar/${Datos.CodigoRedSocial}`, Datos);
+    return this.http.put(`${this.Url}/editar/${Datos.CodigoRedSocialImagen}`, Datos);
   }
 
   Eliminar(Codigo: number): Observable<any> {
