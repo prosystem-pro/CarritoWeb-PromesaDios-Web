@@ -133,117 +133,105 @@
   </div>
 
   <!-- Redes Sociales -->
-<div *ngFor="let red of RedSocial; let i = index" class="mb-3 d-flex justify-content-center position-relative">
+  <div *ngFor="let red of RedSocial; let i = index" class="mb-3 d-flex justify-content-center position-relative">
 
-  <!-- CONTENIDO PRINCIPAL -->
-  <div class="d-flex align-items-center gap-3 px-4 py-2 position-relative ContornoFondoRedesSociales"
-       [ngStyle]="{
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="d-flex align-items-center gap-3 px-4 py-2 position-relative ContornoFondoRedesSociales" [ngStyle]="{
          'background-color': ContactanosPortada.ColorFondoRedSocial,
          'border': '4px solid ' + ContactanosPortada.ColorContornoRedSocial,
          'border-radius': '3rem',
          'box-shadow': '0 4px 10px rgba(0,0,0,0.2)'
        }">
 
-    <!-- Switch real -->
-    <div class="position-absolute top-0 start-0 ms-4 mt-2" style="z-index: 3;">
-      <div class="form-check form-switch">
-        <input class="form-check-input toggle-red-social" type="checkbox" role="switch"
-               [checked]="red.Estatus === 1"
-               (change)="DesactivarRedSocial(i, $event)"
-               style="transform: scale(1.2); cursor: pointer;"
-               [ngClass]="{'activo': red.Estatus === 1, 'desactivado': red.Estatus !== 1}" />
+      <!-- Switch real -->
+      <div *ngIf="Permiso.PermisoSuperAdmin()" class="position-absolute top-0 start-0 ms-4 mt-2" style="z-index: 3;">
+        <div class="form-check form-switch">
+          <input class="form-check-input toggle-red-social" type="checkbox" role="switch" [checked]="red.Estatus === 1"
+            (change)="DesactivarRedSocial(i, $event)" style="transform: scale(1.2); cursor: pointer;"
+            [ngClass]="{'activo': red.Estatus === 1, 'desactivado': red.Estatus !== 1}" />
+        </div>
       </div>
-    </div>
 
-    <!-- IMAGEN -->
-    <div class="d-flex align-items-center position-relative ContenidoRedesSociales" style="width: 50px; height: 50px;">
-      <a *ngIf="red.Link; else imagenSinLink"
-         [href]="red.Estatus === 1 ? red.Link : null"
-         target="_blank"
-         [attr.tabindex]="red.Estatus === 1 ? 0 : -1"
-         style="display: block; border-radius: 50%;">
-        <img *ngIf="red.Imagenes?.length > 0" [src]="red.Imagenes[0]?.UrlImagen" [alt]="red.NombreRedSocial"
-             style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.3);" />
-      </a>
-      <ng-template #imagenSinLink>
-        <img *ngIf="red.UrlImagen" [src]="red.UrlImagen" [alt]="red.NombreRedSocial"
-             style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.3);" />
-      </ng-template>
-
-      <!-- Botón cámara -->
-      <label *ngIf="Permiso.PermisoSuperAdmin()"
-             class="position-absolute bottom-0 end-0 bg-white rounded-circle d-flex align-items-center justify-content-center"
-             style="width: 18px; height: 18px; cursor: pointer; box-shadow: 0px 2px 5px rgba(0,0,0,0.3);">
-        <i class="bi bi-camera-fill text-black fs-6"></i>
-        <input type="file" accept="image/*" hidden (change)="ActualizarImagenRedSocial($event, i)" [disabled]="red.Estatus !== 1">
-      </label>
-    </div>
-
-    <!-- TEXTO O INPUTS -->
-    <div class="d-flex flex-column justify-content-center flex-grow-1">
-      <ng-container *ngIf="!MostrarListado[i]">
-        <a *ngIf="red.Link" [href]="red.Link" target="_blank"
-           class="fw-semibold TamañoLetraRedSocial"
-           [style.color]="ContactanosPortada.ColorTextoRedSocial"
-           style="text-decoration: none;">
-          {{ red.NombreRedSocial }}
+      <!-- IMAGEN -->
+      <div class="d-flex align-items-center position-relative ContenidoRedesSociales"
+        style="width: 50px; height: 50px;">
+        <a *ngIf="red.Link; else imagenSinLink" [href]="red.Estatus === 1 ? red.Link : null" target="_blank"
+          [attr.tabindex]="red.Estatus === 1 ? 0 : -1" style="display: block; border-radius: 50%;">
+          <img *ngIf="red.Imagenes?.length > 0" [src]="red.Imagenes[0]?.UrlImagen" [alt]="red.NombreRedSocial"
+            style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.3);" />
         </a>
-        <span *ngIf="!red.Link" class="fw-semibold TamañoLetraRedSocial"
-              [style.color]="ContactanosPortada.ColorTextoRedSocial">
-          {{ red.NombreRedSocial }}
-        </span>
-      </ng-container>
+        <ng-template #imagenSinLink>
+          <img *ngIf="red.UrlImagen" [src]="red.UrlImagen" [alt]="red.NombreRedSocial"
+            style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.3);" />
+        </ng-template>
 
-      <div *ngIf="MostrarListado[i]" class="d-flex flex-column gap-2">
-        <input type="text" class="form-control" [(ngModel)]="red.NombreRedSocial"
-               placeholder="Nombre de la red social"
-               [disabled]="red.Estatus !== 1"
-               style="background-color: rgba(211, 211, 211, 0.8); border-radius: 10px; padding: 5px;">
-        <input type="text" class="form-control" [(ngModel)]="red.Link"
-               placeholder="Enlace de la red social"
-               [disabled]="red.Estatus !== 1"
-               style="background-color: rgba(211, 211, 211, 0.8); border-radius: 10px; padding: 5px;">
+        <!-- Botón cámara -->
+        <label *ngIf="Permiso.PermisoSuperAdmin()"
+          class="position-absolute bottom-0 end-0 bg-white rounded-circle d-flex align-items-center justify-content-center"
+          style="width: 18px; height: 18px; cursor: pointer; box-shadow: 0px 2px 5px rgba(0,0,0,0.3);">
+          <i class="bi bi-camera-fill text-black fs-6"></i>
+          <input type="file" accept="image/*" hidden (change)="ActualizarImagenRedSocial($event, i)"
+            [disabled]="red.Estatus !== 1">
+        </label>
+      </div>
+
+      <!-- TEXTO O INPUTS -->
+      <div class="d-flex flex-column justify-content-center flex-grow-1">
+        <ng-container *ngIf="!MostrarListado[i]">
+          <a *ngIf="red.Link" [href]="red.Link" target="_blank" class="fw-semibold TamañoLetraRedSocial"
+            [style.color]="ContactanosPortada.ColorTextoRedSocial" style="text-decoration: none;">
+            {{ red.NombreRedSocial }}
+          </a>
+          <span *ngIf="!red.Link" class="fw-semibold TamañoLetraRedSocial"
+            [style.color]="ContactanosPortada.ColorTextoRedSocial">
+            {{ red.NombreRedSocial }}
+          </span>
+        </ng-container>
+
+        <div *ngIf="MostrarListado[i]" class="d-flex flex-column gap-2">
+          <input type="text" class="form-control" [(ngModel)]="red.NombreRedSocial"
+            placeholder="Nombre de la red social" [disabled]="red.Estatus !== 1"
+            style="background-color: rgba(211, 211, 211, 0.8); border-radius: 10px; padding: 5px;">
+          <input type="text" class="form-control" [(ngModel)]="red.Link" placeholder="Enlace de la red social"
+            [disabled]="red.Estatus !== 1"
+            style="background-color: rgba(211, 211, 211, 0.8); border-radius: 10px; padding: 5px;">
+        </div>
+      </div>
+
+      <!-- BOTONES -->
+      <div class="d-flex flex-column align-items-center justify-content-center gap-1 ms-2"
+        *ngIf="Permiso.PermisoSuperAdmin()">
+        <label *ngIf="!MostrarListado[i]"
+          class="bg-white rounded-circle d-flex align-items-center justify-content-center"
+          style="width: 30px; height: 30px; cursor: pointer; box-shadow: 0px 2px 5px rgba(0,0,0,0.3);"
+          (click)="MostrarListado[i] = true">
+          <i class="bi bi-pencil-fill text-black fs-6"></i>
+        </label>
+
+        <button *ngIf="!MostrarListado[i]" class="btn btn-sm"
+          style="width: 30px; height: 30px; padding: 0; background-color: #dc3545; color: white; border: none;"
+          (click)="EliminarRedSocial(i)" [disabled]="red.Estatus !== 1">
+          <i class="bi bi-x-lg fs-6"></i>
+        </button>
+
+        <button *ngIf="MostrarListado[i]" class="btn btn-success btn-sm"
+          (click)="EditarRedSocial(i); MostrarListado[i] = false" [disabled]="red.Estatus !== 1">
+          <i class="bi bi-check-lg"></i>
+        </button>
+
+        <button *ngIf="MostrarListado[i]" class="btn btn-danger btn-sm" (click)="MostrarListado[i] = false"
+          [disabled]="red.Estatus !== 1">
+          <i class="bi bi-x-lg"></i>
+        </button>
       </div>
     </div>
 
-    <!-- BOTONES -->
-    <div class="d-flex flex-column align-items-center justify-content-center gap-1 ms-2"
-         *ngIf="Permiso.PermisoSuperAdmin()">
-      <label *ngIf="!MostrarListado[i]"
-             class="bg-white rounded-circle d-flex align-items-center justify-content-center"
-             style="width: 30px; height: 30px; cursor: pointer; box-shadow: 0px 2px 5px rgba(0,0,0,0.3);"
-             (click)="MostrarListado[i] = true">
-        <i class="bi bi-pencil-fill text-black fs-6"></i>
-      </label>
-
-      <button *ngIf="!MostrarListado[i]" class="btn btn-sm"
-              style="width: 30px; height: 30px; padding: 0; background-color: #dc3545; color: white; border: none;"
-              (click)="EliminarRedSocial(i)"
-              [disabled]="red.Estatus !== 1">
-        <i class="bi bi-x-lg fs-6"></i>
-      </button>
-
-      <button *ngIf="MostrarListado[i]" class="btn btn-success btn-sm"
-              (click)="EditarRedSocial(i); MostrarListado[i] = false"
-              [disabled]="red.Estatus !== 1">
-        <i class="bi bi-check-lg"></i>
-      </button>
-
-      <button *ngIf="MostrarListado[i]" class="btn btn-danger btn-sm"
-              (click)="MostrarListado[i] = false"
-              [disabled]="red.Estatus !== 1">
-        <i class="bi bi-x-lg"></i>
-      </button>
+    <!-- CAPA QUE BLOQUEA TODO MENOS EL SWITCH -->
+    <div *ngIf="red.Estatus !== 1" class="position-absolute  ContornoFondoRedesSociales"
+      style="background-color: rgba(255, 255, 255, 0.6); border-radius: 3rem; z-index: 2;">
     </div>
-  </div>
 
-  <!-- CAPA QUE BLOQUEA TODO MENOS EL SWITCH -->
-  <div *ngIf="red.Estatus !== 1"
-       class="position-absolute  ContornoFondoRedesSociales"
-       style="background-color: rgba(255, 255, 255, 0.6); border-radius: 3rem; z-index: 2;">
   </div>
-
-</div>
 
 
   <!-- Crear nueva Rede Social -->
