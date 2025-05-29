@@ -171,9 +171,9 @@
   }
 
   /* Remover la línea del último elemento */
-  /* .navbar-nav .nav-item:last-child {
+  .navbar-nav .nav-item:last-child {
     border-bottom: none;
-  } */
+  }
 
   .navbar-nav .nav-link {
     color: #333;
@@ -278,9 +278,9 @@
   }
 
   /* Remover la línea del último elemento */
-  /* .navbar-nav .nav-item:last-child {
+  .navbar-nav .nav-item:last-child {
     border-bottom: none;
-  } */
+  }
 
   .navbar-nav .nav-link {
     color: #333;
@@ -489,6 +489,11 @@
 
   .navbar-overlay.show {
     display: block;
+  }
+
+  /* Remover la línea del último elemento */
+  .navbar-nav .nav-item:last-child {
+    border-bottom: none;
   }
 }
 
