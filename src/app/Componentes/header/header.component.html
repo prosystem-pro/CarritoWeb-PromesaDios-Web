@@ -161,6 +161,14 @@
                         </div>
                     </div>
                 </li>
+
+                <li class="nav-item">
+                    <!-- Botón para cerrar sesión -->
+                    <button *ngIf="Permiso.PermisoAdminSuperAdmin()" class="btn btn-sm mobile-logout-container"
+                        title="Cerrar sesión" (click)="cerrarSesion()">
+                        Cerrar sesión <i class="bi bi-box-arrow-right"></i>
+                    </button>
+                </li>
             </ul>
 
             <div class="mobile-social-icons mx-auto gap-1">

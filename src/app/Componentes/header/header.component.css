@@ -200,6 +200,10 @@
   .d-lg-none.d-flex.justify-content-center {
     display: none !important;
   }
+
+  .mobile-logout-container {
+    display: none !important;
+  }
 }
 
 @media (max-width: 768px) {
