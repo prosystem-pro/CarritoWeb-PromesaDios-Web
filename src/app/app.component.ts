@@ -1,14 +1,12 @@
 import { Component, OnInit, HostListener } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router } from '@angular/router';
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './Componentes/header/header.component';
 import { NgIf } from '@angular/common';
 import { FooterComponent } from './Componentes/footer/footer.component';
-import { filter } from 'rxjs/operators';
 import { ReporteVistaServicio } from './Servicios/ReporteVistaServicio';
-import { HttpClient } from '@angular/common/http';
 import { ReporteTiempoPaginaServicio } from './Servicios/ReporteTiempoPaginaServicio';
-import { Entorno } from './Entornos/Entorno';
+
 
 @Component({
   selector: 'app-root',
@@ -29,17 +27,8 @@ export class AppComponent implements OnInit {
     private ReporteTiempoPaginaServicio: ReporteTiempoPaginaServicio
   ) { }
 
-  // SEGUNDA OPCION
   ngOnInit(): void {
     this.horaEntrada = Date.now();
-
-    this.intervaloEnvio = setInterval(() => {
-      const ahora = Date.now();
-      this.tiempoAcumuladoMs = ahora - this.horaEntrada;
-
-      const tiempoFormateado = this.formatearTiempo(this.tiempoAcumuladoMs);
-      console.log('Tiempo acumulado:', tiempoFormateado);
-    }, 60000);
 
     const EntradasNavegacion = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
 
@@ -58,11 +47,10 @@ export class AppComponent implements OnInit {
 
   @HostListener('window:beforeunload', ['$event'])
   registrarSalida(event: Event): void {
-    clearInterval(this.intervaloEnvio);
     const horaSalida = Date.now();
     const tiempoMs = horaSalida - this.horaEntrada;
-    const tiempoFormato = this.formatearTiempo(tiempoMs);
-    this.RegistrarTiempoPagina(tiempoFormato);
+    const tiempoFormateado = this.formatearTiempo(tiempoMs);
+    this.RegistrarTiempoPagina(tiempoFormateado);
   }
 
   RegistrarTiempoPagina(tiempoFormateado: string): void {
@@ -84,6 +72,14 @@ export class AppComponent implements OnInit {
     const segundos = (totalSegundos % 60).toString().padStart(2, '0');
     return `${horas}:${minutos}:${segundos}`;
   }
+
+
+
+
+
+
+
+
   ReportarVista(): void {
     const Datos = {
       Navegador: this.ObtenerNavegador()
