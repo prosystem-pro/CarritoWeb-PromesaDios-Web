@@ -138,8 +138,8 @@
                     <div class="d-flex justify-content-center position-relative gap-1">
                         <a *ngFor="let red of RedSocial" [href]="'https://' + red.Link" target="_blank"
                             rel="noopener noreferrer" class="position-relative d-inline-block">
-                            <img [src]="red.Imagenes[0]?.UrlImagen || ''" [alt]="red.NombreRedSocial" width="40"
-                                height="40" />
+                            <img [src]="red.Imagenes[0]?.UrlImagen || ''" [alt]="red.NombreRedSocial" width="35"
+                                height="35" />
                             <!-- Botón cámara -->
                             <label *ngIf="Permiso.PermisoSuperAdmin()"
                                 class="position-absolute bottom-0 end-0 bg-white rounded-circle d-flex align-items-center justify-content-center"
@@ -305,8 +305,8 @@
                         <div class="d-flex justify-content-center position-relative gap-1">
                             <a *ngFor="let red of RedSocial" [href]="'https://' + red.Link" target="_blank"
                                 rel="noopener noreferrer" class="position-relative d-inline-block">
-                                <img [src]="red.Imagenes[0]?.UrlImagen || ''" [alt]="red.NombreRedSocial" width="30"
-                                    height="30" />
+                                <img [src]="red.Imagenes[0]?.UrlImagen || ''" [alt]="red.NombreRedSocial" width="25"
+                                    height="25" />
                                 <!-- Botón cámara -->
                                 <label *ngIf="Permiso.PermisoSuperAdmin()"
                                     class="position-absolute bottom-0 end-0 bg-white rounded-circle d-flex align-items-center justify-content-center"

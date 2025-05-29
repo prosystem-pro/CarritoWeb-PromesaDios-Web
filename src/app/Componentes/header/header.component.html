@@ -163,10 +163,18 @@
                 </li>
             </ul>
 
-            <div class="mobile-social-icons mx-auto">
-                <a *ngFor="let red of RedeSocial" class="social-icon" [href]="'https://' + red.Link" target="_blank"
-                    rel="noopener noreferrer" (click)="ReportarRedSocial(red.CodigoRedSocial)">
-                    <img [src]="red.UrlImagen" [alt]="red.NombreRedSocial" width="45" height="45" />
+            <div class="mobile-social-icons mx-auto gap-1">
+                <a *ngFor="let red of RedeSocial" [href]="'https://' + red.Link" target="_blank"
+                    rel="noopener noreferrer" class="social-icon position-relative d-inline-block">
+                    <img [src]="red.Imagenes[0]?.UrlImagen || ''" [alt]="red.NombreRedSocial" width="30" height="30" />
+                    <!-- Botón cámara -->
+                    <label *ngIf="Permiso.PermisoSuperAdmin()"
+                        class="position-absolute bottom-0 end-0 bg-white rounded-circle d-flex align-items-center justify-content-center"
+                        style="width: 18px; height: 18px; cursor: pointer; box-shadow: 0px 2px 5px rgba(0,0,0,0.3);">
+                        <i class="bi bi-camera-fill text-black fs-6"></i>
+                        <input type="file" accept="image/*"
+                            (change)="actualizarImagenRedSocial($event, red.CodigoRedSocial)" hidden>
+                    </label>
                 </a>
             </div>
         </div>

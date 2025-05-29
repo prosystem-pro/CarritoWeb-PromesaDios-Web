@@ -27,7 +27,6 @@ export class FooterComponent implements OnInit {
   error = false;
   modoEdicion: boolean = false;
   datosOriginales: any = null;
-  // RedeSocial: RedSocial[] = [];
   RedSocial: any = [];
 
   constructor(
@@ -328,8 +327,6 @@ crearRegistroRedSocialImagen(codigoRedSocial: number, urlImagen: string): void {
     Estatus: 1 // Agregar estatus activo
   };
 
-  console.log('Creando registro con datos:', datosNuevos);
-
   this.redSocialImagenServicio.Crear(datosNuevos).subscribe({
     next: (response) => {
       this.alertaServicio.MostrarExito('Imagen de red social creada correctamente');
@@ -353,11 +350,8 @@ actualizarRegistroRedSocialImagen(codigoRedSocialImagen: number, urlImagen: stri
     Estatus: 1 // Mantener estatus activo
   };
 
-  console.log('Actualizando registro con datos:', datosActualizados);
-
   this.redSocialImagenServicio.Editar(datosActualizados).subscribe({
     next: (response) => {
-      console.log('Registro actualizado exitosamente:', response);
       this.alertaServicio.MostrarExito('Imagen de red social actualizada correctamente');
       
       // Recargar las redes sociales para obtener los datos actualizados
