@@ -6,11 +6,12 @@ import { NgIf } from '@angular/common';
 import { FooterComponent } from './Componentes/footer/footer.component';
 import { ReporteVistaServicio } from './Servicios/ReporteVistaServicio';
 import { ReporteTiempoPaginaServicio } from './Servicios/ReporteTiempoPaginaServicio';
-
+import { Entorno } from './Entornos/Entorno';
+import { SidebarRedSocialComponent } from './Componentes/sidebar-red-social/sidebar-red-social.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, HeaderComponent, NgIf, FooterComponent],
+  imports: [RouterOutlet, HeaderComponent, NgIf, FooterComponent, SidebarRedSocialComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
