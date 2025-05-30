@@ -31,10 +31,11 @@ import { HeaderReporteComponent } from './Componentes/header-reporte/header-repo
 import { ReporteVistaComponent } from './Paginas/Inicio/reporte-vista/reporte-vista.component';
 import { ReporteRedSocialComponent } from './Paginas/Inicio/reporte-red-social/reporte-red-social.component';
 import { ReporteTiempoPaginaComponent } from './Paginas/Inicio/reporte-tiempo-pagina/reporte-tiempo-pagina.component';
+import { LoginGuard } from './Servicios/loginGuard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/nosotros', pathMatch: 'full' },
-  { path: 'login', component: LoginComponent },
+  { path: 'login', component: LoginComponent, canActivate: [LoginGuard] },
 
   //Rutas publicas
   { path: 'nosotros', component: NosotrosComponent},
