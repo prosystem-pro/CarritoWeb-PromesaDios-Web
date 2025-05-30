@@ -175,6 +175,14 @@ registrarSalida(event: Event): void {
     return this.router.url.startsWith('/productos');
   }
 
+  esContacto(): boolean {
+    return this.router.url === '/contacto';
+  }
+
+  esOtro(): boolean {
+    return this.router.url === '/otro';
+  }
+
   esReporteProducto(): boolean {
     return this.router.url === '/reporte-producto';
   }
