@@ -6,6 +6,7 @@ import { RedSocialServicio } from '../../Servicios/RedSocialServicio';
 import { PermisoServicio } from '../../Autorizacion/AutorizacionPermiso';
 import { AlertaServicio } from '../../Servicios/Alerta-Servicio';
 import { Entorno } from '../../Entornos/Entorno';
+import { ReporteRedSocialServicio } from '../../Servicios/ReporteRedSocialServicio';
 
 @Component({
   selector: 'app-sidebar-red-social',
@@ -17,18 +18,51 @@ export class SidebarRedSocialComponent implements OnInit {
   private Url = `${Entorno.ApiUrl}`;
   private NombreEmpresa = `${Entorno.NombreEmpresa}`;
   RedeSocial: any = [];
-  isVisible: boolean = true;
 
   constructor(
     private redSocialImagenServicio: RedSocialImagenServicio,
     private redSocialServicio: RedSocialServicio,
     public Permiso: PermisoServicio,
     private http: HttpClient,
-    private AlertaServicio: AlertaServicio
+    private AlertaServicio: AlertaServicio,
+    private ReporteRedSocialServicio: ReporteRedSocialServicio
   ) {}
 
   ngOnInit(): void {
     this.cargarRedesSociales();
+  }
+
+  ReportarRedSocial(codigo: number | undefined): void {
+    if (codigo === undefined) {
+      console.warn('⚠️ Código de red social no definido, no se reporta');
+      return;
+    }
+
+    const Datos = {
+      CodigoRedSocial: codigo.toString(),
+      Navegador: this.ObtenerNavegador()
+    };
+
+    this.ReporteRedSocialServicio.Crear(Datos).subscribe({
+      next: (respuesta) => console.log('Red social reportada:', respuesta),
+      error: (error) => console.error('Error al reportar red social:', error)
+    });
+  }
+
+  ObtenerNavegador(): string {
+    const AgenteUsuario = navigator.userAgent;
+
+    if (AgenteUsuario.includes('Chrome') && !AgenteUsuario.includes('Edg')) {
+      return 'Chrome';
+    } else if (AgenteUsuario.includes('Firefox')) {
+      return 'Firefox';
+    } else if (AgenteUsuario.includes('Safari') && !AgenteUsuario.includes('Chrome')) {
+      return 'Safari';
+    } else if (AgenteUsuario.includes('Edg')) {
+      return 'Edge';
+    } else {
+      return 'Desconocido';
+    }
   }
 
   cargarRedesSociales(): void {
@@ -38,14 +72,6 @@ export class SidebarRedSocialComponent implements OnInit {
       },
       error: (error) => {},
     });
-  }
-
-  openSocialMedia(url: string): void {
-    window.open(url, '_blank', 'noopener,noreferrer');
-  }
-
-  toggleVisibility(): void {
-    this.isVisible = !this.isVisible;
   }
 
   // Método para actualizar imagen de red social
