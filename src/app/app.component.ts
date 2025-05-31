@@ -8,6 +8,8 @@ import { ReporteVistaServicio } from './Servicios/ReporteVistaServicio';
 import { ReporteTiempoPaginaServicio } from './Servicios/ReporteTiempoPaginaServicio';
 import { Entorno } from './Entornos/Entorno';
 import { SidebarRedSocialComponent } from './Componentes/sidebar-red-social/sidebar-red-social.component';
+import { CarritoEstadoService } from './Servicios/CarritoEstadoServicio';
+import { PermisoServicio } from './Autorizacion/AutorizacionPermiso';
 
 @Component({
   selector: 'app-root',
@@ -21,12 +23,20 @@ export class AppComponent implements OnInit {
   private horaEntrada: number = 0;
   private intervaloEnvio: any;
   private tiempoAcumuladoMs: number = 0;
+  carritoAbierto = false;
 
   constructor(
     private router: Router,
     private ReporteVistaServicio: ReporteVistaServicio,
-    private ReporteTiempoPaginaServicio: ReporteTiempoPaginaServicio
-  ) { }
+    private ReporteTiempoPaginaServicio: ReporteTiempoPaginaServicio,
+    private carritoEstadoService: CarritoEstadoService,
+    public permisoServicio: PermisoServicio
+  ) {
+        // Suscribirse al estado del carrito
+    this.carritoEstadoService.carritoAbierto$.subscribe(
+      estado => this.carritoAbierto = estado
+    );
+   }
 
   ngOnInit(): void {
     this.horaEntrada = Date.now();
@@ -132,13 +142,6 @@ registrarSalida(event: Event): void {
     return `${horas}:${minutos}:${segundos}`;
   }
 
-
-
-
-
-
-
-
   ReportarVista(): void {
     const Datos = {
       Navegador: this.ObtenerNavegador()
@@ -197,5 +200,13 @@ registrarSalida(event: Event): void {
 
   esReporteTiempoPagina(): boolean {
     return this.router.url === '/reporte-tiempo-pagina';
+  }
+
+  mostrarSidebar(): boolean {
+    if (this.permisoServicio.PermisoAdminSuperAdmin() && this.esReporteProducto()) {
+        return false;
+    }
+
+    return true;
   }
 }

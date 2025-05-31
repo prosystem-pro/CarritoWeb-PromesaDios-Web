@@ -13,6 +13,7 @@ import { AlertaServicio } from '../../Servicios/Alerta-Servicio';
 import { PermisoServicio } from '../../Autorizacion/AutorizacionPermiso';
 import { ReporteRedSocialServicio } from '../../Servicios/ReporteRedSocialServicio';
 import { RedSocialImagenServicio } from '../../Servicios/RedSocialImagenServicio';
+import { CarritoEstadoService } from '../../Servicios/CarritoEstadoServicio';
 
 @Component({
   selector: 'app-header',
@@ -47,6 +48,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     public Permiso: PermisoServicio,
     private redSocialImagenServicio: RedSocialImagenServicio,
     private AlertaServicio: AlertaServicio,
+    private carritoEstadoService: CarritoEstadoService,
     private ReporteRedSocialServicio: ReporteRedSocialServicio
   ) { }
 
@@ -541,6 +543,12 @@ actualizarRegistroRedSocialImagen(codigoRedSocialImagen: number, urlImagen: stri
   //Método para ver el carrito
   alternarCarrito() {
     this.mostrarCarrito = !this.mostrarCarrito;
+
+      if (this.mostrarCarrito) {
+      this.carritoEstadoService.abrirCarrito();
+    } else {
+      this.carritoEstadoService.cerrarCarrito();
+    }
   }
 
   verificarVista() {
