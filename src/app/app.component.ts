@@ -203,7 +203,7 @@ registrarSalida(event: Event): void {
   }
 
   mostrarSidebar(): boolean {
-    if (this.permisoServicio.PermisoAdminSuperAdmin() && this.esReporteProducto()) {
+    if (this.permisoServicio.PermisoAdminSuperAdmin() && this.router.url.startsWith('/reporte')) {
         return false;
     }
 
