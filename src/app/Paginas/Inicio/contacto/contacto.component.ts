@@ -230,35 +230,27 @@ export class ContactoComponent implements OnInit {
     this.RedSocialServicio.Listado('Contacto').subscribe({
       next: (data: RedSocial[]) => {
         this.RedSocial = data;
-
-        const whatsappRed = this.RedSocial.find(
-          red => red.NombreRedSocial?.toLowerCase() === 'whatsapp'
-        );
-
-        if (whatsappRed) {
-          this.EmpresaServicio.Listado().subscribe({
-            next: (empresas: any[]) => {
-              if (empresas && empresas.length > 0) {
-                const celular = empresas[0].Celular;
-
-                whatsappRed.Link = `${whatsappRed.Link}${celular}`;
-              }
-            },
-            error: (error) => {
-              this.AlertaServicio.MostrarError(error, 'Error al obtener el celular');
-            }
-          });
-        }
       },
       error: (error) => {
-        this.AlertaServicio.MostrarError(error, 'Error al obtener las redes sociales');
+        this.AlertaServicio.MostrarError(error, 'Error al obtener los datos');
       }
     });
   }
 
+  //Código relacionado a Redes Sociales
+  // ObtenerRedesSocialesImagen(): void {
+  //   this.RedSocialImagenServicio.Listado().subscribe({
+  //     next: (data: RedSocial[]) => {
+  //       this.RedeSocialImagen = data;
+  //     },
+  //     error: (error) => {
+  //       this.AlertaServicio.MostrarError(error, 'Error al obtener los datos');
+  //     }
+  //   });
+  // }
   DesactivarRedSocial(index: number, event: Event): void {
     const input = event.target as HTMLInputElement;
-    const estaActivo = input.checked;
+    const estaActivo = input.checked; // true si activado, false si desactivado
     const Estatus = estaActivo ? 1 : 2;
 
     const red = this.RedSocial[index] || { CodigoRedSocial: '', Imagenes: [] };
@@ -272,8 +264,9 @@ export class ContactoComponent implements OnInit {
 
     this.RedSocialServicio.Editar(datosEditar).subscribe({
       next: () => {
+        // Opcional: actualizar UI, mostrar alerta, etc.
         this.AlertaServicio.MostrarExito('Estado actualizado correctamente');
-        this.ObtenerRedesSociales();
+        this.ObtenerRedesSociales(); // si quieres recargar
       },
       error: (err) => {
         this.AlertaServicio.MostrarError(err, 'Error al actualizar el estado');
@@ -503,7 +496,7 @@ export class ContactoComponent implements OnInit {
   }
 
 
-  ObtenerNavegador(): string {
+   ObtenerNavegador(): string {
     const AgenteUsuario = navigator.userAgent;
 
     if (AgenteUsuario.includes('Chrome') && !AgenteUsuario.includes('Edg')) {
