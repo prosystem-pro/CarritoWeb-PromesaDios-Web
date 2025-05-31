@@ -164,10 +164,11 @@
 
                 <li class="nav-item">
                     <!-- Botón para cerrar sesión -->
-                    <button *ngIf="Permiso.PermisoAdminSuperAdmin()" class="btn btn-sm mobile-logout-container"
-                        title="Cerrar sesión" (click)="cerrarSesion()">
+                    <a *ngIf="Permiso.PermisoAdminSuperAdmin()" class="nav-link mobile-logout-container"
+                        title="Cerrar sesión" (click)="cerrarSesion()"
+                        [ngStyle]="{'color': Datos?.ColorTextextoReporte}">
                         Cerrar sesión <i class="bi bi-box-arrow-right"></i>
-                    </button>
+                    </a>
                 </li>
             </ul>
 
