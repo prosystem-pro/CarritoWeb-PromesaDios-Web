@@ -10,7 +10,8 @@ import { RedSocialImagen } from '../../../Modelos/RedSocialImagen';
 import { Entorno } from '../../../Entornos/Entorno';
 
 import { PermisoServicio } from '../../../Autorizacion/AutorizacionPermiso';
-import { RedSocialServicio } from '../../../Servicios/RedSocialServicio';
+import { RedSocialServicio } from '../../../Servicios/RedSocialServicio'
+import { ReporteRedSocialServicio } from '../../../Servicios/ReporteRedSocialServicio';
 import { RedSocialImagenServicio } from '../../../Servicios/RedSocialImagenServicio';
 import { EmpresaServicio } from '../../../Servicios/EmpresaServicio';
 import { ContactanosPortadaServicio } from '../../../Servicios/ContactanosPortadaServicio';
@@ -28,9 +29,7 @@ export class ContactoComponent implements OnInit {
   private NombreEmpresa = `${Entorno.NombreEmpresa}`;
 
   ContactanosPortada!: ContactanosPortada;
-
   MapaSeguro!: SafeResourceUrl;
-  // RedSocial: RedSocial[] = [];
   RedSocial: any[] = [];
 
 
@@ -56,6 +55,8 @@ export class ContactoComponent implements OnInit {
     private EmpresaServicio: EmpresaServicio,
     private RedSocialServicio: RedSocialServicio,
     private RedSocialImagenServicio: RedSocialImagenServicio,
+    private ReporteRedSocialServicio: ReporteRedSocialServicio,
+
     private sanitizer: DomSanitizer,
     private AlertaServicio: AlertaServicio
   ) { }
@@ -247,31 +248,31 @@ export class ContactoComponent implements OnInit {
   //     }
   //   });
   // }
-DesactivarRedSocial(index: number, event: Event): void {
-  const input = event.target as HTMLInputElement;
-  const estaActivo = input.checked; // true si activado, false si desactivado
-  const Estatus = estaActivo ? 1 : 2;
+  DesactivarRedSocial(index: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const estaActivo = input.checked; // true si activado, false si desactivado
+    const Estatus = estaActivo ? 1 : 2;
 
-  const red = this.RedSocial[index] || { CodigoRedSocial: '', Imagenes: [] };
-  
-  const CodigoRedSocial = red.CodigoRedSocial?.toString() || '';
+    const red = this.RedSocial[index] || { CodigoRedSocial: '', Imagenes: [] };
 
-  const datosEditar = {
-    CodigoRedSocial,
-    Estatus
-  };
+    const CodigoRedSocial = red.CodigoRedSocial?.toString() || '';
 
-  this.RedSocialServicio.Editar(datosEditar).subscribe({
-    next: () => {
-      // Opcional: actualizar UI, mostrar alerta, etc.
-      this.AlertaServicio.MostrarExito('Estado actualizado correctamente');
-      this.ObtenerRedesSociales(); // si quieres recargar
-    },
-    error: (err) => {
-      this.AlertaServicio.MostrarError(err, 'Error al actualizar el estado');
-    }
-  });
-}
+    const datosEditar = {
+      CodigoRedSocial,
+      Estatus
+    };
+
+    this.RedSocialServicio.Editar(datosEditar).subscribe({
+      next: () => {
+        // Opcional: actualizar UI, mostrar alerta, etc.
+        this.AlertaServicio.MostrarExito('Estado actualizado correctamente');
+        this.ObtenerRedesSociales(); // si quieres recargar
+      },
+      error: (err) => {
+        this.AlertaServicio.MostrarError(err, 'Error al actualizar el estado');
+      }
+    });
+  }
 
 
   EditarRedSocial(index: number): void {
@@ -382,72 +383,72 @@ DesactivarRedSocial(index: number, event: Event): void {
 
 
   subirImagenRedSocial(file: File, index: number | null): void {
-  this.EmpresaServicio.ConseguirPrimeraEmpresa().subscribe({
-    next: (empresa) => {
-      if (!empresa) {
-        this.AlertaServicio.MostrarAlerta('No se encontró ninguna empresa.');
-        return;
-      }
-
-      const red = index !== null && this.RedSocial[index]
-        ? this.RedSocial[index]
-        : { CodigoRedSocial: '' };
-
-      const CodigoRedSocial = red.CodigoRedSocial?.toString() || '';
-      const CodigoRedSocialImagen = red?.Imagenes?.[0]?.CodigoRedSocialImagen?.toString() || '';
-
-      const formData = new FormData();
-      formData.append('Imagen', file);
-      formData.append('CarpetaPrincipal', this.NombreEmpresa);
-      formData.append('SubCarpeta', 'RedSocialImagen');
-      formData.append('CodigoVinculado', this.CodigoTemporal?.toString() || CodigoRedSocial || '');
-      formData.append('CodigoPropio', CodigoRedSocialImagen);
-      formData.append('CampoVinculado', 'CodigoRedSocial');
-      formData.append('CampoPropio', 'CodigoRedSocialImagen');
-      formData.append('NombreCampoImagen', 'UrlImagen');
-
-      this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
-        next: (res: any) => {
-          const entidad = res?.Entidad;
-
-          if (entidad?.UrlImagen) {
-            this.ImagenTemporal = entidad.UrlImagen;
-          }
-
-          const codigoImagen = entidad?.CodigoRedSocialImagen;
-          const codigoVinculo = entidad?.CodigoRedSocial;
-
-          if (codigoImagen) {
-            const datosEditar = {
-              CodigoRedSocialImagen: codigoImagen,
-              CodigoRedSocial: codigoVinculo,
-              Ubicacion: 'Contacto'
-            };
-            this.RedSocialImagenServicio.Editar(datosEditar).subscribe({
-              next: () => {
-                this.AlertaServicio.MostrarExito('Registrado correctamente');
-                this.ObtenerRedesSociales();
-                this.imagenTemporalArchivo = null;
-                this.ImagenTemporal = '';
-              },
-              error: (err) => {
-                console.error('Error al actualizar RedSocialImagen:', err);
-              }
-            });
-          }
-        },
-        error: (err) => {
-          console.error('Error al subir la imagen:', err);
-          this.AlertaServicio.MostrarError(err, 'Error al subir la imagen');
+    this.EmpresaServicio.ConseguirPrimeraEmpresa().subscribe({
+      next: (empresa) => {
+        if (!empresa) {
+          this.AlertaServicio.MostrarAlerta('No se encontró ninguna empresa.');
+          return;
         }
-      });
-    },
-    error: (err) => {
-      console.error('Error al obtener la empresa:', err);
-      this.AlertaServicio.MostrarError(err, 'Error al obtener la empresa');
-    }
-  });
-}
+
+        const red = index !== null && this.RedSocial[index]
+          ? this.RedSocial[index]
+          : { CodigoRedSocial: '' };
+
+        const CodigoRedSocial = red.CodigoRedSocial?.toString() || '';
+        const CodigoRedSocialImagen = red?.Imagenes?.[0]?.CodigoRedSocialImagen?.toString() || '';
+
+        const formData = new FormData();
+        formData.append('Imagen', file);
+        formData.append('CarpetaPrincipal', this.NombreEmpresa);
+        formData.append('SubCarpeta', 'RedSocialImagen');
+        formData.append('CodigoVinculado', this.CodigoTemporal?.toString() || CodigoRedSocial || '');
+        formData.append('CodigoPropio', CodigoRedSocialImagen);
+        formData.append('CampoVinculado', 'CodigoRedSocial');
+        formData.append('CampoPropio', 'CodigoRedSocialImagen');
+        formData.append('NombreCampoImagen', 'UrlImagen');
+
+        this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
+          next: (res: any) => {
+            const entidad = res?.Entidad;
+
+            if (entidad?.UrlImagen) {
+              this.ImagenTemporal = entidad.UrlImagen;
+            }
+
+            const codigoImagen = entidad?.CodigoRedSocialImagen;
+            const codigoVinculo = entidad?.CodigoRedSocial;
+
+            if (codigoImagen) {
+              const datosEditar = {
+                CodigoRedSocialImagen: codigoImagen,
+                CodigoRedSocial: codigoVinculo,
+                Ubicacion: 'Contacto'
+              };
+              this.RedSocialImagenServicio.Editar(datosEditar).subscribe({
+                next: () => {
+                  this.AlertaServicio.MostrarExito('Registrado correctamente');
+                  this.ObtenerRedesSociales();
+                  this.imagenTemporalArchivo = null;
+                  this.ImagenTemporal = '';
+                },
+                error: (err) => {
+                  console.error('Error al actualizar RedSocialImagen:', err);
+                }
+              });
+            }
+          },
+          error: (err) => {
+            console.error('Error al subir la imagen:', err);
+            this.AlertaServicio.MostrarError(err, 'Error al subir la imagen');
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Error al obtener la empresa:', err);
+        this.AlertaServicio.MostrarError(err, 'Error al obtener la empresa');
+      }
+    });
+  }
 
 
 
@@ -478,6 +479,38 @@ DesactivarRedSocial(index: number, event: Event): void {
   }
 
 
+  CrearReporteRedSocial(CodigoRedSocial: string): void {
+    const DatosReporte = {
+      CodigoRedSocial: CodigoRedSocial,
+      Navegador: this.ObtenerNavegador()
+    };
+
+    this.ReporteRedSocialServicio.Crear(DatosReporte).subscribe({
+      next: (respuesta) => {
+        console.log(' Reporte creado correctamente:', respuesta);
+      },
+      error: (error) => {
+        console.error(' Error al crear el reporte:', error);
+      }
+    });
+  }
+
+
+   ObtenerNavegador(): string {
+    const AgenteUsuario = navigator.userAgent;
+
+    if (AgenteUsuario.includes('Chrome') && !AgenteUsuario.includes('Edg')) {
+      return 'Chrome';
+    } else if (AgenteUsuario.includes('Firefox')) {
+      return 'Firefox';
+    } else if (AgenteUsuario.includes('Safari') && !AgenteUsuario.includes('Chrome')) {
+      return 'Safari';
+    } else if (AgenteUsuario.includes('Edg')) {
+      return 'Edge';
+    } else {
+      return 'Desconocido';
+    }
+  }
 
 }
 
