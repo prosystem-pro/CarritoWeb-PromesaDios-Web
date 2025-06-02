@@ -1,9 +1,9 @@
 export interface ReporteRedSocial {
   CodigoReporteRedSocial?: number;
-  CodigoEmpresa?: number;
   CodigoRedSocial?: number;
-  Cantidad?: number;
   Fecha?: Date;
+  DireccionIp?: string;
+  Navegador?: string;
   NombreDiagrama?: string;
   Estatus?: any;
 }

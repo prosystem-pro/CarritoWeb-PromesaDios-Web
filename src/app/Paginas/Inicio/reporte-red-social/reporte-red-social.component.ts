@@ -30,7 +30,7 @@ export class ReporteRedSocialComponent {
   MesTemporal: number = new Date().getMonth() + 1;
 
   Meses = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Ma\u200Byo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ];
 

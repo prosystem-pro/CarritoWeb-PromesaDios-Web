@@ -1,8 +1,9 @@
 export interface ReporteTiempoPagina {
   CodigoReporteTiempoPagina?: number;
-  CodigoEmpresa?: number;
-  TiempoPromedio?: number;
+  TiempoPromedio?: any;
   Fecha?: Date;
+  DireccionIp?: string;
+  Navegador?: string;
   NombreDiagrama?: string;
   Estatus?: any;
 }

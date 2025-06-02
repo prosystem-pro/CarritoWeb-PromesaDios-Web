@@ -133,7 +133,7 @@
   </div>
 
   <!-- Redes Sociales -->
-  <div *ngFor="let red of RedSocial; let i = index" class="mb-3 d-flex justify-content-center position-relative">
+  <div *ngFor="let red of OcultarRedSocialInactivos(); let i = index" class="mb-3 d-flex justify-content-center position-relative">
 
     <!-- CONTENIDO PRINCIPAL -->
     <div class="d-flex align-items-center gap-3 px-4 py-2 position-relative ContornoFondoRedesSociales" [ngStyle]="{

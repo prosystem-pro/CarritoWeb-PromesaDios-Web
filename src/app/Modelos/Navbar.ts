@@ -10,6 +10,8 @@ export interface Navbar {
   TextoOtro?: string;
   ColortextoOtro?: string;
   ColorFondoOtro?: string;
+  TextoReporte?: string;
+  ColorTextextoReporte?: string;
   TextoBuscador?: string;
   ColorTextoBuscador?: string;
   ColorFondoBuscador?: string;

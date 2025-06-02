@@ -176,7 +176,6 @@ export class ContactoComponent implements OnInit {
     }
   }
 
-
   ActualizarImagenContactanosPortada(event: any): void {
     const file = event.target.files[0];
     if (file) {
@@ -185,7 +184,6 @@ export class ContactoComponent implements OnInit {
       this.AlertaServicio.MostrarAlerta('No se seleccionó ningún archivo.');
     }
   }
-
 
   subirImagen(file: File, CampoDestino: string): void {
     const nombreEmpresa = this.NombreEmpresa ?? 'defaultCompanyName';
@@ -237,17 +235,6 @@ export class ContactoComponent implements OnInit {
     });
   }
 
-  //Código relacionado a Redes Sociales
-  // ObtenerRedesSocialesImagen(): void {
-  //   this.RedSocialImagenServicio.Listado().subscribe({
-  //     next: (data: RedSocial[]) => {
-  //       this.RedeSocialImagen = data;
-  //     },
-  //     error: (error) => {
-  //       this.AlertaServicio.MostrarError(error, 'Error al obtener los datos');
-  //     }
-  //   });
-  // }
   DesactivarRedSocial(index: number, event: Event): void {
     const input = event.target as HTMLInputElement;
     const estaActivo = input.checked; // true si activado, false si desactivado
@@ -274,7 +261,6 @@ export class ContactoComponent implements OnInit {
     });
   }
 
-
   EditarRedSocial(index: number): void {
     const redEditada = this.RedSocial[index];
 
@@ -296,7 +282,6 @@ export class ContactoComponent implements OnInit {
       }
     });
   }
-
 
   CrearRedSocial(nombre: string, link: string) {
     if (!nombre.trim() || !link.trim()) {
@@ -346,8 +331,6 @@ export class ContactoComponent implements OnInit {
     });
   }
 
-
-
   ActualizarImagenRedSocial(event: any, index: number | null): void {
     const file = event.target.files[0];
     if (!file) return;
@@ -366,6 +349,7 @@ export class ContactoComponent implements OnInit {
 
     this.subirImagenRedSocial(file, index);
   }
+
   ActualizarImagenRedSocialTemporal(event: any, index: number | null): void {
     const file = event.target.files[0];
     if (!file) return;
@@ -380,7 +364,6 @@ export class ContactoComponent implements OnInit {
       reader.readAsDataURL(file);
     }
   }
-
 
   subirImagenRedSocial(file: File, index: number | null): void {
     this.EmpresaServicio.ConseguirPrimeraEmpresa().subscribe({
@@ -450,8 +433,6 @@ export class ContactoComponent implements OnInit {
     });
   }
 
-
-
   EliminarRedSocial(index: number): void {
     const red = this.RedSocial[index];
     const codigo = red?.CodigoRedSocial;
@@ -478,7 +459,6 @@ export class ContactoComponent implements OnInit {
     });
   }
 
-
   CrearReporteRedSocial(CodigoRedSocial: string): void {
     const DatosReporte = {
       CodigoRedSocial: CodigoRedSocial,
@@ -495,7 +475,6 @@ export class ContactoComponent implements OnInit {
     });
   }
 
-
    ObtenerNavegador(): string {
     const AgenteUsuario = navigator.userAgent;
 
@@ -511,6 +490,13 @@ export class ContactoComponent implements OnInit {
       return 'Desconocido';
     }
   }
+  OcultarRedSocialInactivos() {
+  if (this.Permiso.PermisoSuperAdmin()) {
+    return this.RedSocial;
+  } else {
+    return this.RedSocial.filter(red => red.Estatus === 1);
+  }
+}
 
 }
 

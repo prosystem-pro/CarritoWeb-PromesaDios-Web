@@ -33,7 +33,7 @@ export class ReporteTiempoPaginaComponent {
 
 
   Meses = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Ma\u200Byo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ];
 
