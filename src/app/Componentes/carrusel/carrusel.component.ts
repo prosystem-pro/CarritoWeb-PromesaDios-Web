@@ -304,6 +304,7 @@ private applyIOSFixes(): void {
     // Aplicar fixes específicos para iOS
     if (this.isIOS) {
       this.applyIOSFixes();
+      this.applyIOSImageFixes();
     }
   }
   
@@ -751,4 +752,29 @@ private applyIOSFixes(): void {
     this.editandoTitulo = false;
     this.tituloTemporal = '';
   }
+
+private applyIOSImageFixes(): void {
+  if (!this.isIOS) return;
+  
+  const carousel = this.carouselContainer?.nativeElement;
+  if (!carousel) return;
+  
+  // Aplicar estilos específicos a las imágenes en iOS
+  const images = carousel.querySelectorAll('.product-image');
+  images.forEach((img: any) => {
+    img.style.height = '165px';
+    img.style.width = '100%';
+    img.style.aspectRatio = '1/1';
+    img.style.objectFit = 'cover';
+  });
+  
+  // Aplicar estilos específicos a las tarjetas en iOS
+  const cards = carousel.querySelectorAll('.product-card');
+  cards.forEach((card: any) => {
+    card.style.width = '220px';
+    card.style.maxWidth = '220px';
+    card.style.minWidth = '220px';
+    card.style.flex = '0 0 220px';
+  });
+}
 }
