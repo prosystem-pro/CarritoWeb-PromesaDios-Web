@@ -181,7 +181,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
     if (carousel) {
       carousel.removeEventListener('scroll', this.handleScroll);
       carousel.removeEventListener('touchstart', this.handleTouchStart);
-      carousel.removeEventListener('touchmove', this.handleTouchMove);
+      // carousel.removeEventListener('touchmove', this.handleTouchMove);
       carousel.removeEventListener('touchend', this.handleTouchEnd);
     }
   }
@@ -219,7 +219,7 @@ private applyIOSFixes(): void {
   
   // Agregar event listeners específicos para iOS
   carousel.addEventListener('touchstart', this.handleTouchStart, { passive: true });
-  carousel.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+  // carousel.addEventListener('touchmove', this.handleTouchMove, { passive: false });
   carousel.addEventListener('touchend', this.handleTouchEnd, { passive: true });
 }
 
@@ -229,29 +229,29 @@ private applyIOSFixes(): void {
     this.isScrolling = false;
   };
 
-  private handleTouchMove = (e: TouchEvent) => {
-    if (!this.touchStartX || !this.touchStartY) return;
+  // private handleTouchMove = (e: TouchEvent) => {
+  //   if (!this.touchStartX || !this.touchStartY) return;
     
-    const touchX = e.touches[0].clientX;
-    const touchY = e.touches[0].clientY;
+  //   const touchX = e.touches[0].clientX;
+  //   const touchY = e.touches[0].clientY;
     
-    const diffX = Math.abs(touchX - this.touchStartX);
-    const diffY = Math.abs(touchY - this.touchStartY);
+  //   const diffX = Math.abs(touchX - this.touchStartX);
+  //   const diffY = Math.abs(touchY - this.touchStartY);
     
-    // Determinar la dirección del scroll
-    if (!this.isScrolling) {
-      this.isScrolling = true;
+  //   // Determinar la dirección del scroll
+  //   if (!this.isScrolling) {
+  //     this.isScrolling = true;
       
-      // Si el movimiento es más horizontal que vertical, es scroll horizontal
-      if (diffX > diffY) {
-        // Permitir scroll horizontal, prevenir scroll vertical
-        e.preventDefault();
-      }
-    } else if (diffX > diffY) {
-      // Continuar previniendo scroll vertical si ya estamos scrolling horizontalmente
-      e.preventDefault();
-    }
-  };
+  //     // Si el movimiento es más horizontal que vertical, es scroll horizontal
+  //     if (diffX > diffY) {
+  //       // Permitir scroll horizontal, prevenir scroll vertical
+  //       e.preventDefault();
+  //     }
+  //   } else if (diffX > diffY) {
+  //     // Continuar previniendo scroll vertical si ya estamos scrolling horizontalmente
+  //     e.preventDefault();
+  //   }
+  // };
 
   private handleTouchEnd = (e: TouchEvent) => {
     this.touchStartX = 0;
@@ -295,7 +295,7 @@ private applyIOSFixes(): void {
     // Remover listeners existentes para evitar duplicados
     carousel.removeEventListener('scroll', this.handleScroll);
     carousel.removeEventListener('touchstart', this.handleTouchStart);
-    carousel.removeEventListener('touchmove', this.handleTouchMove);
+    // carousel.removeEventListener('touchmove', this.handleTouchMove);
     carousel.removeEventListener('touchend', this.handleTouchEnd);
     
     // Añadir listener de scroll

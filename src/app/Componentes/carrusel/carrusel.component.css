@@ -599,3 +599,37 @@ body {
     flex: 0 0 220px !important;
   }
 }
+
+/* Mejorar el scroll horizontal en iOS - AGREGAR al final del CSS */
+@supports (-webkit-overflow-scrolling: touch) {
+  .products-carousel {
+    -webkit-overflow-scrolling: touch !important;
+    overflow-x: scroll !important;
+    scroll-behavior: smooth !important;
+
+    /* Permitir momentum scrolling nativo de iOS */
+    -webkit-momentum-scrolling: touch;
+
+    /* Asegurar que el scroll sea horizontal */
+    overflow-y: hidden !important;
+  }
+
+  .mobile-view {
+    /* Mejorar el snap scrolling en iOS */
+    scroll-snap-type: x mandatory !important;
+    -webkit-scroll-snap-type: x mandatory !important;
+  }
+
+  .mobile-view .product-card {
+    scroll-snap-align: center !important;
+    scroll-snap-stop: always !important;
+  }
+}
+
+/* Fix específico para Safari en iOS */
+@media screen and (-webkit-min-device-pixel-ratio: 1) {
+  .products-carousel {
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+  }
+}
