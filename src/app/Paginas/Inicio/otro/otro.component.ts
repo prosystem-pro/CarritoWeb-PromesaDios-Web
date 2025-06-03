@@ -252,12 +252,13 @@ export class OtroComponent {
 
         const formData = new FormData();
         const CodigoOtro = index != null ? String(this.Otro[index]?.CodigoOtro ?? '') : '';
-
+        const CodigoPropio = String(this.CodigoTemporal || CodigoOtro || '');
+        
         formData.append('Imagen', file);
         formData.append('CarpetaPrincipal', nombreEmpresa);
         formData.append('SubCarpeta', 'Otro');
         formData.append('CodigoVinculado', empresa.CodigoEmpresa.toString());
-        formData.append('CodigoPropio', CodigoOtro);
+        formData.append('CodigoPropio', CodigoPropio);
         formData.append('CampoVinculado', 'CodigoEmpresa');
         formData.append('CampoPropio', 'CodigoOtro');
         formData.append('NombreCampoImagen', CampoDestino);

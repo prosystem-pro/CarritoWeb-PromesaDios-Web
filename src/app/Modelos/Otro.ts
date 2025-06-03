@@ -3,6 +3,7 @@ export interface Otro {
   CodigoEmpresa?: number;
   NombreOtro?: string;
   UrlImagen?: string;
+  UrlImagen2?: string;
   Descripcion?: any;
   Estatus?: any;
 }
