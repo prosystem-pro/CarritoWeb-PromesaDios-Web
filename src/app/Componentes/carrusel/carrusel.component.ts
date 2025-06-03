@@ -43,6 +43,7 @@ interface NuevaImagen {
 export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly Url = `${Entorno.ApiUrl}`;
   private readonly NombreEmpresa = `${Entorno.NombreEmpresa}`;
+  
   @Input() items: CarruselItem[] = [];
   @Input() codigoCarrusel: number = 0;
   @Input() title: string = '¡Los productos más destacados!';
@@ -58,6 +59,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
   itemWidth = 280;
   gapWidth = 20;
   isMobile = false;
+  isIOS = false;
   maxScrollPosition = 0;
   shouldCenter = false;
   autoplayIntervalId?: number;
@@ -68,6 +70,11 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
   editandoTitulo: boolean = false;
   tituloTemporal: string = '';
   carruselActual: Carrusel | null = null;
+  
+  // Propiedades para manejo de touch en iOS
+  private touchStartX: number = 0;
+  private touchStartY: number = 0;
+  private isScrolling: boolean = false;
 
   nuevaImagen: NuevaImagen = {
     id: '',
@@ -92,7 +99,10 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
     private carruselServicio: CarruselServicio,
     public Permiso: PermisoServicio,
     private alertaServicio: AlertaServicio
-  ) {}
+  ) {
+    // Detectar iOS al inicializar el componente
+    this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  }
   
   ngOnInit(): void {
     this.checkScreenSize();
@@ -162,8 +172,18 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopAutoplay();
+    
     // Limpiar todas las suscripciones
     this.subscriptions.forEach(sub => sub.unsubscribe());
+    
+    // Limpiar event listeners específicos de iOS
+    const carousel = this.carouselContainer?.nativeElement;
+    if (carousel) {
+      carousel.removeEventListener('scroll', this.handleScroll);
+      carousel.removeEventListener('touchstart', this.handleTouchStart);
+      carousel.removeEventListener('touchmove', this.handleTouchMove);
+      carousel.removeEventListener('touchend', this.handleTouchEnd);
+    }
   }
   
   @HostListener('window:resize')
@@ -183,6 +203,61 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
       setTimeout(() => this.setupCarousel(), 100);
     }
   }
+
+private applyIOSFixes(): void {
+  const carousel = this.carouselContainer?.nativeElement;
+  if (!carousel) return;
+  
+  // Aplicar estilos específicos para iOS usando cast a any
+  (carousel.style as any).webkitOverflowScrolling = 'touch';
+  (carousel.style as any).overscrollBehaviorX = 'contain';
+  carousel.style.touchAction = 'pan-x';
+  
+  // Aplicar transform3d para hardware acceleration
+  carousel.style.transform = 'translateZ(0)';
+  (carousel.style as any).webkitTransform = 'translateZ(0)';
+  
+  // Agregar event listeners específicos para iOS
+  carousel.addEventListener('touchstart', this.handleTouchStart, { passive: true });
+  carousel.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+  carousel.addEventListener('touchend', this.handleTouchEnd, { passive: true });
+}
+
+  private handleTouchStart = (e: TouchEvent) => {
+    this.touchStartX = e.touches[0].clientX;
+    this.touchStartY = e.touches[0].clientY;
+    this.isScrolling = false;
+  };
+
+  private handleTouchMove = (e: TouchEvent) => {
+    if (!this.touchStartX || !this.touchStartY) return;
+    
+    const touchX = e.touches[0].clientX;
+    const touchY = e.touches[0].clientY;
+    
+    const diffX = Math.abs(touchX - this.touchStartX);
+    const diffY = Math.abs(touchY - this.touchStartY);
+    
+    // Determinar la dirección del scroll
+    if (!this.isScrolling) {
+      this.isScrolling = true;
+      
+      // Si el movimiento es más horizontal que vertical, es scroll horizontal
+      if (diffX > diffY) {
+        // Permitir scroll horizontal, prevenir scroll vertical
+        e.preventDefault();
+      }
+    } else if (diffX > diffY) {
+      // Continuar previniendo scroll vertical si ya estamos scrolling horizontalmente
+      e.preventDefault();
+    }
+  };
+
+  private handleTouchEnd = (e: TouchEvent) => {
+    this.touchStartX = 0;
+    this.touchStartY = 0;
+    this.isScrolling = false;
+  };
   
   setupCarousel(): void {
     const carousel = this.carouselContainer?.nativeElement;
@@ -217,11 +292,19 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
     // Distribuir los elementos según el modo de visualización
     this.distributeItems();
     
-    // Remover listener existente para evitar duplicados
+    // Remover listeners existentes para evitar duplicados
     carousel.removeEventListener('scroll', this.handleScroll);
+    carousel.removeEventListener('touchstart', this.handleTouchStart);
+    carousel.removeEventListener('touchmove', this.handleTouchMove);
+    carousel.removeEventListener('touchend', this.handleTouchEnd);
     
     // Añadir listener de scroll
-    carousel.addEventListener('scroll', this.handleScroll);
+    carousel.addEventListener('scroll', this.handleScroll, { passive: true });
+    
+    // Aplicar fixes específicos para iOS
+    if (this.isIOS) {
+      this.applyIOSFixes();
+    }
   }
   
   private handleScroll = () => {
@@ -288,10 +371,20 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
     
-    carousel.scrollTo({
-      left: newScrollPosition,
-      behavior: 'smooth'
-    });
+    // Usar requestAnimationFrame para un scroll más suave especialmente en iOS
+    if (this.isIOS) {
+      requestAnimationFrame(() => {
+        carousel.scrollTo({
+          left: newScrollPosition,
+          behavior: 'smooth'
+        });
+      });
+    } else {
+      carousel.scrollTo({
+        left: newScrollPosition,
+        behavior: 'smooth'
+      });
+    }
     
     // Actualizar las flechas después del scroll
     setTimeout(() => {
@@ -349,10 +442,19 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
     const carousel = this.carouselContainer?.nativeElement;
     if (!carousel) return;
     
-    carousel.scrollTo({
-      left: 0,
-      behavior: 'smooth'
-    });
+    if (this.isIOS) {
+      requestAnimationFrame(() => {
+        carousel.scrollTo({
+          left: 0,
+          behavior: 'smooth'
+        });
+      });
+    } else {
+      carousel.scrollTo({
+        left: 0,
+        behavior: 'smooth'
+      });
+    }
     
     this.currentIndex = 0;
     this.updateArrowsBasedOnScroll(carousel);
@@ -369,13 +471,26 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
     const scrollStep = this.itemWidth + this.gapWidth;
     const newScrollPosition = index * scrollStep;
     
-    carousel.scrollTo({
-      left: newScrollPosition,
-      behavior: 'smooth'
-    });
+    // Usar requestAnimationFrame para mejor rendimiento especialmente en iOS
+    if (this.isIOS) {
+      requestAnimationFrame(() => {
+        carousel.scrollTo({
+          left: newScrollPosition,
+          behavior: 'smooth'
+        });
+      });
+    } else {
+      carousel.scrollTo({
+        left: newScrollPosition,
+        behavior: 'smooth'
+      });
+    }
     
     this.currentIndex = index;
-    this.updateArrowsBasedOnScroll(carousel);
+    
+    setTimeout(() => {
+      this.updateArrowsBasedOnScroll(carousel);
+    }, 300);
   }
 
   resetNuevaImagen(): void {
@@ -569,37 +684,37 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
     
   // Eliminar una imagen del carrusel
   eliminarImagen(item: CarruselItem): void {
-  this.alertaServicio.Confirmacion(
-    '¿Está seguro que desea eliminar esta imagen?',
-    'Esta acción no se puede deshacer.'
-  ).then((confirmado) => {
-    if (confirmado) {
-      const codigoCarruselImagen = item.CodigoCarruselImagen;
+    this.alertaServicio.Confirmacion(
+      '¿Está seguro que desea eliminar esta imagen?',
+      'Esta acción no se puede deshacer.'
+    ).then((confirmado) => {
+      if (confirmado) {
+        const codigoCarruselImagen = item.CodigoCarruselImagen;
 
-      const subscription = this.carruselImagenServicio.Eliminar(codigoCarruselImagen).subscribe({
-        next: (response) => {
-          this.alertaServicio.MostrarExito('Imagen eliminada correctamente');
+        const subscription = this.carruselImagenServicio.Eliminar(codigoCarruselImagen).subscribe({
+          next: (response) => {
+            this.alertaServicio.MostrarExito('Imagen eliminada correctamente');
 
-          // Eliminar el ítem del array local
-          this.items = this.items.filter((img: CarruselItem) =>
-            img.CodigoCarruselImagen !== codigoCarruselImagen
-          );
+            // Eliminar el ítem del array local
+            this.items = this.items.filter((img: CarruselItem) =>
+              img.CodigoCarruselImagen !== codigoCarruselImagen
+            );
 
-          // Actualizar el carrusel
-          setTimeout(() => {
-            this.setupCarousel();
-            this.cdr.detectChanges();
-          }, 100);
-        },
-        error: (error) => {
-          this.alertaServicio.MostrarError(error, 'Error al eliminar la imagen');
-        }
-      });
+            // Actualizar el carrusel
+            setTimeout(() => {
+              this.setupCarousel();
+              this.cdr.detectChanges();
+            }, 100);
+          },
+          error: (error) => {
+            this.alertaServicio.MostrarError(error, 'Error al eliminar la imagen');
+          }
+        });
 
-      this.subscriptions.push(subscription);
-    }
-  });
-}
+        this.subscriptions.push(subscription);
+      }
+    });
+  }
 
   // Verificar si un ítem está en edición
   esItemEnEdicion(item: CarruselItem): boolean {
