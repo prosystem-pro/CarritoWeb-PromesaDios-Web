@@ -28,10 +28,10 @@
 
       <div class="formulario-login">
         <div class="text-center mb-2">
-          <div [style.backgroundColor]="portadaLogin.Color" class="contenedor-icono-usuario">
+          <div [style.backgroundColor]="portadaLogin?.Color" class="contenedor-icono-usuario">
             <i class="bi bi-person-fill"></i>
           </div>
-          <h4 [style.color]="portadaLogin.Color" class="titulo-login">INICIAR SESIÓN</h4>
+          <h4 [style.color]="portadaLogin?.Color" class="titulo-login">INICIAR SESIÓN</h4>
         </div>
 
         <button *ngIf="Permiso.PermisoSuperAdmin()" (click)="toggleModoEdicion()" class="btn edit-main-button btn-edit"
@@ -81,7 +81,7 @@
             {{ errorMessage }}
           </div>
 
-          <button [style.backgroundColor]="portadaLogin.Color" type="submit" class="boton boton-oscuro w-100 py-2"
+          <button [style.backgroundColor]="portadaLogin?.Color" type="submit" class="boton boton-oscuro w-100 py-2"
             [disabled]="loginForm.invalid || isLoading">
             <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
             {{ isLoading ? 'Iniciando...' : 'Iniciar' }}

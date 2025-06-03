@@ -30,6 +30,11 @@ export class PermisoServicio {
       const payload = this.ObtenerPayload();
       return payload?.SuperAdmin === 1 || payload?.NombreRol === 'Administrador';
     }
+
+    EsSoloAdmin(): boolean {
+      const payload = this.ObtenerPayload();
+      return payload?.NombreRol === 'Administrador' && payload?.SuperAdmin !== 1;
+    }
   
     // También podrías tener un helper si quisieras
     ObtenerRol(): string {

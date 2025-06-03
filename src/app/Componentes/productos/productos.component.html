@@ -55,7 +55,7 @@
                     {{ nombreClasificacion | uppercase }}
                 </div>
 
-                <div *ngIf="!modoEdicion" class="cart-icon" (click)="alternarCarrito()">
+                <div *ngIf="!modoEdicion && !Permiso.EsSoloAdmin()" class="cart-icon" (click)="alternarCarrito()">
                     <span class="cart-count">{{totalItemsCarrito || 0}}</span>
                     <img [src]="DatosHeader.urlImagenCarrito" alt="Carrito" height="30">
                 </div>
@@ -265,7 +265,8 @@
         style="height: 150px; display: flex; justify-content: center; align-items: center; gap: 40px; font-weight: bold;">
         <button class="btn px-4 py-2 rounded-pill" [style.backgroundColor]="colorClasificacion"
             [style.color]="colorTextoClasificacion" (click)="volver()">REGRESAR</button>
-        <button class="btn px-4 py-2 rounded-pill" [style.backgroundColor]="colorClasificacion"
-            [style.color]="colorTextoClasificacion" (click)="alternarCarrito()">IR AL CARRITO</button>
+        <button *ngIf="!Permiso.EsSoloAdmin()" class="btn px-4 py-2 rounded-pill"
+            [style.backgroundColor]="colorClasificacion" [style.color]="colorTextoClasificacion"
+            (click)="alternarCarrito()">IR AL CARRITO</button>
     </div>
 </div>

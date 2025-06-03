@@ -1,7 +1,7 @@
 <div class="social-sidebar">
     <!-- Lista de redes sociales -->
     <div class="social-icons mobile-social-icons mx-auto">
-        <a *ngFor="let red of RedeSocial" [href]="'https://' + red.Link" target="_blank" rel="noopener noreferrer"
+        <a *ngFor="let red of RedeSocial" [href]="red.Link" target="_blank" rel="noopener noreferrer"
             class="social-item social-icon position-relative d-inline-block">
             <img [src]="red.Imagenes[0]?.UrlImagen || ''" [alt]="red.NombreRedSocial"
                 (click)="ReportarRedSocial(red.CodigoRedSocial)" />

@@ -229,7 +229,7 @@
                 </button>
             </div>
             <!-- Versión normal del carrito -->
-            <div *ngIf="!modoEdicion" class="carrito-container" (click)="alternarCarrito()">
+            <div *ngIf="!modoEdicion && !Permiso.EsSoloAdmin()" class="carrito-container" (click)="alternarCarrito()">
                 <span class="cart-count">{{totalItemsCarrito || 0}}</span>
                 <img [src]="Datos?.UrlImagenCarrito" alt="Carrito" width="30">
             </div>
