@@ -91,24 +91,26 @@ export class CarritoComponent implements OnInit {
   cerrar(): void {
     this.cerrarCarrito.emit();
   }
-  ReportarProductosVendidos(): void {
-    this.productosCarrito.forEach((producto) => {
-      if (producto.CodigoProducto && producto.cantidad) {
-        const datos = {
-          CodigoProducto: producto.CodigoProducto,
-          CantidadVendida: producto.cantidad,
-          Navegador: this.ObtenerNavegador()
-        };
+ReportarProductosVendidos(): void {
+  const productosValidos = this.productosCarrito
+    .filter(producto => producto.CodigoProducto && producto.cantidad)
+    .map(producto => ({
+      CodigoProducto: producto.CodigoProducto,
+      CantidadVendida: producto.cantidad,
+      Navegador: this.ObtenerNavegador()
+    }));
 
-        this.ReporteProductoServicio.Crear(datos).subscribe({
-          next: (respuesta) => console.log(`Producto ${producto.CodigoProducto} reportado`, respuesta),
-          error: (error) => console.error(`Error al reportar producto ${producto.CodigoProducto}`, error)
-        });
-      } else {
-        console.warn('⚠️ Producto sin código o cantidad válida:', producto);
-      }
-    });
+  if (productosValidos.length === 0) {
+    console.warn('No hay productos válidos para reportar.');
+    return;
   }
+
+  this.ReporteProductoServicio.Crear(productosValidos).subscribe({
+    next: (respuesta) => console.log('Productos reportados correctamente', respuesta),
+    error: (error) => console.error('Error al reportar productos', error)
+  });
+}
+
   ObtenerNavegador(): string {
     const AgenteUsuario = navigator.userAgent;
 
