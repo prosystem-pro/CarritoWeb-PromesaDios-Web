@@ -12,7 +12,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 
 @Component({
   selector: 'app-reporte-tiempo-pagina',
-  imports: [HeaderReporteComponent, BaseChartDirective, FormsModule, CommonModule,
+  imports: [HeaderReporteComponent, FormsModule, CommonModule,
     MatDatepickerModule,
     MatFormFieldModule,
     MatInputModule,
@@ -23,6 +23,17 @@ import { MatNativeDateModule } from '@angular/material/core';
 })
 export class ReporteTiempoPaginaComponent {
   @ViewChild('selectorFecha') selectorFecha!: ElementRef<HTMLInputElement>;
+  TotalTiempo: { dias: number, horas: number, minutos: number, segundos: number } = {
+    dias: 0,
+    horas: 0,
+    minutos: 0,
+    segundos: 0
+  };
+  segmentos = 12;
+  espacioEntreSegmentos = 3;
+
+
+
   TotalSolicitudMes: number = 0;
   TopProductos: any[] = [];
   ConseguirAnio = new Date().getFullYear();
@@ -30,6 +41,42 @@ export class ReporteTiempoPaginaComponent {
   MesTemporal: number = new Date().getMonth() + 1;
   DiaSeleccionado: string = String(new Date().getDate()).padStart(2, '0');
   FechaSeleccionada: Date = new Date(this.AnioTemporal, this.MesTemporal - 1, parseInt(this.DiaSeleccionado));
+
+
+  CalcularDashArray(porcentaje: number): string {
+    const radio = 10; 
+    const perimetro = 2 * Math.PI * radio; 
+
+    if (porcentaje <= 0) {
+      return `0 ${perimetro.toFixed(2)}`;
+    }
+
+    if (porcentaje >= 100) {
+      return `${perimetro.toFixed(2)} 0`;
+    }
+
+    const segmento = 5;   
+    const espacio = 0.5; 
+
+    const longitudTotal = (porcentaje / 100) * perimetro;
+    const numeroSegmentos = Math.floor(longitudTotal / (segmento + espacio));
+    const resto = longitudTotal - numeroSegmentos * (segmento + espacio);
+
+    let dashArray = '';
+    for (let i = 0; i < numeroSegmentos; i++) {
+      dashArray += `${segmento} ${espacio} `;
+    }
+
+    if (resto > 0) {
+      dashArray += `${resto} `;
+    }
+
+    const gapFinal = perimetro - longitudTotal;
+    dashArray += `${gapFinal.toFixed(2)}`;
+
+    return dashArray.trim();
+  }
+
 
 
   Meses = [
@@ -73,81 +120,46 @@ export class ReporteTiempoPaginaComponent {
 
     this.Servicio.ObtenerResumen(Anio, Mes).subscribe({
       next: (res) => {
-        // Guardamos total solicitudes por mes
-        if (res.SolicitudTotalMes && typeof res.SolicitudTotalMes === 'number') {
-          this.TotalSolicitudMes = res.SolicitudTotalMes;
+        if (res.TotalTiempo) {
+          this.TotalTiempo = res.TotalTiempo;
         }
 
-        // Línea - ResumenPorDiaMes
-        if (res.SolicitudesDiaMes && Array.isArray(res.SolicitudesDiaMes)) {
-          const labelsLine = res.SolicitudesDiaMes.map((item: any) => item.dia);
-          const dataLine = res.SolicitudesDiaMes.map((item: any) => item.total); // << CORREGIDO
-
-          const colorHue = Math.floor(Math.random() * 360);
-          const borderColorLine = `hsl(${colorHue}, 70%, 50%)`;
-          const backgroundColorLine = `hsla(${colorHue}, 70%, 60%, 0.3)`;
-
-          this.ConfiguracionGraficoLineal = {
-            labels: labelsLine,
-            datasets: [{
-              data: dataLine,
-              borderColor: borderColorLine,
-              backgroundColor: backgroundColorLine,
-              fill: false,
-              tension: 0.3,
-              pointRadius: 5,
-              pointHoverRadius: 7,
-              borderWidth: 2
-            }]
-          };
-        }
-
-
-
-        // PolarArea - SolicitudesDiaMes con selección de día
-        if (res.SolicitudesDiaMes && Array.isArray(res.SolicitudesDiaMes)) {
-          const totalMes = res.SolicitudesDiaMes.reduce((sum: number, item: { total: number }) => sum + item.total, 0);
-          const diaObj = res.SolicitudesDiaMes.find((item: { dia: string }) => item.dia === this.DiaSeleccionado);
-          const totalDia = diaObj ? diaObj.total : 0;
-          const totalResto = totalMes - totalDia;
-
-          const labels = [`Resto del mes`, `Día ${this.DiaSeleccionado}`];
-          const data = [totalResto, totalDia];
-          const backgroundColor = this.GenerarColoresAleatorios(labels.length);
-
-          this.ConfiguracionGraficoRadar = {
-            labels,
-            datasets: [{
-              data,
-              backgroundColor
-            }]
-          };
-        }
-
-
-
-
-
-        // Barra - SolicitudesAño
-        if (res.SolicitudesPorMes && res.SolicitudesPorMes && Array.isArray(res.SolicitudesPorMes)) {
-          const labelsBar = res.SolicitudesPorMes.map((item: any) => item.nombre);
-          const dataBar = res.SolicitudesPorMes.map((item: any) => item.total);
-          const backgroundColorBar = this.GenerarColoresAleatorios(labelsBar.length);
-
-          this.ConfiguracionGraficoBarra = {
-            labels: labelsBar,
-            datasets: [{
-              data: dataBar,
-              backgroundColor: backgroundColorBar
-            }]
-          };
-        }
       },
       error: (error) => {
         console.error('Error al obtener resumen:', error);
       }
     });
   }
+  get tiemposCirculos() {
+    const maxDias = 30; 
+    const maxHoras = 24;
+    const maxMinutos = 60;
+    const maxSegundos = 60;
+
+    return [
+      {
+        valor: this.TotalTiempo.dias,
+        etiqueta: 'Días',
+        porcentaje: Math.min(100, (this.TotalTiempo.dias / maxDias) * 100)
+      },
+      {
+        valor: this.TotalTiempo.horas,
+        etiqueta: 'Horas',
+        porcentaje: Math.min(100, (this.TotalTiempo.horas / maxHoras) * 100)
+      },
+      {
+        valor: this.TotalTiempo.minutos,
+        etiqueta: 'Minutos',
+        porcentaje: Math.min(100, (this.TotalTiempo.minutos / maxMinutos) * 100)
+      },
+      {
+        valor: this.TotalTiempo.segundos,
+        etiqueta: 'Segundos',
+        porcentaje: Math.min(100, (this.TotalTiempo.segundos / maxSegundos) * 100)
+      }
+    ];
+  }
+
 
   GenerarColoresAleatorios(cantidad: number): string[] {
     const colores: string[] = [];
@@ -181,7 +193,6 @@ export class ReporteTiempoPaginaComponent {
     this.ObtenerDatos();
   }
 
-  // Si actualizas MesTemporal o AnioTemporal en otro lugar, sincroniza también:
   ActualizarFechaSeleccionada() {
     this.FechaSeleccionada = new Date(this.AnioTemporal, this.MesTemporal - 1, parseInt(this.DiaSeleccionado));
   }
