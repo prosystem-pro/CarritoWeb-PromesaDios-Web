@@ -144,6 +144,7 @@ ReportarProductosVendidos(): void {
 
         const mensajeCodificado = encodeURIComponent(mensaje);
         window.open(`https://wa.me/${numTelefono}?text=${mensajeCodificado}`, '_blank');
+        this.vaciarCarrito();
       },
       error: (error: any) => {
         console.error('Error al obtener los datos de la empresa:', error);
