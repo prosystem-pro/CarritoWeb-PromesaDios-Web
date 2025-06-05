@@ -44,6 +44,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
   error: string | null = null;
   totalItemsCarrito: number = 0;
   mostrarCarrito = false;
+  isLoading: boolean = false;
 
   ordenAscendente: boolean = true;
   colorFooter: string = '';
@@ -601,6 +602,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
       this.alertaServicio.MostrarAlerta(
         'Por favor, complete todos los campos y seleccione una imagen'
       );
+      this.isLoading = false;
       return;
     }
 
@@ -612,6 +614,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
       this.alertaServicio.MostrarAlerta(
         'Ya existe un producto con el mismo nombre. Por favor, elija otro nombre.'
       );
+      this.isLoading = false;
       return;
     }
 
@@ -622,6 +625,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
   subirImagenNuevoProducto(): void {
     if (!this.nuevaImagenFile) return;
 
+    this.isLoading = true;
     const formData = new FormData();
     formData.append('Imagen', this.nuevaImagenFile);
     formData.append('CarpetaPrincipal', this.NombreEmpresa);
@@ -634,7 +638,6 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
     this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
       next: (response: any) => {
-        console.log('Imagen subida y producto creado inicialmente', response);
 
         if (response && response.Entidad && response.Entidad.CodigoProducto) {
           // 2. Capturar el CodigoProducto generado
@@ -654,6 +657,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
           // 4. Llamar al servicio para actualizar los datos
           this.productoServicio.Editar(productoActualizado).subscribe({
             next: (editResponse) => {
+              this.isLoading = false;
               this.alertaServicio.MostrarExito('Producto creado correctamente');
 
               // 5. Recargar productos y cerrar formulario
@@ -661,6 +665,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
               this.cancelarNuevoProducto();
             },
             error: (editError) => {
+              this.isLoading = false;
               this.alertaServicio.MostrarError(editError, 'Error al actualizar datos del producto');
 
               // Recargar de todas formas y cerrar formulario
@@ -669,6 +674,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
             },
           });
         } else {
+          this.isLoading = false;
           this.alertaServicio.MostrarAlerta('Error al procesar la respuesta del servidor');
         }
       },
@@ -783,4 +789,30 @@ export class ProductosComponent implements OnInit, OnDestroy {
       this.actualizarTotalCarrito();
     }
   }
+
+  toggleEstadoProducto(producto: Producto): void {
+  const nuevoEstado = producto.Estatus === 1 ? 2 : 1;
+
+  const productoActualizado: Producto = {
+    ...producto,
+    Estatus: nuevoEstado
+  };
+
+  this.productoServicio.Editar(productoActualizado).subscribe({
+    next: () => {
+      producto.Estatus = nuevoEstado; // Actualiza el estado local
+      this.alertaServicio.MostrarExito(
+        `Producto ${nuevoEstado === 1 ? 'activado' : 'desactivado'} correctamente` 
+      );
+    },
+    error: (err) => {
+      this.alertaServicio.MostrarError(err, 'Error al cambiar el estado del producto');
+    }
+  });
+}
+
+getProductosActivos() {
+    return this.productos.filter(producto => producto.Estatus !== 2);
+}
+
 }

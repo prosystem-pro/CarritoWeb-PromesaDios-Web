@@ -46,6 +46,7 @@ export class MenuCategoriaComponent implements OnInit {
   datosListos: boolean = false;
   empresaData: any = null;
   codigoEmpresa: number = 0;
+  isLoadingCrear: boolean = false;
 
   nuevaCategoria = {
     titulo: '',
@@ -367,6 +368,8 @@ export class MenuCategoriaComponent implements OnInit {
   // Crea una nueva categoría subiendo primero la imagen
   subirImagenNuevaCategoria() {
     if (this.nuevaCategoria.titulo && this.nuevaCategoria.imagenFile) {
+
+      this.isLoadingCrear = true;
       const formData = new FormData();
       formData.append('Imagen', this.nuevaCategoria.imagenFile);
       formData.append('CarpetaPrincipal', this.NombreEmpresa);
@@ -397,6 +400,7 @@ export class MenuCategoriaComponent implements OnInit {
               .Editar(nuevaClasificacion)
               .subscribe({
                 next: (updateResponse) => {
+                  this.isLoadingCrear = false;
                   this.alertaServicio.MostrarExito('Nueva categoría creada correctamente', 'Éxito');
 
                   // Recargar clasificaciones
@@ -406,6 +410,7 @@ export class MenuCategoriaComponent implements OnInit {
                   this.resetNuevaCategoria();
                 },
                 error: (updateError) => {
+                  this.isLoadingCrear = false;
                   this.alertaServicio.MostrarError(updateError, 'Error al crear la categoría');
 
                   // Recargar clasificaciones de todos modos
@@ -413,10 +418,12 @@ export class MenuCategoriaComponent implements OnInit {
                 },
               });
           } else {
+            this.isLoadingCrear = false;
             this.alertaServicio.MostrarError('Error al procesar la respuesta del servidor', 'Error');
           }
         },
         error: (error) => {
+          this.isLoadingCrear = false;
           this.alertaServicio.MostrarError(error, 'Error al subir la imagen. Por favor, intente de nuevo.');
         },
       });

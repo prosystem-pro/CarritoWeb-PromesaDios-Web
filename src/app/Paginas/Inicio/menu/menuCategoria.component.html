@@ -186,9 +186,11 @@
                 </div>
 
                 <button class="btn btn-success text-white w-100 fw-bold rounded-5"
-                    [disabled]="!nuevaCategoria.titulo || !nuevaCategoria.imagenFile"
+                    [disabled]="!nuevaCategoria.titulo || !nuevaCategoria.imagenFile || isLoadingCrear"
                     (click)="subirImagenNuevaCategoria()">
-                    AÑADIR
+                    <i *ngIf="!isLoadingCrear" class="bi bi-check-lg me-1"></i>
+                    <span *ngIf="isLoadingCrear" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                    {{ isLoadingCrear ? 'Creando...' : 'AÑADIR' }}
                 </button>
             </div>
 
