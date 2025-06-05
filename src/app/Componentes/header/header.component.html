@@ -122,7 +122,7 @@
 
                 <li *ngIf="Permiso.PermisoAdminSuperAdmin()" class="nav-item">
                     <!-- Versión normal -->
-                    <a *ngIf="!modoEdicion" class="nav-link" (click)="NavegarEspecial('/reporte-producto')"
+                    <a *ngIf="!modoEdicion" class="nav-link" (click)="NavegarEspecial()"
                         [ngClass]="!esMovil && estaRutaActiva('/reporte-producto') ? 'active-route' : ''"
                         [ngStyle]="{'color': Datos?.ColorTextextoReporte}">
                         {{ Datos?.TextoReporte || '' }}
