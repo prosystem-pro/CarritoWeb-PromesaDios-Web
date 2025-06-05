@@ -192,8 +192,16 @@
     -->
 
             <!-- Reproductor de video cuando se hace clic -->
-            <iframe [src]="sanitizedVideoUrl" class="reproductor d-block mx-auto" frameborder="0" allow="autoplay"
-                allowfullscreen style="object-fit: cover;"></iframe>
+            <!-- <iframe [src]="sanitizedVideoUrl" class="reproductor d-block mx-auto" frameborder="0" allow="autoplay"
+                allowfullscreen style="object-fit: cover;"></iframe> -->
+            <video #videoPlayer class="reproductor d-block mx-auto" autoplay muted [src]="sanitizedVideoUrl"
+                style="object-fit: cover;">
+            </video>
+
+
+
+
+
 
             <!-- Botón de reproducción -->
             <!--

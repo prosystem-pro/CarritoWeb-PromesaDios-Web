@@ -49,11 +49,13 @@ export class NosotrosComponent implements OnInit {
     public Permiso: PermisoServicio,
     private alertaServicio: AlertaServicio,
     private servicioCompartido: ServicioCompartido
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // this.checkScreenSize();
-    this.extractVideoId();
+    this.playVideo();
+    this.playVideo();
+    this.playVideo();
     this.setSanitizedUrl();
     this.cargarDatosPortada();
     this.cargarDatosCarrusel();
@@ -73,7 +75,7 @@ export class NosotrosComponent implements OnInit {
         // Actualizar la URL del video si viene de la API
         if (this.portadaData.Urlvideo) {
           this.rawYoutubeUrl = this.portadaData.Urlvideo;
-          this.extractVideoId();
+
           this.setSanitizedUrl();
         }
       },
@@ -249,30 +251,41 @@ export class NosotrosComponent implements OnInit {
   actualizarVideo(): void {
     if (this.portadaData) {
       this.portadaData.Urlvideo = this.rawYoutubeUrl;
-      this.extractVideoId();
+
       this.setSanitizedUrl();
     }
   }
 
-  extractVideoId(): void {
-    const match = this.rawYoutubeUrl.match(
-      /(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/
-    );
-    this.videoId = match ? match[1] : '';
-  }
+  // extractVideoId(): void {
+  //   const match = this.rawYoutubeUrl.match(
+  //     /(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/
+  //   );
+  //   this.videoId = match ? match[1] : '';
+  // }
+
+  // setSanitizedUrl(): void {
+  //   const embedUrl = `https://www.youtube.com/embed/${this.videoId}?autoplay=1&rel=0&mute=1`;
+  //   this.sanitizedVideoUrl =
+  //     this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
+  // }
+
+  // get videoThumbnailUrl(): string {
+  //   return `https://img.youtube.com/vi/${this.videoId}/maxresdefault.jpg`;
+  // }
+
+  // playVideo(): void {
+  //   this.isVideoPlaying = true;
+  //   this.actualizarVideo();
+  // }
+
 
   setSanitizedUrl(): void {
-    const embedUrl = `https://www.youtube.com/embed/${this.videoId}?autoplay=1&rel=0&mute=1`;
-    this.sanitizedVideoUrl =
-      this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
+    this.sanitizedVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.rawYoutubeUrl);
   }
 
-  get videoThumbnailUrl(): string {
-    return `https://img.youtube.com/vi/${this.videoId}/maxresdefault.jpg`;
-  }
 
   playVideo(): void {
     this.isVideoPlaying = true;
-    this.actualizarVideo();
+    this.setSanitizedUrl();
   }
 }
