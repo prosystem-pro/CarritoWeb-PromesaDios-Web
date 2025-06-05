@@ -514,6 +514,9 @@ actualizarRegistroRedSocialImagen(codigoRedSocialImagen: number, urlImagen: stri
     this.cerrarNavbarSiEsMovil();
     this.router.navigate([ruta]);
   }
+  NavegarEspecial(ruta: string) {
+  this.router.navigate([ruta]);
+}
 
   estaRutaActiva(ruta: string): boolean {
     return this.router.url === ruta || this.router.url.startsWith(ruta + '/');

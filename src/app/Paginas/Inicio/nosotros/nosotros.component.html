@@ -194,9 +194,24 @@
             <!-- Reproductor de video cuando se hace clic -->
             <!-- <iframe [src]="sanitizedVideoUrl" class="reproductor d-block mx-auto" frameborder="0" allow="autoplay"
                 allowfullscreen style="object-fit: cover;"></iframe> -->
-            <video #videoPlayer class="reproductor d-block mx-auto" autoplay muted [src]="sanitizedVideoUrl"
-                style="object-fit: cover;">
-            </video>
+
+
+
+<video
+  *ngIf="sanitizedVideoUrl"
+  #videoPlayer
+  class="reproductor d-block mx-auto"
+  [src]="sanitizedVideoUrl"
+  autoplay
+  loop
+  muted
+  controls
+  style="object-fit: cover;"
+></video>
+
+
+
+
 
 
 

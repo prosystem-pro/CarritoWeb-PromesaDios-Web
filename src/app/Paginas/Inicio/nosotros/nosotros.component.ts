@@ -11,6 +11,8 @@ import { CarruselServicio } from '../../../Servicios/CarruselServicio';
 import { ServicioCompartido } from '../../../Servicios/ServicioCompartido';
 import { PermisoServicio } from '../../../Autorizacion/AutorizacionPermiso';
 import { AlertaServicio } from '../../../Servicios/Alerta-Servicio';
+import {  ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+
 
 @Component({
   selector: 'app-nosotros',
@@ -20,6 +22,8 @@ import { AlertaServicio } from '../../../Servicios/Alerta-Servicio';
   standalone: true,
 })
 export class NosotrosComponent implements OnInit {
+    @ViewChild('videoPlayer', { static: false }) videoPlayer!: ElementRef<HTMLVideoElement>;
+  private VolumenVideo = false;
   rawYoutubeUrl: string = '';
   sanitizedVideoUrl!: SafeResourceUrl;
   isVideoPlaying = false;
@@ -50,6 +54,7 @@ export class NosotrosComponent implements OnInit {
     private alertaServicio: AlertaServicio,
     private servicioCompartido: ServicioCompartido
   ) { }
+
 
   ngOnInit(): void {
     // this.checkScreenSize();
@@ -278,14 +283,25 @@ export class NosotrosComponent implements OnInit {
   //   this.actualizarVideo();
   // }
 
+  ngAfterViewChecked(): void {
+    if (this.videoPlayer && !this.VolumenVideo) {
+      const videoEl = this.videoPlayer.nativeElement;
+      videoEl.muted = true;
+      videoEl.volume = 0;
+      videoEl.play().catch(err => console.warn('Error play:', err));
+      this.VolumenVideo = true; 
+    }
+  }
+
 
   setSanitizedUrl(): void {
     this.sanitizedVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.rawYoutubeUrl);
   }
 
-
   playVideo(): void {
     this.isVideoPlaying = true;
     this.setSanitizedUrl();
   }
+
+
 }
