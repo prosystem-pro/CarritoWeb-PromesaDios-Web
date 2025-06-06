@@ -177,8 +177,17 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
     this.productoServicio.BuscarProductos(1, texto).subscribe({
       next: (data) => {
+      const esAdminOSuperAdmin = this.Permiso.PermisoAdminSuperAdmin();
+
+      // Filtrar productos según el estatus y rol del usuario
+      const productosFiltrados = data.filter((producto: Producto) => {
+        return (
+          producto.Estatus === 1 ||
+          (producto.Estatus === 2 && esAdminOSuperAdmin)
+        );
+      });
         // Agregar la propiedad cantidad a cada producto
-        this.productos = data.map((producto: Producto) => ({
+        this.productos = productosFiltrados.map((producto: Producto) => ({
           ...producto,
           cantidad: 1,
         }));
