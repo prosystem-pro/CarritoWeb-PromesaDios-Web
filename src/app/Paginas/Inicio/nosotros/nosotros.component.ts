@@ -58,9 +58,6 @@ export class NosotrosComponent implements OnInit {
 
   ngOnInit(): void {
     // this.checkScreenSize();
-    this.playVideo();
-    this.playVideo();
-    this.playVideo();
     this.setSanitizedUrl();
     this.cargarDatosPortada();
     this.cargarDatosCarrusel();
@@ -302,6 +299,19 @@ export class NosotrosComponent implements OnInit {
     this.isVideoPlaying = true;
     this.setSanitizedUrl();
   }
+
+mostrarOverlay = true;
+
+activarSonido() {
+  if (this.videoPlayer) {
+    const videoEl = this.videoPlayer.nativeElement;
+    videoEl.muted = true;
+    videoEl.volume = 1;
+    videoEl.play().catch(err => console.warn('Error play:', err));
+
+    this.mostrarOverlay = false;
+  }
+}
 
 
 }
