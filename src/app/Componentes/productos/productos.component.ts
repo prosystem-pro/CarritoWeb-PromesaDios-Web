@@ -203,27 +203,36 @@ export class ProductosComponent implements OnInit, OnDestroy {
   }
 
   cargarProductos(codigo: number): void {
-    this.cargando = true;
-    this.error = null;
+  this.cargando = true;
+  this.error = null;
 
-    this.productoServicio.ListadoProductos(codigo).subscribe({
-      next: (data) => {
-        // Agregar la propiedad cantidad a cada producto
-        this.productos = data.map((producto: Producto) => ({
-          ...producto,
-          cantidad: 1,
-        }));
-        this.productosOriginales = [...this.productos]; // Guardar una copia original para restaurar
-        this.cargando = false;
-      },
-      error: (err) => {
-        this.error =
-        'No se pudieron cargar los productos. Contacte al administrador.';
-        this.cargando = false;
-      },
-    });
-  }
+  this.productoServicio.ListadoProductos(codigo).subscribe({
+    next: (data) => {
+      const esAdminOSuperAdmin = this.Permiso.PermisoAdminSuperAdmin();
 
+      // Filtrar productos según el estatus y rol del usuario
+      const productosFiltrados = data.filter((producto: Producto) => {
+        return (
+          producto.Estatus === 1 ||
+          (producto.Estatus === 2 && esAdminOSuperAdmin)
+        );
+      });
+
+      // Agregar cantidad y guardar
+      this.productos = productosFiltrados.map((producto: Producto) => ({
+        ...producto,
+        cantidad: 1,
+      }));
+
+      this.productosOriginales = [...this.productos]; // copia original
+      this.cargando = false;
+    },
+    error: (err) => {
+      this.error = 'No se pudieron cargar los productos. Contacte al administrador.';
+      this.cargando = false;
+    },
+  });
+}
   cargarClasificacion(codigo: number): void {
     this.clasificacionProductoServicio.ObtenerPorCodigo(codigo).subscribe({
       next: (data) => {
