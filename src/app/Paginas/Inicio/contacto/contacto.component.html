@@ -300,7 +300,7 @@
   </div>
 </div>
 <!-- Contenedor general -->
-<div class="container py-2 position-relative" *ngIf="Permiso.PermisoSuperAdmin()" style="position: relative; top: 0px;">
+<div class="container py-2 position-relative"  style="position: relative; top: 0px;">
 
   <!-- Imagen de fondo si existe -->
 <div *ngIf="ContactanosPortada" class="w-100 FondoPantalla" [ngStyle]="{
@@ -314,7 +314,8 @@
 
 
   <!-- Botón de subir imagen, siempre visible -->
-  <label class="rounded-circle d-flex align-items-center justify-content-center" style="
+  <label  *ngIf="Permiso.PermisoSuperAdmin()" 
+  class="rounded-circle d-flex align-items-center justify-content-center" style="
       width: 45px;
       height: 45px;
       cursor: pointer;
