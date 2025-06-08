@@ -13,7 +13,7 @@ export interface ContactanosPortada {
   TextoComoLlegar?: string;
   ColorTextoComoLlegar?: string;
   ColorBotonComoLlegar?: string;
-  UrlImagenComoLlegar?: string;
+  UrlImagenHorario?: string;
   UrlMapaComoLlegar?: string;
   UrlMapa?: any;
   Estatus?: any;

@@ -5,5 +5,6 @@ export interface ReporteProducto {
   DireccionIp?: string;
   Navegador?: string;
   Fecha?: Date;
+  CodigoSolicitud?: string;
   Estatus?: any;
 }

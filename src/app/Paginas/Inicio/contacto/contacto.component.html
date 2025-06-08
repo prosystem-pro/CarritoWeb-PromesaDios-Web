@@ -133,7 +133,8 @@
   </div>
 
   <!-- Redes Sociales -->
-  <div *ngFor="let red of OcultarRedSocialInactivos(); let i = index" class="mb-3 d-flex justify-content-center position-relative">
+  <div *ngFor="let red of OcultarRedSocialInactivos(); let i = index"
+    class="mb-3 d-flex justify-content-center position-relative">
 
     <!-- CONTENIDO PRINCIPAL -->
     <div class="d-flex align-items-center gap-3 px-4 py-2 position-relative ContornoFondoRedesSociales" [ngStyle]="{
@@ -181,7 +182,7 @@
         <ng-container *ngIf="!MostrarListado[i]">
           <a *ngIf="red.Link" [href]="red.Link" target="_blank" class="fw-semibold TamañoLetraRedSocial"
             [style.color]="ContactanosPortada.ColorTextoRedSocial" style="text-decoration: none;"
-             (click)="CrearReporteRedSocial(red.CodigoRedSocial)">
+            (click)="CrearReporteRedSocial(red.CodigoRedSocial)">
             {{ red.NombreRedSocial }}
           </a>
           <span *ngIf="!red.Link" class="fw-semibold TamañoLetraRedSocial"
@@ -298,11 +299,43 @@
     </div>
   </div>
 </div>
+<!-- Contenedor general -->
+<div class="container py-2 position-relative" *ngIf="Permiso.PermisoSuperAdmin()" style="position: relative; top: 0px;">
+
+  <!-- Imagen de fondo si existe -->
+<div *ngIf="ContactanosPortada" class="w-100 FondoPantalla" [ngStyle]="{
+  'background-image': 'url(' + ContactanosPortada.UrlImagenHorario + ')',
+  'background-size': 'cover',
+  'background-position': 'center',
+  'background-repeat': 'no-repeat',
+  'min-height': '300px'
+}">
+</div>
+
+
+  <!-- Botón de subir imagen, siempre visible -->
+  <label class="rounded-circle d-flex align-items-center justify-content-center" style="
+      width: 45px;
+      height: 45px;
+      cursor: pointer;
+      background-color: #ffffff;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+      position: absolute;
+      top: 10px; /* separado un poco del borde superior */
+      left: 10px; /* separado un poco del borde izquierdo */
+      z-index: 10; /* asegúrate de que esté encima de la imagen */
+    ">
+    <i class="bi bi-camera text-black fs-5"></i>
+    <input type="file" (change)="ActualizarImagenHorario($event)" accept="image/*" hidden>
+  </label>
+
+</div>
+
 
 <!-- Mapa de Google Maps a pantalla completa -->
-<div class="w-100 position-relative">
+<div class="w-100 position-relative mt-0">
   <!-- Botón de edición (pencil) -->
-  <div *ngIf="!MostrarMapa" class="position-absolute top-0 end-0 me-3 mt-2 z-3">
+  <div *ngIf="!MostrarMapa" class="position-absolute top-0 end-0 me-3 mt-0 z-3">
     <button *ngIf="Permiso.PermisoSuperAdmin()" class="btn p-1 d-flex align-items-center justify-content-center"
       style="background-color: white; border: 1px solid #ccc; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.2); width: 45px; height: 45px;"
       (click)="MostrarMapa = true; ContactanosPortada.UrlMapa = ''">
@@ -335,7 +368,7 @@
       <input type="color" class="form-control form-control-sm mb-2"
         [(ngModel)]="ContactanosPortada.ColorBotonComoLlegar">
       <label class="form-label fw-semibold small">URL al hacer clic</label>
-      <input type="text" class="form-control form-control-sm shadow-sm" placeholder="https://maps.google.com"
+      <input type="text" class="form-control form-control-sm shadow-sm" 
         [(ngModel)]="ContactanosPortada.UrlMapaComoLlegar">
     </div>
 

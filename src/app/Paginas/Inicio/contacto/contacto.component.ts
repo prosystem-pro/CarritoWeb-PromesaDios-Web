@@ -96,6 +96,7 @@ export class ContactoComponent implements OnInit {
           this.ContactanosPortada.ColorTextoComoLlegar = this.ContactanosPortada.ColorTextoComoLlegar || '#ffffff';
           this.ContactanosPortada.ColorBotonComoLlegar = this.ContactanosPortada.ColorBotonComoLlegar || '#007bff';
           this.ContactanosPortada.UrlMapaComoLlegar = this.ContactanosPortada.UrlMapaComoLlegar || 'https://maps.google.com';
+          this.ContactanosPortada.UrlImagenHorario = this.ContactanosPortada.UrlImagenHorario || 'http://neni2048.com.ar/alumnos/horarios/';
 
         } else {
           this.ContactanosPortada = {
@@ -108,7 +109,8 @@ export class ContactoComponent implements OnInit {
             TextoComoLlegar: 'COMO LLEGAR',
             ColorTextoComoLlegar: '#ffffff',
             ColorBotonComoLlegar: '#007bff',
-            UrlMapaComoLlegar: 'https://maps.google.com'
+            UrlMapaComoLlegar: 'https://maps.google.com',
+            UrlImagenHorario: 'http://neni2048.com.ar/alumnos/horarios/'
           };
         }
       },
@@ -180,6 +182,14 @@ export class ContactoComponent implements OnInit {
     const file = event.target.files[0];
     if (file) {
       this.subirImagen(file, 'UrlImagenContactanosPortada');
+    } else {
+      this.AlertaServicio.MostrarAlerta('No se seleccionó ningún archivo.');
+    }
+  }
+    ActualizarImagenHorario(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.subirImagen(file, 'UrlImagenHorario');
     } else {
       this.AlertaServicio.MostrarAlerta('No se seleccionó ningún archivo.');
     }
