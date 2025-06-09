@@ -1,18 +1,20 @@
 <!-- Fondo de la página -->
-<div *ngIf="ContactanosPortada" class=" w-100 FondoPantalla" [ngStyle]="{
+<div *ngIf="ContactanosPortada" class=" w-100 FondoPantalla" style="  padding: 0;" [ngStyle]="{
     'background-image': 'url(' + ContactanosPortada.UrlImagenContactanosPortada + ')',
     'background-size': 'cover',
     'background-position': 'center',
-    'background-repeat': 'no-repeat'
+    'background-repeat': 'no-repeat',
   }">
+
+  
   <!-- Subir imagen fondo de página -->
-  <div class="container py-4 position-relative" style="position: relative; top: 20px;"
+  <div class="container position-relative" style="position: relative; top: 20px;"
     *ngIf="Permiso.PermisoSuperAdmin()">
     <label class="rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px; cursor: pointer;
          background-color: #ffffff;
          box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
          position: absolute;
-         top: 0px;">
+         z-index: 10;">
       <i class="bi bi-camera text-black fs-5"></i>
       <input type="file" (change)="ActualizarImagenContactanosPortada($event)" accept="image/*" hidden>
     </label>
@@ -27,13 +29,13 @@
       <!-- Botón de lápiz -->
       <label *ngIf="Permiso.PermisoSuperAdmin() && !MostrarTitulo" (click)="MostrarTitulo = true"
         class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center shadow"
-        style="width: 45px; height: 45px; cursor: pointer; background-color: #fff; position: relative; top: -40px;">
+        style="width: 45px; height: 45px; cursor: pointer; background-color: #fff; position: relative;">
         <i class="bi bi-pencil-square text-black"></i>
       </label>
 
       <!-- Botón de guardar -->
       <button *ngIf="MostrarTitulo" class="btn btn-sm d-flex align-items-center justify-content-center shadow"
-        style="background-color: black; border: none; width: 36px; height: 36px; border-radius: 50%; position: relative; top: -40px;"
+        style="background-color: black; border: none; width: 36px; height: 36px; border-radius: 50%; position: relative;"
         (click)="GuardarContactanosPortada()">
         <i class="bi bi-check-lg text-white"></i>
       </button>
@@ -41,7 +43,7 @@
       <!-- Botón de cancelar -->
       <button *ngIf="MostrarTitulo" (click)="MostrarTitulo = false"
         class="btn btn-sm d-flex align-items-center justify-content-center shadow"
-        style="background-color: black; border: none; width: 36px; height: 36px; border-radius: 50%; position: relative; top: -40px;">
+        style="background-color: black; border: none; width: 36px; height: 36px; border-radius: 50%; position: relative;">
         <i class="bi bi-x-lg text-white"></i>
       </button>
     </div>
@@ -49,7 +51,7 @@
     <!-- CONTENIDO -->
     <div class="row justify-content-center mt-5">
       <div class="col-12 col-md-8">
-        <div class="position-relative p-3 text-center mb-4 d-flex align-items-center justify-content-center"
+        <div class="position-relative p-3 text-center mb-2 d-flex align-items-center justify-content-center"
           style="overflow: hidden; border-radius: 1rem;">
 
           <!-- Fondo decorativo -->
@@ -62,11 +64,11 @@
           </div>
 
           <!-- Contenido -->
-          <div class="position-relative w-100 z-1 px-4 pt-0 pb-2">
+          <div class="position-relative w-100 z-1 px-4 ">
             <div class="d-flex flex-column flex-md-row align-items-center justify-content-center gap-3">
 
               <!-- Título en modo vista -->
-              <div *ngIf="!MostrarTitulo" class="fw-bold fs-2 text-center" style="margin-top: 0rem;"
+              <div *ngIf="!MostrarTitulo" class="fw-bold fs-2 text-center" 
                 [style.color]="ContactanosPortada.ColorNombreContactanosPortada">
                 {{ ContactanosPortada.NombreContactanosPortada }}
               </div>
@@ -108,7 +110,7 @@
   </div>
 
   <!-- Nuevos botones de edición de colores -->
-  <div *ngIf="MostrarTitulo" class="d-flex justify-content-center align-items-start gap-4 BotonesExtras">
+  <div *ngIf="MostrarTitulo" class="d-flex justify-content-center align-items-start gap-4 BotonesExtras mb-2">
     <div class="text-center">
       <label class="form-label small mb-1 px-2 rounded" style="background-color: black; color: white;">
         Fondo Red Social
@@ -238,10 +240,10 @@
 
 
   <!-- Crear nueva Rede Social -->
-  <div class="container mt-2" *ngIf="Permiso.PermisoSuperAdmin()">
-    <div class="mb-3 d-flex justify-content-center position-relative">
+  <div class="container" *ngIf="Permiso.PermisoSuperAdmin()">
+    <div class="d-flex justify-content-center position-relative">
       <div
-        class="d-flex align-items-center justify-content-center gap-3 px-4 py-2 position-relative ContornoFondoRedesSocialesNuevo"
+        class="d-flex align-items-center justify-content-center gap-3 py-4 position-relative ContornoFondoRedesSocialesNuevo"
         [ngStyle]="{
            'background-color': ContactanosPortada.ColorFondoRedSocial,
            'border': '4px solid ' + ContactanosPortada.ColorContornoRedSocial,
@@ -261,7 +263,7 @@
         </div>
 
         <!-- Área de formulario para nueva red social -->
-        <div *ngIf="MostrarCrearRedSocial" class="w-100 d-flex align-items-center justify-content-center gap-2 px-1">
+        <div *ngIf="MostrarCrearRedSocial" class="w-100 d-flex align-items-center justify-content-center gap-2 ">
 
           <!-- Imagen temporal -->
           <label *ngIf="ImagenTemporal" class="d-flex align-items-center justify-content-center bg-white"
@@ -299,42 +301,41 @@
     </div>
   </div>
 </div>
-<!-- Contenedor general -->
-<div class="container py-2 position-relative"  style="position: relative; top: 0px;">
-
-  <!-- Imagen de fondo si existe -->
-<div *ngIf="ContactanosPortada" class="w-100 FondoPantalla" [ngStyle]="{
-  'background-image': 'url(' + ContactanosPortada.UrlImagenHorario + ')',
-  'background-size': 'cover',
-  'background-position': 'center',
-  'background-repeat': 'no-repeat',
-  'min-height': '300px'
-}">
-</div>
 
 
-  <!-- Botón de subir imagen, siempre visible -->
-  <label  *ngIf="Permiso.PermisoSuperAdmin()" 
-  class="rounded-circle d-flex align-items-center justify-content-center" style="
+<div class="container p-0 py-2 position-relative  ">
+  <div *ngIf="ContactanosPortada"
+    class="w-100 FondoPantalla"
+    [ngStyle]="{
+      'background-image': 'url(' + ContactanosPortada.UrlImagenHorario + ')',
+      'background-size': 'cover',
+      'background-position': 'center',
+      'background-repeat': 'no-repeat',
+      'height': '300px'
+    }">
+  </div>
+
+  <!-- Botón de subir imagen -->
+  <label *ngIf="Permiso.PermisoSuperAdmin()"
+    class="rounded-circle d-flex align-items-center justify-content-center"
+    style="
       width: 45px;
       height: 45px;
       cursor: pointer;
       background-color: #ffffff;
       box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
       position: absolute;
-      top: 10px; /* separado un poco del borde superior */
-      left: 10px; /* separado un poco del borde izquierdo */
-      z-index: 10; /* asegúrate de que esté encima de la imagen */
-    ">
+      top: 10px;
+      left: 10px;
+      z-index: 10;">
     <i class="bi bi-camera text-black fs-5"></i>
     <input type="file" (change)="ActualizarImagenHorario($event)" accept="image/*" hidden>
   </label>
-
 </div>
 
 
 <!-- Mapa de Google Maps a pantalla completa -->
-<div class="w-100 position-relative mt-0">
+<div class="w-100 position-relative ">
   <!-- Botón de edición (pencil) -->
   <div *ngIf="!MostrarMapa" class="position-absolute top-0 end-0 me-3 mt-0 z-3">
     <button *ngIf="Permiso.PermisoSuperAdmin()" class="btn p-1 d-flex align-items-center justify-content-center"
