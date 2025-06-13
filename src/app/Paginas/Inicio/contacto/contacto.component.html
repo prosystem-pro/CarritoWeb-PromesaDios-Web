@@ -304,18 +304,19 @@
 
 
 <div class="container p-0 py-2 position-relative  ">
-  <div *ngIf="ContactanosPortada"
-    class="w-100 FondoPantalla"
-    [ngStyle]="{
-      'background-image': 'url(' + ContactanosPortada.UrlImagenHorario + ')',
-      'background-size': 'cover',
-      'background-position': 'center',
-      'background-repeat': 'no-repeat',
-      'height': '410px'
-    }">
-  </div>
+<div *ngIf="ContactanosPortada"
+  class="w-100 FondoPantalla"
+  [ngStyle]="{
+    'background-image': 'url(' + ContactanosPortada.UrlImagenHorario + ')',
+    'background-size': 'contain',
+    'background-position': 'center',
+    'background-repeat': 'no-repeat',
+    'height': '410px'
+  }">
+</div>
 
-  <!-- Botón de subir imagen -->
+
+
   <label *ngIf="Permiso.PermisoSuperAdmin()"
     class="rounded-circle d-flex align-items-center justify-content-center"
     style="

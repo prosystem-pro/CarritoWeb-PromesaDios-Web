@@ -183,36 +183,15 @@
                 [autoplayInterval]="5000">
             </app-carrusel>
         </div>
-
         <div class="container-fluid p-0 position-relative mb-2">
-            <!-- Imagen previa mientras no se reproduce el video -->
-            <!--
-    <img *ngIf="!isVideoPlaying" [src]="videoThumbnailUrl" class="img-fluid w-100" alt=""
-        style="max-height: 400px; object-fit: cover;">
-    -->
-
-            <!-- Reproductor de video cuando se hace clic -->
-            <!-- <iframe [src]="sanitizedVideoUrl" class="reproductor d-block mx-auto" frameborder="0" allow="autoplay"
-                allowfullscreen style="object-fit: cover;"></iframe> -->
+            <div class="video-container" style="position: relative;">
+                <video #videoPlayer class="reproductor d-block mx-auto" [src]="sanitizedVideoUrl" loop muted playsinline
+                    autoplay preload="auto" controls [hidden]="!sanitizedVideoUrl"
+                    style="object-fit: cover; width: 100%; height: auto;">
+                </video>
 
 
-
-<div class="video-container" style="position: relative;">
-  <video
-    *ngIf="sanitizedVideoUrl"
-    #videoPlayer
-    class="reproductor d-block mx-auto"
-    [src]="sanitizedVideoUrl"
-    loop
-    controls
-    muted
-    style="object-fit: cover; width: 100%; height: auto;"
-  ></video>
-
-  <div
-    *ngIf="mostrarOverlay"
-    (click)="activarSonido()"
-    style="
+                <div *ngIf="mostrarOverlay" (click)="activarSonido()" style="
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
@@ -222,32 +201,9 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-    "
-  >
-  </div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-            <!-- Botón de reproducción -->
-            <!--
-    <div class="position-absolute top-50 start-50 translate-middle" *ngIf="!isVideoPlaying">
-        <button (click)="playVideo()"
-            class="btn bg-white rounded-circle d-flex justify-content-center align-items-center"
-            style="width: 64px; height: 64px;">
-            <i class="bi bi-play-fill fs-3"></i>
-        </button>
-    </div>
-    -->
+    ">
+                </div>
+            </div>
 
             <!-- Botón para editar la URL del video -->
             <div *ngIf="modoEdicion" class="position-absolute" style="top: 10px; right: 10px;">

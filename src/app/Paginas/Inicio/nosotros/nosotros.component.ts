@@ -11,7 +11,7 @@ import { CarruselServicio } from '../../../Servicios/CarruselServicio';
 import { ServicioCompartido } from '../../../Servicios/ServicioCompartido';
 import { PermisoServicio } from '../../../Autorizacion/AutorizacionPermiso';
 import { AlertaServicio } from '../../../Servicios/Alerta-Servicio';
-import {  ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 
 
 @Component({
@@ -22,7 +22,9 @@ import {  ElementRef, ViewChild, AfterViewInit } from '@angular/core';
   standalone: true,
 })
 export class NosotrosComponent implements OnInit {
-    @ViewChild('videoPlayer', { static: false }) videoPlayer!: ElementRef<HTMLVideoElement>;
+
+
+  @ViewChild('videoPlayer', { static: false }) videoPlayer!: ElementRef<HTMLVideoElement>;
   private VolumenVideo = false;
   rawYoutubeUrl: string = '';
   sanitizedVideoUrl!: SafeResourceUrl;
@@ -64,11 +66,12 @@ export class NosotrosComponent implements OnInit {
     this.servicioCompartido.colorFooter$.subscribe((color) => {
       this.colorFooter = color;
     });
+    document.body.addEventListener('touchstart', this.intentaReproducirVideo, { once: true });
+    document.body.addEventListener('click', this.reproducirVideo, { once: true });
+    document.body.addEventListener('scroll', this.reproducirVideo, { once: true });
   }
 
-  // Método para cargar los datos de la portada
   cargarDatosPortada(): void {
-    // El ID 11 está quemado como se mencionó en tu ejemplo
     this.empresaPortadaServicio.Listado().subscribe({
       next: (data) => {
         this.portadaData = data[0];
@@ -258,39 +261,6 @@ export class NosotrosComponent implements OnInit {
     }
   }
 
-  // extractVideoId(): void {
-  //   const match = this.rawYoutubeUrl.match(
-  //     /(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/
-  //   );
-  //   this.videoId = match ? match[1] : '';
-  // }
-
-  // setSanitizedUrl(): void {
-  //   const embedUrl = `https://www.youtube.com/embed/${this.videoId}?autoplay=1&rel=0&mute=1`;
-  //   this.sanitizedVideoUrl =
-  //     this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
-  // }
-
-  // get videoThumbnailUrl(): string {
-  //   return `https://img.youtube.com/vi/${this.videoId}/maxresdefault.jpg`;
-  // }
-
-  // playVideo(): void {
-  //   this.isVideoPlaying = true;
-  //   this.actualizarVideo();
-  // }
-
-  ngAfterViewChecked(): void {
-    if (this.videoPlayer && !this.VolumenVideo) {
-      const videoEl = this.videoPlayer.nativeElement;
-      videoEl.muted = true;
-      videoEl.volume = 0;
-      videoEl.play().catch(err => console.warn('Error play:', err));
-      this.VolumenVideo = true; 
-    }
-  }
-
-
   setSanitizedUrl(): void {
     this.sanitizedVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.rawYoutubeUrl);
   }
@@ -300,18 +270,59 @@ export class NosotrosComponent implements OnInit {
     this.setSanitizedUrl();
   }
 
-mostrarOverlay = true;
+  mostrarOverlay = true;
 
-activarSonido() {
-  if (this.videoPlayer) {
-    const videoEl = this.videoPlayer.nativeElement;
-    videoEl.muted = true;
-    videoEl.volume = 1;
-    videoEl.play().catch(err => console.warn('Error play:', err));
+  activarSonido() {
+    if (this.videoPlayer) {
+      const videoEl = this.videoPlayer.nativeElement;
+      videoEl.muted = true;
+      videoEl.volume = 1;
+      videoEl.play().catch(err => console.warn('Error play:', err));
 
-    this.mostrarOverlay = false;
+      this.mostrarOverlay = false;
+    }
   }
-}
+  intentaReproducirVideo = () => {
+    if (this.videoPlayer && !this.VolumenVideo) {
+      const videoEl = this.videoPlayer.nativeElement;
+
+      videoEl.volume = 0;
+      videoEl.muted = true;
+
+      videoEl.play()
+        .then(() => console.log('Reproducción tras interacción'))
+        .catch(err => console.warn('Error tras interacción:', err));
+
+      this.VolumenVideo = true;
+    }
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.reproducirVideo();
+    }, 300); 
+  }
+
+  reproducirVideo() {
+    const videoEl = this.videoPlayer?.nativeElement;
+
+    if (videoEl && this.sanitizedVideoUrl && !this.VolumenVideo) {
+      videoEl.muted = true;
+      videoEl.volume = 0;
+
+      videoEl.play()
+        .then(() => {
+          console.log(' Reproducción automática en PC lograda');
+        })
+        .catch((err) => {
+          console.warn(' PC sigue bloqueando autoplay:', err);
+
+          this.mostrarOverlay = true;
+        });
+
+      this.VolumenVideo = true;
+    }
+  }
 
 
 }
