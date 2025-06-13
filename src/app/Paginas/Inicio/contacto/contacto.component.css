@@ -87,6 +87,13 @@
     height: 100%;
     position: relative;
   }
+
+  .MedidaImagenHorario {
+    height: 720px;
+    width: 100%;
+    background-size: 100% 100%;
+
+  }
 }
 
 /* Tablet */
@@ -127,8 +134,15 @@
   }
 
   .FondoPantalla {
-    height: 45%;
+    height: 65%;
     position: relative;
+  }
+
+  .MedidaImagenHorario {
+    height: 500px;
+    width: 100%;
+    background-size: 100% 100%;
+
   }
 }
 
@@ -177,6 +191,13 @@
     height: 100vh;
     position: relative;
   }
+
+  .MedidaImagenHorario {
+    height: 500px;
+    width: 100%;
+    background-size: 100% 100%;
+
+  }
 }
 
 /* Celular pequeños */
@@ -223,6 +244,13 @@
   .FondoPantalla {
     height: 100vh;
     position: relative;
+  }
+
+  .MedidaImagenHorario {
+    height: 500px;
+    width: 100%;
+    background-size: 100% 100%;
+
   }
 }
 
@@ -282,5 +310,12 @@
 
   .DiseñoMapa {
     width: 200px;
+  }
+
+  .MedidaImagenHorario {
+    height: 500px;
+    width: 100%;
+    background-size: 100% 100%;
+
   }
 }

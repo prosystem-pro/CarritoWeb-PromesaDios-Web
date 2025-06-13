@@ -10,7 +10,6 @@
         style="background-color: #f8f9fa; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
         <i class="bi bi-pencil-square fs-6"></i>
       </button>
-
       <ng-container *ngIf="MostrarPortadaOtro">
         <button (click)="GuardarPortadaOtro()" class="btn btn-sm btn-success shadow-sm" title="Guardar"
           style="border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
@@ -96,49 +95,43 @@
 
 <!-- LISTADO DEL MODELO OTRO -->
 <div *ngFor="let item of Otro; let i = index" class="mb-2 position-relative">
-<!-- Contenedor de las dos imágenes -->
-<div style="display: flex; gap: 5rem; flex-wrap: wrap; justify-content: center; align-items: center;">
-  <!-- Imagen 1 -->
-  <div style="position: relative; border-radius: 8px; overflow: hidden; width: 700px; height: 500px; aspect-ratio: 1/1;">
-    <img *ngIf="item.UrlImagen" [src]="item.UrlImagen" alt="Imagen de Otro"
-      style="width: 100%; height: 100%; object-fit: cover; display: block;">
+  <!-- Contenedor de las dos imágenes -->
+  <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; align-items: center;">
+    <!-- Imagen 1 -->
+    <div class="MedidaImagenOtros" style="position: relative; border-radius: 8px; overflow: hidden; aspect-ratio: 1/1;">
+      <img *ngIf="item.UrlImagen" [src]="item.UrlImagen" alt="Imagen de Otro"
+        style="width: 100%; height: 100%; object-fit: cover; display: block;">
 
-    <!-- Botón de actualizar imagen 1 -->
-    <label *ngIf="Permiso.PermisoSuperAdmin()"
-      class="position-absolute d-flex align-items-center justify-content-center EditarEliminar"
-      style="top: 10px; right: 10px; background-color: rgba(255, 255, 255, 0.9); border-radius: 50%; cursor: pointer;
+      <!-- Botón de actualizar imagen 1 -->
+      <label *ngIf="Permiso.PermisoSuperAdmin()"
+        class="position-absolute d-flex align-items-center justify-content-center EditarEliminar" style="top: 10px; right: 10px; background-color: rgba(255, 255, 255, 0.9); border-radius: 50%; cursor: pointer;
              box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);">
-      <i class="bi bi-camera text-dark fs-5"></i>
-      <input type="file" (change)="ActualizarImagenOtro($event, i, null)" accept="image/*" hidden>
-    </label>
-  </div>
+        <i class="bi bi-camera text-dark fs-5"></i>
+        <input type="file" (change)="ActualizarImagenOtro($event, i, null)" accept="image/*" hidden>
+      </label>
+    </div>
 
-  <!-- Imagen 2 -->
-  <div style="position: relative; border-radius: 8px; overflow: hidden; width: 700px; height: 500px; aspect-ratio: 1/1;">
-    <img *ngIf="item.UrlImagen2" [src]="item.UrlImagen2" alt="Segunda Imagen de Otro"
-      style="width: 100%; height: 100%; object-fit: cover; display: block;">
+    <!-- Imagen 2 -->
+    <div class="MedidaImagenOtros" style="position: relative; border-radius: 8px; overflow: hidden; aspect-ratio: 1/1;">
+      <img *ngIf="item.UrlImagen2" [src]="item.UrlImagen2" alt="Segunda Imagen de Otro"
+        style="width: 100%; height: 100%; object-fit: cover; display: block;">
 
-    <!-- Botón de eliminar (general) -->
-    <button *ngIf="!MostrarListado[i] && Permiso.PermisoSuperAdmin()"
-      class="btn btn-sm d-flex align-items-center justify-content-center EditarEliminar"
-      style="position: absolute; bottom: 10px; right: 10px; background-color: #dc3545; color: white; border: none; border-radius: 50%;
-             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);"
-      (click)="EliminarOtro(i)">
-      <i class="bi bi-trash fs-6"></i>
-    </button>
+      <!-- Botón de eliminar (general) -->
+      <button *ngIf="!MostrarListado[i] && Permiso.PermisoSuperAdmin()"
+        class="btn btn-sm d-flex align-items-center justify-content-center EditarEliminar" style="position: absolute; bottom: 10px; right: 10px; background-color: #dc3545; color: white; border: none; border-radius: 50%;
+             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);" (click)="EliminarOtro(i)">
+        <i class="bi bi-trash fs-6"></i>
+      </button>
 
-    <!-- Botón de actualizar imagen 2 -->
-    <label *ngIf="Permiso.PermisoSuperAdmin()"
-      class="position-absolute d-flex align-items-center justify-content-center EditarEliminar"
-      style="top: 10px; right: 10px; background-color: rgba(255, 255, 255, 0.9); border-radius: 50%; cursor: pointer;
+      <!-- Botón de actualizar imagen 2 -->
+      <label *ngIf="Permiso.PermisoSuperAdmin()"
+        class="position-absolute d-flex align-items-center justify-content-center EditarEliminar" style="top: 10px; right: 10px; background-color: rgba(255, 255, 255, 0.9); border-radius: 50%; cursor: pointer;
              box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);">
-      <i class="bi bi-camera text-dark fs-5"></i>
-      <input type="file" (change)="ActualizarImagen2Otro($event, i, null)" accept="image/*" hidden>
-    </label>
+        <i class="bi bi-camera text-dark fs-5"></i>
+        <input type="file" (change)="ActualizarImagen2Otro($event, i, null)" accept="image/*" hidden>
+      </label>
+    </div>
   </div>
-</div>
-
-
 
   <!-- Contenedor de controles -->
   <div *ngIf="MostrarListado[i]" class="my-3 d-flex justify-content-end align-items-center gap-2 flex-wrap">
