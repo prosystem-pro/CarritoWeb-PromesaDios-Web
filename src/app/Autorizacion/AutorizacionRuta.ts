@@ -9,27 +9,29 @@ export class AutorizacionRuta implements CanActivate {
 
   constructor(private LoginServicio: LoginServicio, private router: Router) {}
 
-  canActivate(
-    next: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): boolean {
-    console.log('AutorizacionRuta: canActivate llamado');
-    console.log('Ruta solicitada (ActivatedRouteSnapshot):', next);
-    console.log('Estado de la ruta (RouterStateSnapshot):', state);
-    console.log('URL completa solicitada:', state.url);
+canActivate(
+  next: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot
+): boolean {
+  console.log('%c[AutorizacionRuta] → canActivate()', 'color:blue; font-weight:bold;');
+  console.log('Ruta solicitada:', state.url);
+  console.log('Snapshot completo:', next);
 
-    const tokenValido = this.LoginServicio.ValidarToken();
-    console.log('Resultado de ValidarToken():', tokenValido);
+  const tokenValido = this.LoginServicio.ValidarToken();
+  console.log('Resultado de ValidarToken():', tokenValido);
 
-    if (tokenValido) {
-      console.log('Token válido, se permite el acceso a la ruta');
-      return true;
-    } else {
-      console.log('Token inválido o inexistente, eliminando token...');
-      this.LoginServicio.EliminarToken();
-      console.log('Redirigiendo al login...');
+  if (tokenValido) {
+    console.log('✔️ Acceso permitido');
+    return true;
+  } else {
+    console.warn('❌ Token inválido, eliminando token y redirigiendo al login');
+    this.LoginServicio.EliminarToken();
+    setTimeout(() => {
+      console.log('➡️ Redireccionando al login con delay');
       this.router.navigate(['/login']);
-      return false;
-    }
+    }, 0);
+    return false;
   }
+}
+
 }
