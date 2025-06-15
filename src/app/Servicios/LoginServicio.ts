@@ -58,37 +58,38 @@ export class LoginServicio {
     localStorage.removeItem('authToken');
   }
 
-  ValidarToken(): boolean {
-    const token = this.ObtenerToken();
-    console.log('[LoginServicio] ValidarToken(): Token obtenido:', token);
+ValidarToken(): boolean {
+  const token = this.ObtenerToken();
+  console.log('[LoginServicio] ValidarToken(): Token obtenido:', token);
 
-    if (!token) {
-      console.warn('[LoginServicio] ValidarToken(): No hay token');
-      return false;
-    }
+  if (!token) {
+    console.warn('[LoginServicio] ValidarToken(): No hay token');
+    return false;
+  }
 
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const expiracion = payload.exp * 1000;
-      const ahora = Date.now();
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const expiracion = payload.exp * 1000;
+    const ahora = Date.now();
 
-      console.log('[LoginServicio] ValidarToken(): Payload:', payload);
-      console.log('[LoginServicio] ValidarToken(): Expira en (ms):', expiracion);
-      console.log('[LoginServicio] ValidarToken(): Fecha actual (ms):', ahora);
+    console.log('[LoginServicio] ValidarToken(): Payload:', payload);
+    console.log('[LoginServicio] ValidarToken(): Expira en (ms):', expiracion);
+    console.log('[LoginServicio] ValidarToken(): Fecha actual (ms):', ahora);
 
-      if (expiracion < ahora) {
-        console.warn('[LoginServicio] ValidarToken(): Token expirado');
-        this.EliminarToken();
-        return false;
-      }
-
-      console.log('[LoginServicio] ValidarToken(): Token válido');
-      return true;
-    } catch (error) {
-      console.error('[LoginServicio] ValidarToken(): Error al decodificar token:', error);
+    const margenTolerancia = 60_000; // 1 minuto de margen
+    if (expiracion + margenTolerancia < ahora) {
+      console.warn('[LoginServicio] ValidarToken(): Token expirado');
       this.EliminarToken();
       return false;
     }
+
+    console.log('[LoginServicio] ValidarToken(): Token válido');
+    return true;
+  } catch (error) {
+    console.error('[LoginServicio] ValidarToken(): Error al decodificar token:', error);
+    this.EliminarToken();
+    return false;
   }
+}
   
 }
