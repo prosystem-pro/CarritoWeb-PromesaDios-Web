@@ -121,8 +121,8 @@
                 </li>
                                 <li class="nav-item">
                     <!-- Versión normal -->
-                    <a *ngIf="!modoEdicion" class="nav-link" (click)="navegar('/reporte/producto')"
-                        [ngClass]="!esMovil && estaRutaActiva('/reporte/producto') ? 'active-route' : ''"
+                    <a *ngIf="!modoEdicion" class="nav-link" (click)="navegar('/reporte')"
+                        [ngClass]="!esMovil && estaRutaActiva('/reporte') ? 'active-route' : ''"
                         [ngStyle]="{'color': Datos?.ColorTextoContacto}">
                         {{ Datos?.TextoContacto || '' }}
                     </a>
@@ -136,8 +136,8 @@
 
                 <li *ngIf="Permiso.PermisoAdminSuperAdmin()" class="nav-item">
                     <!-- Versión normal -->
-                    <a *ngIf="!modoEdicion" class="nav-link" (click)="navegar('/reporte-vista')"
-                        [ngClass]="!esMovil && estaRutaActiva('/reporte-vista') ? 'active-route' : ''"
+                    <a *ngIf="!modoEdicion" class="nav-link" (click)="navegar('/reporte')"
+                        [ngClass]="!esMovil && estaRutaActiva('/reporte') ? 'active-route' : ''"
                         [ngStyle]="{'color': Datos?.ColorTextextoReporte}">
                         {{ Datos?.TextoReporte || '' }}
                     </a>
