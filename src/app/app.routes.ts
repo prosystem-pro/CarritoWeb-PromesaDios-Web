@@ -46,7 +46,7 @@ export const routes: Routes = [
   { path: 'otro', component: OtroComponent},
 
   //Rutas protegidas
-  { path: 'reporte-producto', component: ReporteProductoComponent },
+  { path: 'reporte-producto', component: ReporteProductoComponent,canActivate: [AutorizacionRuta] },
   { path: 'header-reporte', component: HeaderReporteComponent,canActivate: [AutorizacionRuta] },
   { path: 'reporte-vista', component: ReporteVistaComponent,canActivate: [AutorizacionRuta] },
   { path: 'reporte-red-social', component: ReporteRedSocialComponent,canActivate: [AutorizacionRuta] },
