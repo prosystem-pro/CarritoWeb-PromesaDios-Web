@@ -10,26 +10,23 @@ export const AutorizacionInterceptor: HttpInterceptorFn = (Solicitud, Siguiente)
   const router = inject(Router);
 
   const Token = Servicio.ObtenerToken();
-  console.log('[Interceptor] Token actual:', Token);
 
   if (Token) {
+    // console.log('Token adjuntado:', Token);
     Solicitud = Solicitud.clone({
       setHeaders: {
         Authorization: `Bearer ${Token}`
       }
     });
-    console.log('[Interceptor] Token añadido a headers');
-  } else {
-    console.warn('[Interceptor] No se encontró token para añadir');
   }
 
   return Siguiente(Solicitud).pipe(
     catchError(Error => {
-      console.error('[Interceptor] Error HTTP:', Error);
       if (Error.status === 401) {
-        console.warn('[Interceptor] Token expirado/401 recibido. Eliminando token y redirigiendo');
+        console.warn('Token expirado o no válido');
         Servicio.EliminarToken();
-        router.navigate(['/login']);
+        // console.log('Depuración - Redireccionando al login');
+        router.navigate(['/login']); 
       }
       return throwError(() => Error);
     })

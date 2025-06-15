@@ -42,36 +42,26 @@ export class LoginServicio {
     localStorage.removeItem('authToken');
   }
   
-ValidarToken(): boolean {
-  const token = this.ObtenerToken();
-  console.log('[LoginServicio] ValidarToken(): Token obtenido:', token);
-
-  if (!token) return false;
-
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const expiracion = payload.exp * 1000;
-    const emitidoEn = payload.iat * 1000;
-    const ahora = Date.now();
-
-    console.log('[LoginServicio] ValidarToken(): Payload:', payload);
-    console.log(`[LoginServicio] iat (fecha emisión): ${new Date(emitidoEn).toUTCString()} | Local: ${new Date(emitidoEn).toString()}`);
-    console.log(`[LoginServicio] exp (fecha expiración): ${new Date(expiracion).toUTCString()} | Local: ${new Date(expiracion).toString()}`);
-    console.log(`[LoginServicio] Fecha actual (sistema): ${new Date(ahora).toUTCString()} | Local: ${new Date(ahora).toString()}`);
-
-    if (expiracion < ahora) {
-      console.warn('[LoginServicio] ValidarToken(): ❌ Token expirado');
+  ValidarToken(): boolean {
+    const token = this.ObtenerToken();
+    if (!token) return false;
+  
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expiracion = payload.exp * 1000;
+      const ahora = Date.now();
+  
+      if (expiracion < ahora) {
+        this.EliminarToken();
+        return false;
+      }
+  
+      return true;
+    } catch (error) {
       this.EliminarToken();
       return false;
     }
-
-    console.log('[LoginServicio] ValidarToken(): ✅ Token válido');
-    return true;
-  } catch (error) {
-    console.error('[LoginServicio] ValidarToken(): ⚠️ Error decodificando token', error);
-    this.EliminarToken();
-    return false;
   }
-}
-
+  
+  
 }
