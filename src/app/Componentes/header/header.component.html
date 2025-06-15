@@ -119,25 +119,11 @@
                             placeholder="Contacto">
                     </div>
                 </li>
-                                <li class="nav-item">
-                    <!-- Versión normal -->
-                    <a *ngIf="!modoEdicion" class="nav-link" (click)="navegar('/reporte')"
-                        [ngClass]="!esMovil && estaRutaActiva('/reporte') ? 'active-route' : ''"
-                        [ngStyle]="{'color': Datos?.ColorTextoContacto}">
-                        {{ Datos?.TextoContacto || '' }}
-                    </a>
-
-                    <!-- Versión editable -->
-                    <div *ngIf="modoEdicion" class="d-flex align-items-center edit-nav-item">
-                        <input [(ngModel)]="Datos.TextoContacto" class="form-control form-control-sm mt-2"
-                            placeholder="Contacto">
-                    </div>
-                </li>
 
                 <li *ngIf="Permiso.PermisoAdminSuperAdmin()" class="nav-item">
                     <!-- Versión normal -->
-                    <a *ngIf="!modoEdicion" class="nav-link" (click)="navegar('/reporte')"
-                        [ngClass]="!esMovil && estaRutaActiva('/reporte') ? 'active-route' : ''"
+                    <a *ngIf="!modoEdicion" class="nav-link" (click)="navegar('/reporte-producto')"
+                        [ngClass]="!esMovil && estaRutaActiva('/reporte-producto') ? 'active-route' : ''"
                         [ngStyle]="{'color': Datos?.ColorTextextoReporte}">
                         {{ Datos?.TextoReporte || '' }}
                     </a>
