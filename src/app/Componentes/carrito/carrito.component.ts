@@ -127,8 +127,33 @@ ReportarProductosVendidos(): void {
     }
   }
 
+  isIOS(): boolean {
+    return /iPhone|iPad|iPod/.test(navigator.userAgent);
+  }
+
+  isSafari(): boolean {
+    return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  }
+
+  isAndroid(): boolean {
+    return /Android/i.test(navigator.userAgent);
+  }
+
   realizarPedido(): void {
     this.ReportarProductosVendidos();
+
+    const esIOS = this.isIOS() && this.isSafari();
+    const esAndroid = this.isAndroid();
+
+    let nuevaVentana: Window | null = null;
+
+    if (esIOS) {
+      nuevaVentana = window.open('', '_blank');
+      if (!nuevaVentana) {
+        console.error('El navegador bloqueó la ventana emergente.');
+        return;
+      }
+    }
 
     this.empresaServicio.Listado().subscribe({
       next: (data: any) => {
@@ -136,7 +161,7 @@ ReportarProductosVendidos(): void {
 
         const numTelefono = this.datosEmpresa?.Celular;
         if (!numTelefono) {
-          console.error('El número de celular no está disponible.');
+          if (esIOS && nuevaVentana) nuevaVentana.close();
           return;
         }
 
@@ -146,13 +171,16 @@ ReportarProductosVendidos(): void {
         const mensajeCodificado = encodeURIComponent(mensaje);
         const url = `https://wa.me/${numTelefono}?text=${mensajeCodificado}`;
 
-        // Apertura directa
-        window.open(url, '_blank', 'noopener');
+        if (esIOS && nuevaVentana) {
+          nuevaVentana.location.href = url; // Safari
+        } else {
+          window.open(url, '_blank'); // Android y demás
+        }
 
         this.vaciarCarrito();
       },
       error: (error: any) => {
-        console.error('Error al obtener los datos de la empresa:', error);
+        if (esIOS && nuevaVentana) nuevaVentana.close();
       }
     });
   }
