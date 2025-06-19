@@ -14,6 +14,7 @@ import { PermisoServicio } from '../../Autorizacion/AutorizacionPermiso';
 import { ReporteRedSocialServicio } from '../../Servicios/ReporteRedSocialServicio';
 import { RedSocialImagenServicio } from '../../Servicios/RedSocialImagenServicio';
 import { CarritoEstadoService } from '../../Servicios/CarritoEstadoServicio';
+import { EmpresaServicio } from '../../Servicios/EmpresaServicio'; // Importar el servicio
 
 @Component({
   selector: 'app-header',
@@ -36,6 +37,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   mostrarCarrito = false;
   RedeSocial: any = [];
   esMovil: boolean = false;
+  codigoEmpresa: number | null = null; // Nueva propiedad para almacenar el código de empresa
+  
   @ViewChild('navbarCollapse') navbarCollapse!: ElementRef;
 
   constructor(
@@ -49,19 +52,206 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private redSocialImagenServicio: RedSocialImagenServicio,
     private AlertaServicio: AlertaServicio,
     private carritoEstadoService: CarritoEstadoService,
-    private ReporteRedSocialServicio: ReporteRedSocialServicio
+    private ReporteRedSocialServicio: ReporteRedSocialServicio,
+    private EmpresaServicio: EmpresaServicio // Inyectar el servicio
   ) { }
 
   ngOnInit(): void {
-    this.Listado();
-    this.cargarRedesSociales();
-    this.subscription = this.servicioCompartido.carritoVaciado$.subscribe(() => {
+    this.obtenerCodigoEmpresa().then(() => {
+      this.Listado();
+      this.cargarRedesSociales();
+      this.subscription = this.servicioCompartido.carritoVaciado$.subscribe(() => {
+        this.obtenerTotalItemsCarrito();
+      });
       this.obtenerTotalItemsCarrito();
+      this.verificarVista();
     });
-    this.obtenerTotalItemsCarrito();
-    this.verificarVista();
   }
 
+  // Nuevo método para obtener el código de empresa
+  private async obtenerCodigoEmpresa(): Promise<void> {
+    try {
+      const empresa = await this.EmpresaServicio.ConseguirPrimeraEmpresa().toPromise();
+      if (empresa && empresa.CodigoEmpresa) {
+        this.codigoEmpresa = empresa.CodigoEmpresa;
+      } else {
+        console.warn('No se encontró información de empresa');
+        this.AlertaServicio.MostrarError('No se pudo obtener la información de la empresa');
+      }
+    } catch (error) {
+      console.error('Error al obtener código de empresa:', error);
+      this.AlertaServicio.MostrarError('Error al cargar información de empresa');
+    }
+  }
+
+  // Modificar el método Listado para crear navbar si no existe
+  Listado(): void {
+    this.Servicio.Listado().subscribe({
+      next: (data) => {
+        if (data && data.length > 0) {
+          // Existe el navbar, usar datos existentes
+          this.Datos = data[0];
+          this.actualizarEstilosCSS();
+          this.servicioCompartido.setDatosHeader({
+            urlImagenCarrito: this.Datos.UrlImagenCarrito,
+            textoBuscador: this.Datos.TextoBuscador,
+            urlImagenLupa: this.Datos.UrlImagenBuscador,
+          });
+        } else {
+          // No existe navbar, crear uno nuevo con valores por defecto
+          this.crearNavbarPorDefecto();
+        }
+      },
+      error: (error) => {
+        console.error('Error al cargar los datos del navbar:', error);
+        // En caso de error, intentar crear navbar por defecto
+        this.crearNavbarPorDefecto();
+      },
+    });
+  }
+
+  // Nuevo método para crear navbar con valores por defecto
+  private crearNavbarPorDefecto(): void {
+    if (!this.codigoEmpresa) {
+      this.AlertaServicio.MostrarError('No se puede crear el navbar sin información de empresa');
+      return;
+    }
+
+    const navbarDefecto = {
+      CodigoEmpresa: this.codigoEmpresa,
+      TextoInicio: 'Nosotros',
+      ColorTextoInicio: '#000000',
+      TextoMenu: 'Menú',
+      ColorTextoMenu: '#000000',
+      TextoContacto: 'Contacto',
+      ColorTextoContacto: '#000000',
+      TextoOtro: 'Otro',
+      ColortextoOtro: '#000000',
+      ColorFondoOtro: '#f8f9fa',
+      TextoReporte: 'Reportes',
+      ColorTextextoReporte: '#000000',
+      TextoBuscador: 'Buscar...',
+      ColorTextoBuscador: '#000000',
+      ColorFondoBuscador: '#ffffff',
+      UrlImagenBuscador: '',
+      UrlImagenCarrito: '',
+      ColorFondoNavbar: '#ffffff',
+      UrlLogo: '',
+      Estatus: 1
+    };
+
+    this.Servicio.Crear(navbarDefecto).subscribe({
+      next: (response) => {
+        console.log('Navbar creado exitosamente:', response);
+        this.AlertaServicio.MostrarExito('Configuración de navbar creada correctamente');
+        
+        // Asignar los datos del navbar creado
+        this.Datos = response.Entidad || response;
+        this.actualizarEstilosCSS();
+        this.servicioCompartido.setDatosHeader({
+          urlImagenCarrito: this.Datos.UrlImagenCarrito,
+          textoBuscador: this.Datos.TextoBuscador,
+          urlImagenLupa: this.Datos.UrlImagenBuscador,
+        });
+      },
+      error: (error) => {
+        console.error('Error al crear navbar por defecto:', error);
+        this.AlertaServicio.MostrarError('Error al crear la configuración del navbar');
+        
+        // Como fallback, usar datos temporales para que la interfaz no se rompa
+        this.Datos = navbarDefecto;
+        this.actualizarEstilosCSS();
+      }
+    });
+  }
+
+  // Modificar el método subirImagen para manejar la creación si no existe CodigoNavbar
+  subirImagen(file: File, campoDestino: string): void {
+    if (!this.Datos) {
+      this.AlertaServicio.MostrarError('No hay datos de navbar disponibles');
+      return;
+    }
+
+    // Si no existe CodigoNavbar, primero crear el navbar
+    if (!this.Datos.CodigoNavbar) {
+      this.AlertaServicio.MostrarAlerta('Creando configuración de navbar...', 'Por favor, espere');
+      
+      // Crear el navbar primero y luego subir la imagen
+      this.Servicio.Crear(this.Datos).subscribe({
+        next: (response) => {
+          this.Datos = response.Entidad || response;
+          // Ahora que tenemos el CodigoNavbar, proceder a subir la imagen
+          this.ejecutarSubidaImagen(file, campoDestino);
+        },
+        error: (error) => {
+          console.error('Error al crear navbar antes de subir imagen:', error);
+          this.AlertaServicio.MostrarError('Error al crear la configuración del navbar');
+        }
+      });
+    } else {
+      // Ya existe el navbar, proceder directamente a subir la imagen
+      this.ejecutarSubidaImagen(file, campoDestino);
+    }
+  }
+
+  // Nuevo método para ejecutar la subida de imagen
+  private ejecutarSubidaImagen(file: File, campoDestino: string): void {
+    const formData = new FormData();
+    formData.append('Imagen', file);
+    formData.append('CarpetaPrincipal', this.NombreEmpresa);
+    formData.append('SubCarpeta', 'Navbar');
+    formData.append('CodigoVinculado', this.Datos.CodigoEmpresa.toString());
+    formData.append('CodigoPropio', this.Datos.CodigoNavbar.toString());
+    formData.append('CampoVinculado', 'CodigoEmpresa');
+    formData.append('CampoPropio', 'CodigoNavbar');
+    formData.append('NombreCampoImagen', campoDestino);
+
+    this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
+      next: (response: any) => {
+        this.AlertaServicio.MostrarAlerta('Cargando imagen...', 'Por favor, espere');
+
+        if (response && response.Entidad && response.Entidad[campoDestino]) {
+          this.Datos[campoDestino] = response.Entidad[campoDestino];
+
+          if (campoDestino === 'UrlImagenBuscador') {
+            document.documentElement.style.setProperty(
+              '--url-imagen-buscador',
+              `url(${response.Entidad[campoDestino]})`
+            );
+          }
+
+          const datosActualizados = { ...this.Datos };
+
+          this.Servicio.Editar(datosActualizados).subscribe({
+            next: (updateResponse) => {
+              this.AlertaServicio.MostrarExito('Imagen actualizada correctamente');
+              this.modoEdicion = false;
+            },
+            error: (updateError) => {
+              this.AlertaServicio.MostrarError('Error al actualizar el campo de imagen');
+            },
+          });
+        } else {
+          const imageUrl =
+            response.UrlImagenPortada ||
+            response.url ||
+            (response.Entidad ? response.Entidad.UrlImagenPortada : null);
+
+          if (imageUrl) {
+            this.Datos[campoDestino] = imageUrl;
+            this.AlertaServicio.MostrarExito('Imagen subida correctamente');
+          } else {
+            this.AlertaServicio.MostrarAlerta('No se pudo obtener la URL de la imagen');
+          }
+        }
+      },
+      error: (error) => {
+        this.AlertaServicio.MostrarError('Error al subir la imagen. Por favor, intente de nuevo.');
+      },
+    });
+  }
+
+  // Los demás métodos permanecen igual...
   ReportarRedSocial(codigo: number | undefined): void {
     if (codigo === undefined) {
       console.warn('⚠️ Código de red social no definido, no se reporta');
@@ -105,176 +295,154 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   cargarRedesSociales(): void {
-  this.redSocialServicio.Listado('Navbar').subscribe({
-    next: (data) => {
-      this.RedeSocial = data.filter((red: any) => red.Estatus === 1);
-    },
-    error: (error) => {
-    }
-  });
-}
-
-  // Método para actualizar imagen de red social
-actualizarImagenRedSocial(event: any, codigoRedSocial: number): void {
-  const file = event.target.files[0];
-  if (!file) {
-    return;
-  }
-
-  if (!codigoRedSocial) {
-    this.AlertaServicio.MostrarError('No se pudo identificar la red social');
-    return;
-  }
-
-  // Buscar la red social específica
-  const redSocial = this.RedeSocial.find((red: any) => red.CodigoRedSocial === codigoRedSocial);
-  if (!redSocial) {
-    this.AlertaServicio.MostrarError('Red social no encontrada');
-    return;
-  }
-
-  // Mostrar preview inmediato
-  const reader = new FileReader();
-  reader.onload = (e: any) => {
-    // Si ya tiene imágenes, actualizar la primera
-    if (redSocial.Imagenes && redSocial.Imagenes.length > 0) {
-      redSocial.Imagenes[0].UrlImagen = e.target.result;
-    } else {
-      // Si no tiene imágenes, crear el array y agregar una imagen temporal
-      redSocial.Imagenes = [{
-        CodigoRedSocialImagen: null,
-        UrlImagen: e.target.result,
-        Ubicacion: 'Navbar'
-      }];
-    }
-  };
-  reader.readAsDataURL(file);
-
-  // Subir la imagen al servidor
-  this.subirImagenRedSocial(file, codigoRedSocial, redSocial);
-}
-
-subirImagenRedSocial(file: File, codigoRedSocial: number, redSocial: any): void {
-  const formData = new FormData();
-  formData.append('Imagen', file);
-  formData.append('CarpetaPrincipal', this.NombreEmpresa);
-  formData.append('SubCarpeta', 'RedSocialImagen');
-  formData.append('CodigoVinculado', codigoRedSocial.toString());
-  
-  // Verificar si ya existe una imagen para esta red social en Navbar
-  const imagenExistente = redSocial.Imagenes?.find((img: any) => img.Ubicacion === 'Navbar');
-  const tieneImagenValida = imagenExistente && imagenExistente.CodigoRedSocialImagen;
-
-  if (tieneImagenValida) {
-    // Si ya existe con código válido, usar para actualización
-    formData.append('CodigoPropio', imagenExistente.CodigoRedSocialImagen.toString());
-  } else {
-    // Si no existe o no tiene código, dejar vacío para creación
-    formData.append('CodigoPropio', '');
-  }
-
-  formData.append('CampoVinculado', 'CodigoRedSocial');
-  formData.append('CampoPropio', 'CodigoRedSocialImagen');
-  formData.append('NombreCampoImagen', 'UrlImagen');
-
-  this.http.post(`${this.Url}subir-imagen`, formData)
-    .subscribe({
-      next: (response: any) => {
-        if (response && response.Entidad && response.Entidad.UrlImagen) {
-          // Procesar la respuesta según si se creó o actualizó
-          this.procesarRespuestaImagen(codigoRedSocial, response, redSocial);
-        } else {
-          // Manejar respuesta alternativa
-          const imageUrl = response.UrlImagenPortada || 
-                          response.url || 
-                          (response.Entidad ? response.Entidad.UrlImagenPortada : null);
-
-          if (imageUrl) {
-            this.procesarRespuestaImagen(codigoRedSocial, { Entidad: { UrlImagen: imageUrl } }, redSocial);
-          } else {
-            this.AlertaServicio.MostrarError('Error al obtener la URL de la imagen');
-          }
-        }
+    this.redSocialServicio.Listado('Navbar').subscribe({
+      next: (data) => {
+        this.RedeSocial = data.filter((red: any) => red.Estatus === 1);
       },
       error: (error) => {
-        this.AlertaServicio.MostrarError('Error al subir la imagen');
-        // Recargar las redes sociales para revertir el preview
+        console.error('Error al cargar redes sociales:', error);
+      }
+    });
+  }
+
+  // Resto de métodos permanecen igual...
+  actualizarImagenRedSocial(event: any, codigoRedSocial: number): void {
+    const file = event.target.files[0];
+    if (!file) {
+      return;
+    }
+
+    if (!codigoRedSocial) {
+      this.AlertaServicio.MostrarError('No se pudo identificar la red social');
+      return;
+    }
+
+    const redSocial = this.RedeSocial.find((red: any) => red.CodigoRedSocial === codigoRedSocial);
+    if (!redSocial) {
+      this.AlertaServicio.MostrarError('Red social no encontrada');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      if (redSocial.Imagenes && redSocial.Imagenes.length > 0) {
+        redSocial.Imagenes[0].UrlImagen = e.target.result;
+      } else {
+        redSocial.Imagenes = [{
+          CodigoRedSocialImagen: null,
+          UrlImagen: e.target.result,
+          Ubicacion: 'Navbar'
+        }];
+      }
+    };
+    reader.readAsDataURL(file);
+
+    this.subirImagenRedSocial(file, codigoRedSocial, redSocial);
+  }
+
+  subirImagenRedSocial(file: File, codigoRedSocial: number, redSocial: any): void {
+    const formData = new FormData();
+    formData.append('Imagen', file);
+    formData.append('CarpetaPrincipal', this.NombreEmpresa);
+    formData.append('SubCarpeta', 'RedSocialImagen');
+    formData.append('CodigoVinculado', codigoRedSocial.toString());
+    
+    const imagenExistente = redSocial.Imagenes?.find((img: any) => img.Ubicacion === 'Navbar');
+    const tieneImagenValida = imagenExistente && imagenExistente.CodigoRedSocialImagen;
+
+    if (tieneImagenValida) {
+      formData.append('CodigoPropio', imagenExistente.CodigoRedSocialImagen.toString());
+    } else {
+      formData.append('CodigoPropio', '');
+    }
+
+    formData.append('CampoVinculado', 'CodigoRedSocial');
+    formData.append('CampoPropio', 'CodigoRedSocialImagen');
+    formData.append('NombreCampoImagen', 'UrlImagen');
+
+    this.http.post(`${this.Url}subir-imagen`, formData)
+      .subscribe({
+        next: (response: any) => {
+          if (response && response.Entidad && response.Entidad.UrlImagen) {
+            this.procesarRespuestaImagen(codigoRedSocial, response, redSocial);
+          } else {
+            const imageUrl = response.UrlImagenPortada || 
+                            response.url || 
+                            (response.Entidad ? response.Entidad.UrlImagenPortada : null);
+
+            if (imageUrl) {
+              this.procesarRespuestaImagen(codigoRedSocial, { Entidad: { UrlImagen: imageUrl } }, redSocial);
+            } else {
+              this.AlertaServicio.MostrarError('Error al obtener la URL de la imagen');
+            }
+          }
+        },
+        error: (error) => {
+          this.AlertaServicio.MostrarError('Error al subir la imagen');
+          this.cargarRedesSociales();
+        }
+      });
+  }
+
+  procesarRespuestaImagen(codigoRedSocial: number, response: any, redSocial: any): void {
+    const urlImagen = response.Entidad.UrlImagen;
+    
+    const imagenExistente = redSocial.Imagenes?.find((img: any) => img.Ubicacion === 'Navbar');
+
+    if (imagenExistente && imagenExistente.CodigoRedSocialImagen) {
+      this.actualizarRegistroRedSocialImagen(imagenExistente.CodigoRedSocialImagen, urlImagen);
+    } else {
+      const codigoImagenCreada = response.Entidad.CodigoRedSocialImagen;
+      
+      if (codigoImagenCreada) {
+        this.actualizarRegistroRedSocialImagen(codigoImagenCreada, urlImagen);
+      } else {
+        this.crearRegistroRedSocialImagen(codigoRedSocial, urlImagen);
+      }
+    }
+  }
+
+  crearRegistroRedSocialImagen(codigoRedSocial: number, urlImagen: string): void {
+    const datosNuevos = {
+      CodigoRedSocial: codigoRedSocial,
+      UrlImagen: urlImagen,
+      Ubicacion: 'Navbar',
+      Estatus: 1
+    };
+
+    this.redSocialImagenServicio.Crear(datosNuevos).subscribe({
+      next: (response) => {
+        this.AlertaServicio.MostrarExito('Imagen de red social creada correctamente');
+        this.cargarRedesSociales();
+      },
+      error: (error) => {
+        this.AlertaServicio.MostrarError('Error al crear la imagen de la red social');
         this.cargarRedesSociales();
       }
     });
-}
-
-procesarRespuestaImagen(codigoRedSocial: number, response: any, redSocial: any): void {
-  const urlImagen = response.Entidad.UrlImagen;
-  
-  // Verificar si ya existe una imagen para esta red social en Navbar
-  const imagenExistente = redSocial.Imagenes?.find((img: any) => img.Ubicacion === 'Navbar');
-
-  if (imagenExistente && imagenExistente.CodigoRedSocialImagen) {
-    // ACTUALIZAR: Ya existe una imagen con código válido en Navbar
-    this.actualizarRegistroRedSocialImagen(imagenExistente.CodigoRedSocialImagen, urlImagen);
-  } else {
-    // ACTUALIZAR EL REGISTRO CREADO AUTOMÁTICAMENTE: 
-    // El endpoint subir-imagen ya creó un registro, solo necesitamos actualizarlo con la Ubicacion
-    const codigoImagenCreada = response.Entidad.CodigoRedSocialImagen;
-    
-    if (codigoImagenCreada) {
-      this.actualizarRegistroRedSocialImagen(codigoImagenCreada, urlImagen);
-    } else {
-      // Fallback: crear manualmente solo si no se creó automáticamente
-      this.crearRegistroRedSocialImagen(codigoRedSocial, urlImagen);
-    }
   }
-}
 
-crearRegistroRedSocialImagen(codigoRedSocial: number, urlImagen: string): void {
-  const datosNuevos = {
-    CodigoRedSocial: codigoRedSocial,
-    UrlImagen: urlImagen,
-    Ubicacion: 'Navbar', // Valor quemado como solicitaste
-    Estatus: 1 // Agregar estatus activo
-  };
+  actualizarRegistroRedSocialImagen(codigoRedSocialImagen: number, urlImagen: string): void {
+    const datosActualizados = {
+      CodigoRedSocialImagen: codigoRedSocialImagen,
+      UrlImagen: urlImagen,
+      Ubicacion: 'Navbar',
+      Estatus: 1
+    };
 
-  this.redSocialImagenServicio.Crear(datosNuevos).subscribe({
-    next: (response) => {
-      this.AlertaServicio.MostrarExito('Imagen de red social creada correctamente');
-      // Recargar las redes sociales para obtener los datos actualizados
-      this.cargarRedesSociales();
-    },
-    error: (error) => {
-      this.AlertaServicio.MostrarError('Error al crear la imagen de la red social');
-      // Recargar las redes sociales para revertir cambios
-      this.cargarRedesSociales();
-    }
-  });
-}
-
-
-actualizarRegistroRedSocialImagen(codigoRedSocialImagen: number, urlImagen: string): void {
-  const datosActualizados = {
-    CodigoRedSocialImagen: codigoRedSocialImagen,
-    UrlImagen: urlImagen,
-    Ubicacion: 'Navbar', // Valor quemado como solicitaste
-    Estatus: 1 // Mantener estatus activo
-  };
-
-  this.redSocialImagenServicio.Editar(datosActualizados).subscribe({
-    next: (response) => {
-      this.AlertaServicio.MostrarExito('Imagen de red social actualizada correctamente');
-      
-      // Recargar las redes sociales para obtener los datos actualizados
-      setTimeout(() => this.cargarRedesSociales(), 500);
-    },
-    error: (error) => {
-      this.AlertaServicio.MostrarError('Error al actualizar la imagen de la red social');
-      // Recargar las redes sociales para revertir cambios
-      this.cargarRedesSociales();
-    }
-  });
-}
+    this.redSocialImagenServicio.Editar(datosActualizados).subscribe({
+      next: (response) => {
+        this.AlertaServicio.MostrarExito('Imagen de red social actualizada correctamente');
+        setTimeout(() => this.cargarRedesSociales(), 500);
+      },
+      error: (error) => {
+        this.AlertaServicio.MostrarError('Error al actualizar la imagen de la red social');
+        this.cargarRedesSociales();
+      }
+    });
+  }
 
   buscar(): void {
-    // Verifica que haya texto de búsqueda antes de hacer la solicitud
     if (this.textoBusqueda.trim()) {
       this.busquedaActiva = true;
       this.router.navigate(['/productos/buscar'], { queryParams: { texto: this.textoBusqueda } });
@@ -282,7 +450,6 @@ actualizarRegistroRedSocialImagen(codigoRedSocialImagen: number, urlImagen: stri
   }
 
   cancelarBusqueda(): void {
-    // Verifica que haya texto de búsqueda antes de hacer la solicitud
     if (this.textoBusqueda.trim()) {
       this.busquedaActiva = false;
       this.textoBusqueda = "";
@@ -302,17 +469,14 @@ actualizarRegistroRedSocialImagen(codigoRedSocialImagen: number, urlImagen: stri
 
   toggleModoEdicion(): void {
     if (!this.modoEdicion) {
-      // Hacer una copia profunda de los datos antes de entrar en modo edición
       this.datosOriginales = JSON.parse(JSON.stringify(this.Datos));
       this.modoEdicion = true;
       document.body.classList.add('modoEdicion');
     } else {
-      // Preguntar si desea guardar los cambios
       this.AlertaServicio.Confirmacion('¿Desea guardar los cambios?').then((confirmado) => {
         if (confirmado) {
           this.guardarCambios();
         } else {
-          // Restaurar datos originales si cancela
           this.Datos = JSON.parse(JSON.stringify(this.datosOriginales));
           this.actualizarEstilosCSS();
         }
@@ -354,24 +518,6 @@ actualizarRegistroRedSocialImagen(codigoRedSocialImagen: number, urlImagen: stri
     } else {
       console.error('No hay datos disponibles para actualizar');
     }
-  }
-
-  Listado(): void {
-    this.Servicio.Listado().subscribe({
-      next: (data) => {
-        this.Datos = data[0];
-        this.actualizarEstilosCSS();
-        this.servicioCompartido.setDatosHeader({
-          urlImagenCarrito: this.Datos.UrlImagenCarrito,
-          textoBuscador: this.Datos.TextoBuscador,
-          urlImagenLupa: this.Datos.UrlImagenBuscador,
-        }
-        );
-      },
-      error: (error) => {
-        console.error('Error al cargar los datos', error);
-      },
-    });
   }
 
   actualizarEstilosCSS(): void {
@@ -447,66 +593,10 @@ actualizarRegistroRedSocialImagen(codigoRedSocialImagen: number, urlImagen: stri
     }
   }
 
-  subirImagen(file: File, campoDestino: string): void {
-    const formData = new FormData();
-    formData.append('Imagen', file);
-    formData.append('CarpetaPrincipal', this.NombreEmpresa);
-    formData.append('SubCarpeta', 'Navbar');
-    formData.append('CodigoVinculado', this.Datos.CodigoEmpresa);
-    formData.append('CodigoPropio', this.Datos.CodigoNavbar);
-    formData.append('CampoVinculado', 'CodigoEmpresa');
-    formData.append('CampoPropio', 'CodigoNavbar');
-    formData.append('NombreCampoImagen', campoDestino);
-
-    this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
-      next: (response: any) => {
-        this.AlertaServicio.MostrarAlerta('Cargando imagen...', 'Por favor, espere');
-
-        if (response && response.Entidad && response.Entidad[campoDestino]) {
-          this.Datos[campoDestino] = response.Entidad[campoDestino];
-
-          if (campoDestino === 'UrlImagenBuscador') {
-            document.documentElement.style.setProperty(
-              '--url-imagen-buscador',
-              `url(${response.Entidad[campoDestino]})`
-            );
-          }
-
-          const datosActualizados = { ...this.Datos };
-
-          this.Servicio.Editar(datosActualizados).subscribe({
-            next: (updateResponse) => {
-              this.modoEdicion = false;
-            },
-            error: (updateError) => {
-              this.AlertaServicio.MostrarError(updateError, 'Error al actualizar el campo de imagen');
-            },
-          });
-        } else {
-          const imageUrl =
-            response.UrlImagenPortada ||
-            response.url ||
-            (response.Entidad ? response.Entidad.UrlImagenPortada : null);
-
-          if (imageUrl) {
-            this.Datos[campoDestino] = imageUrl;
-            this.AlertaServicio.MostrarExito('Imagen subida correctamente');
-          } else {
-            this.AlertaServicio.MostrarAlerta('No se pudo obtener la URL de la imagen');
-          }
-        }
-      },
-      error: (error) => {
-        this.AlertaServicio.MostrarError(error, 'Error al subir la imagen Por favor, intente de nuevo.');
-      },
-    });
-  }
-
   cerrarNavbarSiEsMovil() {
     if (window.innerWidth < 992) {
-      // 992px = Bootstrap breakpoint for lg
       const el = this.navbarCollapse.nativeElement;
-      this.renderer.removeClass(el, 'show'); // Cierra el menú colapsado
+      this.renderer.removeClass(el, 'show');
     }
   }
 
@@ -529,10 +619,8 @@ actualizarRegistroRedSocialImagen(codigoRedSocialImagen: number, urlImagen: stri
   changeColor(event: Event): void {
     const color = (event.target as HTMLInputElement).value;
 
-    // Actualizar la propiedad CSS para cambio visual inmediato
     document.documentElement.style.setProperty('--color-fondo-navbar', color);
 
-    // Actualizar el objeto local Datos
     if (this.Datos) {
       this.Datos.ColorFondoNavbar = color;
     } else {
@@ -540,11 +628,10 @@ actualizarRegistroRedSocialImagen(codigoRedSocialImagen: number, urlImagen: stri
     }
   }
 
-  //Método para ver el carrito
   alternarCarrito() {
     this.mostrarCarrito = !this.mostrarCarrito;
 
-      if (this.mostrarCarrito) {
+    if (this.mostrarCarrito) {
       this.carritoEstadoService.abrirCarrito();
     } else {
       this.carritoEstadoService.cerrarCarrito();
