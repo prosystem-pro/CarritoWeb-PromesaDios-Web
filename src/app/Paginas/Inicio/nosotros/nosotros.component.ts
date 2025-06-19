@@ -221,45 +221,65 @@ export class NosotrosComponent implements OnInit {
 
     this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
       next: (response: any) => {
-
         if (response && response.Entidad && response.Entidad[campoDestino]) {
           this.portadaData[campoDestino] = response.Entidad[campoDestino];
 
-          const datosActualizados = { ...this.portadaData };
+          const {
+            UrlImagenPortada,
+            UrlImagenPortadaIzquierdo,
+            UrlImagenPortadaDerecho,
+            UrlImagenMision,
+            UrlImagenVision,
+            ...datosActualizados
+          } = this.portadaData;
 
           this.empresaPortadaServicio.Editar(datosActualizados).subscribe({
-            next: (updateResponse) => {
+            next: () => {
               this.alertaServicio.MostrarExito(
                 'Campo de imagen actualizado correctamente'
               );
               this.modoEdicion = false;
             },
-            error: (updateError) => {
+            error: () => {
               this.alertaServicio.MostrarError(
-                updateError,
                 'Error al actualizar el campo de imagen. Por favor, intente de nuevo.'
               );
             },
           });
         }
       },
-      error: (error) => {
+      error: () => {
         this.alertaServicio.MostrarError(
-          error,
           'Error al subir la imagen. Por favor, intente de nuevo.'
         );
       },
     });
   }
 
-  // Método para actualizar la URL del video
-  actualizarVideo(): void {
-    if (this.portadaData) {
-      this.portadaData.Urlvideo = this.rawYoutubeUrl;
 
-      this.setSanitizedUrl();
-    }
+  // Método para actualizar la URL del video
+// Método para actualizar la URL del video
+actualizarVideo(): void {
+  if (this.portadaData) {
+    this.portadaData.Urlvideo = this.rawYoutubeUrl;
+    this.setSanitizedUrl();
+
+    const datosVideo = {
+      CodigoEmpresaPortada: this.portadaData.CodigoEmpresaPortada,
+      Urlvideo: this.portadaData.Urlvideo
+    };
+
+    this.empresaPortadaServicio.Editar(datosVideo).subscribe({
+      next: () => {
+        this.alertaServicio.MostrarExito('Video actualizado correctamente');
+        this.modoEdicion = false;
+      },
+      error: () => {
+        this.alertaServicio.MostrarError('Error al actualizar el video. Por favor, intente de nuevo.');
+      },
+    });
   }
+}
 
   setSanitizedUrl(): void {
     this.sanitizedVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.rawYoutubeUrl);
@@ -300,7 +320,7 @@ export class NosotrosComponent implements OnInit {
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.reproducirVideo();
-    }, 300); 
+    }, 300);
   }
 
   reproducirVideo() {
@@ -323,6 +343,5 @@ export class NosotrosComponent implements OnInit {
       this.VolumenVideo = true;
     }
   }
-
 
 }

@@ -38,7 +38,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   RedeSocial: any = [];
   esMovil: boolean = false;
   codigoEmpresa: number | null = null; // Nueva propiedad para almacenar el código de empresa
-  
+
   @ViewChild('navbarCollapse') navbarCollapse!: ElementRef;
 
   constructor(
@@ -144,7 +144,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       next: (response) => {
         console.log('Navbar creado exitosamente:', response);
         this.AlertaServicio.MostrarExito('Configuración de navbar creada correctamente');
-        
+
         // Asignar los datos del navbar creado
         this.Datos = response.Entidad || response;
         this.actualizarEstilosCSS();
@@ -157,7 +157,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Error al crear navbar por defecto:', error);
         this.AlertaServicio.MostrarError('Error al crear la configuración del navbar');
-        
+
         // Como fallback, usar datos temporales para que la interfaz no se rompa
         this.Datos = navbarDefecto;
         this.actualizarEstilosCSS();
@@ -175,7 +175,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     // Si no existe CodigoNavbar, primero crear el navbar
     if (!this.Datos.CodigoNavbar) {
       this.AlertaServicio.MostrarAlerta('Creando configuración de navbar...', 'Por favor, espere');
-      
+
       // Crear el navbar primero y luego subir la imagen
       this.Servicio.Crear(this.Datos).subscribe({
         next: (response) => {
@@ -220,17 +220,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
             );
           }
 
-          const datosActualizados = { ...this.Datos };
+          const { UrlImagenBuscador, UrlImagenCarrito, UrlLogo, ...datosLimpios } = this.Datos;
 
-          this.Servicio.Editar(datosActualizados).subscribe({
-            next: (updateResponse) => {
+          this.Servicio.Editar(datosLimpios).subscribe({
+            next: () => {
               this.AlertaServicio.MostrarExito('Imagen actualizada correctamente');
               this.modoEdicion = false;
             },
-            error: (updateError) => {
+            error: () => {
               this.AlertaServicio.MostrarError('Error al actualizar el campo de imagen');
             },
           });
+
         } else {
           const imageUrl =
             response.UrlImagenPortada ||
@@ -245,7 +246,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
           }
         }
       },
-      error: (error) => {
+      error: () => {
         this.AlertaServicio.MostrarError('Error al subir la imagen. Por favor, intente de nuevo.');
       },
     });
@@ -346,7 +347,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     formData.append('CarpetaPrincipal', this.NombreEmpresa);
     formData.append('SubCarpeta', 'RedSocialImagen');
     formData.append('CodigoVinculado', codigoRedSocial.toString());
-    
+
     const imagenExistente = redSocial.Imagenes?.find((img: any) => img.Ubicacion === 'Navbar');
     const tieneImagenValida = imagenExistente && imagenExistente.CodigoRedSocialImagen;
 
@@ -366,9 +367,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
           if (response && response.Entidad && response.Entidad.UrlImagen) {
             this.procesarRespuestaImagen(codigoRedSocial, response, redSocial);
           } else {
-            const imageUrl = response.UrlImagenPortada || 
-                            response.url || 
-                            (response.Entidad ? response.Entidad.UrlImagenPortada : null);
+            const imageUrl = response.UrlImagenPortada ||
+              response.url ||
+              (response.Entidad ? response.Entidad.UrlImagenPortada : null);
 
             if (imageUrl) {
               this.procesarRespuestaImagen(codigoRedSocial, { Entidad: { UrlImagen: imageUrl } }, redSocial);
@@ -386,14 +387,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   procesarRespuestaImagen(codigoRedSocial: number, response: any, redSocial: any): void {
     const urlImagen = response.Entidad.UrlImagen;
-    
+
     const imagenExistente = redSocial.Imagenes?.find((img: any) => img.Ubicacion === 'Navbar');
 
     if (imagenExistente && imagenExistente.CodigoRedSocialImagen) {
       this.actualizarRegistroRedSocialImagen(imagenExistente.CodigoRedSocialImagen, urlImagen);
     } else {
       const codigoImagenCreada = response.Entidad.CodigoRedSocialImagen;
-      
+
       if (codigoImagenCreada) {
         this.actualizarRegistroRedSocialImagen(codigoImagenCreada, urlImagen);
       } else {

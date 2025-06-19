@@ -328,42 +328,47 @@ export class MenuCategoriaComponent implements OnInit {
     }
   }
 
-  subirImagenDecorativo(file: File, campoDestino: string): void {
-    const formData = new FormData();
-    formData.append('Imagen', file);
-    formData.append('CarpetaPrincipal', this.NombreEmpresa);
-    formData.append('SubCarpeta', 'MenuPortada');
-    formData.append('CodigoVinculado', this.menuPortada.CodigoEmpresa);
-    formData.append('CodigoPropio', this.menuPortada.CodigoMenuPortada);
-    formData.append('CampoVinculado', 'CodigoEmpresa');
-    formData.append('CampoPropio', 'CodigoMenuPortada');
-    formData.append('NombreCampoImagen', campoDestino);
+subirImagenDecorativo(file: File, campoDestino: string): void {
+  const formData = new FormData();
+  formData.append('Imagen', file);
+  formData.append('CarpetaPrincipal', this.NombreEmpresa);
+  formData.append('SubCarpeta', 'MenuPortada');
+  formData.append('CodigoVinculado', this.menuPortada.CodigoEmpresa);
+  formData.append('CodigoPropio', this.menuPortada.CodigoMenuPortada);
+  formData.append('CampoVinculado', 'CodigoEmpresa');
+  formData.append('CampoPropio', 'CodigoMenuPortada');
+  formData.append('NombreCampoImagen', campoDestino);
 
-    this.http.post(`${this.Url}subir-imagen`, formData)
-      .subscribe({
-        next: (response: any) => {
+  this.http.post(`${this.Url}subir-imagen`, formData)
+    .subscribe({
+      next: (response: any) => {
+        if (response && response.Entidad && response.Entidad[campoDestino]) {
+          this.menuPortada[campoDestino] = response.Entidad[campoDestino];
+          const {
+            UrlImagenNavbar,
+            UrlImagenPortadaIzquierdo,
+            UrlImagenPortadaDerecho,
+            UrlImagenMenu,
+            UrlImagenPresentacion,
+            ...datosActualizados
+          } = this.menuPortada;
 
-          if (response && response.Entidad && response.Entidad[campoDestino]) {
-            this.menuPortada[campoDestino] = response.Entidad[campoDestino];
-
-            const datosActualizados = { ...this.menuPortada };
-
-            this.menuPortadaServicio.Editar(datosActualizados).subscribe({
-              next: (updateResponse) => {
-                this.alertaServicio.MostrarExito('Imagen actualizada correctamente', 'Éxito');
-                this.modoEdicion = false;
-              },
-              error: (updateError) => {
-                this.alertaServicio.MostrarError(updateError, 'Error al actualizar la imagen');
-              }
-            });
-          }
-        },
-        error: (error) => {
-          this.alertaServicio.MostrarError(error, 'Error al subir la imagen');
+          this.menuPortadaServicio.Editar(datosActualizados).subscribe({
+            next: () => {
+              this.alertaServicio.MostrarExito('Imagen actualizada correctamente', 'Éxito');
+              this.modoEdicion = false;
+            },
+            error: () => {
+              this.alertaServicio.MostrarError('Error al actualizar la imagen');
+            }
+          });
         }
-      });
-  }
+      },
+      error: () => {
+        this.alertaServicio.MostrarError('Error al subir la imagen');
+      }
+    });
+}
 
   // Crea una nueva categoría subiendo primero la imagen
   subirImagenNuevaCategoria() {
