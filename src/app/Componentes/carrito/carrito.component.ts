@@ -128,27 +128,39 @@ ReportarProductosVendidos(): void {
   }
 
   realizarPedido(): void {
-    this.ReportarProductosVendidos();
-    this.empresaServicio.Listado().subscribe({
-      next: (data: any) => {
-        this.datosEmpresa = data[0];
+  this.ReportarProductosVendidos();
+  this.empresaServicio.Listado().subscribe({
+    next: (data: any) => {
+      this.datosEmpresa = data[0];
 
-        const numTelefono = this.datosEmpresa?.Celular;
-        if (!numTelefono) {
-          console.error('El número de celular no está disponible.');
-          return;
-        }
-
-        const mensaje = `Hola, me gustaría ordenar:\n${this.productosCarrito.map(producto =>
-          `- ${producto.cantidad}x ${producto.NombreProducto} (${producto.Moneda} ${producto.Precio} c/u)`).join('\n')}\n\nTotal: ${this.productosCarrito[0].Moneda} ${this.total}`;
-
-        const mensajeCodificado = encodeURIComponent(mensaje);
-        window.open(`https://wa.me/${numTelefono}?text=${mensajeCodificado}`, '_blank');
-        this.vaciarCarrito();
-      },
-      error: (error: any) => {
-        console.error('Error al obtener los datos de la empresa:', error);
+      const numTelefono = this.datosEmpresa?.Celular;
+      if (!numTelefono) {
+        console.error('El número de celular no está disponible.');
+        return;
       }
-    });
+
+      const mensaje = `Hola, me gustaría ordenar:\n${this.productosCarrito.map(producto =>
+        `- ${producto.cantidad}x ${producto.NombreProducto} (${producto.Moneda} ${producto.Precio} c/u)`).join('\n')}\n\nTotal: ${this.productosCarrito[0].Moneda} ${this.total}`;
+
+      const mensajeCodificado = encodeURIComponent(mensaje);
+      const url = `https://wa.me/${numTelefono}?text=${mensajeCodificado}`;
+      
+      // Crear enlace temporal
+      const enlace = document.createElement('a');
+      enlace.href = url;
+      enlace.target = '_blank';
+      enlace.rel = 'noopener noreferrer';
+      
+      // Agregar al DOM temporalmente
+      document.body.appendChild(enlace);
+      enlace.click();
+      document.body.removeChild(enlace);
+      
+      this.vaciarCarrito();
+    },
+    error: (error: any) => {
+      console.error('Error al obtener los datos de la empresa:', error);
+    }
+  });
   }
 }
