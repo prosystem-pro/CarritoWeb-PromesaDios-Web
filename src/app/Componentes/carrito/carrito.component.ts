@@ -128,14 +128,8 @@ ReportarProductosVendidos(): void {
   }
 
   realizarPedido(): void {
-    const nuevaVentana = window.open('', '_blank');
-
-    if (!nuevaVentana) {
-      console.error('El navegador bloqueó la ventana emergente.');
-      return;
-    }
-
     this.ReportarProductosVendidos();
+
     this.empresaServicio.Listado().subscribe({
       next: (data: any) => {
         this.datosEmpresa = data[0];
@@ -143,7 +137,6 @@ ReportarProductosVendidos(): void {
         const numTelefono = this.datosEmpresa?.Celular;
         if (!numTelefono) {
           console.error('El número de celular no está disponible.');
-          nuevaVentana.close();
           return;
         }
 
@@ -153,14 +146,13 @@ ReportarProductosVendidos(): void {
         const mensajeCodificado = encodeURIComponent(mensaje);
         const url = `https://wa.me/${numTelefono}?text=${mensajeCodificado}`;
 
-        // 3. Redirigir la ventana abierta
-        nuevaVentana.location.href = url;
+        // Apertura directa
+        window.open(url, '_blank', 'noopener');
 
         this.vaciarCarrito();
       },
       error: (error: any) => {
         console.error('Error al obtener los datos de la empresa:', error);
-        nuevaVentana.close();
       }
     });
   }
