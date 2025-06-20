@@ -264,34 +264,42 @@ export class OtroComponent {
         formData.append('NombreCampoImagen', CampoDestino);
 
         this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
-          next: (res: any) => {
-            this.AlertaServicio.MostrarAlerta('El registro se actualizó correctamente.');
+       next: (res: any) => {
+          if (res?.Alerta) {
+            this.AlertaServicio.MostrarAlerta(res.Alerta, 'Atención');
+            return;
+          }
 
-            const UrlImagen = res?.Entidad?.UrlImagen;
-            this.UrlImagenTemporal = UrlImagen;
+          this.AlertaServicio.MostrarAlerta('El registro se actualizó correctamente.');
 
-            const UrlImagen2 = res?.Entidad?.UrlImagen2;
-            this.UrlImagenTemporal2 = UrlImagen2;
+          this.UrlImagenTemporal = res?.Entidad?.UrlImagen || this.UrlImagenTemporal;
+          this.UrlImagenTemporal2 = res?.Entidad?.UrlImagen2 || this.UrlImagenTemporal2;
+          this.CodigoTemporal = res?.Entidad?.CodigoOtro || this.CodigoTemporal;
 
-            const Temporal = res?.Entidad?.CodigoOtro;
-            this.CodigoTemporal = Temporal;
-
-            if (!permiso) {
-              this.ObtenerOtro();
-            }
-          },
-          error: (err) => {
-            console.error('Error al subir la imagen:', err);
+          if (!permiso) {
+            this.ObtenerOtro();
+          }
+        },
+        error: (err) => {
+          console.error('Error al subir la imagen:', err);
+          if (err?.error?.Alerta) {
+            this.AlertaServicio.MostrarAlerta(err.error.Alerta, 'Atención');
+          } else {
             this.AlertaServicio.MostrarAlerta('Hubo un error al procesar la solicitud. Intente de nuevo.');
           }
-        });
-      },
-      error: (err) => {
-        console.error('Error al obtener empresa:', err);
+        }
+      });
+    },
+    error: (err) => {
+      console.error('Error al obtener empresa:', err);
+      if (err?.error?.Alerta) {
+        this.AlertaServicio.MostrarAlerta(err.error.Alerta, 'Atención');
+      } else {
         this.AlertaServicio.MostrarAlerta('No se pudo obtener el dato solicitado. Intente nuevamente.');
       }
-    });
-  }
+    }
+  });
+}
 
   EliminarOtro(index: number): void {
     const item = this.Otro[index];

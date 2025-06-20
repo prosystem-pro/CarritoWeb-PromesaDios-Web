@@ -153,36 +153,41 @@ export class SidebarRedSocialComponent implements OnInit {
 
     this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
       next: (response: any) => {
-        if (response && response.Entidad && response.Entidad.UrlImagen) {
-          // Procesar la respuesta según si se creó o actualizó
-          this.procesarRespuestaImagen(codigoRedSocial, response, redSocial);
-        } else {
-          // Manejar respuesta alternativa
-          const imageUrl =
-            response.UrlImagenPortada ||
-            response.url ||
-            (response.Entidad ? response.Entidad.UrlImagenPortada : null);
+      if (response?.Alerta) {
+        this.AlertaServicio.MostrarAlerta(response.Alerta, 'Atención');
+        return;
+      }
 
-          if (imageUrl) {
-            this.procesarRespuestaImagen(
-              codigoRedSocial,
-              { Entidad: { UrlImagen: imageUrl } },
-              redSocial
-            );
-          } else {
-            this.AlertaServicio.MostrarError(
-              'Error al obtener la URL de la imagen'
-            );
-          }
+      if (response && response.Entidad && response.Entidad.UrlImagen) {
+        this.procesarRespuestaImagen(codigoRedSocial, response, redSocial);
+      } else {
+        const imageUrl =
+          response.UrlImagenPortada ||
+          response.url ||
+          (response.Entidad ? response.Entidad.UrlImagenPortada : null);
+
+        if (imageUrl) {
+          this.procesarRespuestaImagen(
+            codigoRedSocial,
+            { Entidad: { UrlImagen: imageUrl } },
+            redSocial
+          );
+        } else {
+          this.AlertaServicio.MostrarError('Error al obtener la URL de la imagen');
         }
-      },
-      error: (error) => {
+      }
+    },
+    error: (error) => {
+      if (error?.error?.Alerta) {
+        this.AlertaServicio.MostrarAlerta(error.error.Alerta, 'Atención');
+      } else {
         this.AlertaServicio.MostrarError('Error al subir la imagen');
-        // Recargar las redes sociales para revertir el preview
-        this.cargarRedesSociales();
-      },
-    });
-  }
+      }
+
+      this.cargarRedesSociales();
+    },
+  });
+}
 
   procesarRespuestaImagen(
     codigoRedSocial: number,
