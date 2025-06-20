@@ -82,14 +82,13 @@ export class MenuCategoriaComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.cargarDataEmpresa();
     this.cargarMenuPortada();
     this.cargarClasificaciones();
     this.cargarDatosCarrusel();
-    this.cargarDataEmpresa();
   }
 
   ngOnDestroy(): void {
-    // Limpiamos la suscripción cuando el componente se destruye
     if (this.textoBusquedaSubscription) {
       this.textoBusquedaSubscription.unsubscribe();
     }
@@ -104,22 +103,54 @@ export class MenuCategoriaComponent implements OnInit {
       next: (data) => {
         if (data && data.length > 0) {
           this.menuPortada = data[0];
-          // Actualizar el título principal
-          this.tituloPrincipal =
-            this.menuPortada.TituloMenu || '';
-            this.servicioCompartido.setDatosClasificacion({
-              colorClasificacionFondo: this.menuPortada?.ColorFondoNombreClasificacion || '',
-              colorClasificacionTexto: this.menuPortada?.ColorNombreClasificacion || '',
-            });
+          this.tituloPrincipal = this.menuPortada.TituloMenu || '';
+          this.servicioCompartido.setDatosClasificacion({
+            colorClasificacionFondo: this.menuPortada?.ColorFondoNombreClasificacion || '',
+            colorClasificacionTexto: this.menuPortada?.ColorNombreClasificacion || '',
+          });
         } else {
-          console.warn('No se encontraron datos de MenuPortada');
-          this.inicializarMenuPortadaSiNoExiste();
+          this.crearMenuPortadaPorDefecto();
         }
       },
       error: (err) => {
-        console.error('Error al obtener MenuPortada:', err);
-        this.inicializarMenuPortadaSiNoExiste();
+        // this.crearMenuPortadaPorDefecto();
       },
+    });
+  }
+
+  // Crear MenuPortada si no existe
+  private crearMenuPortadaPorDefecto(): void {
+    const menuPortadaDefecto = {
+      CodigoEmpresa: this.codigoEmpresa,
+      UrlImagenNavbar: '',
+      UrlImagenPortadaIzquierdo: '',
+      UrlImagenPortadaDerecho: '',
+      TituloMenu: 'Nuestro Menú',
+      ColorTituloMenu: '#ff9500',
+      UrlImagenMenu: '',
+      ColorContornoImagenClasificacion: '#ff9500',
+      ColorNombreClasificacion: '#000000',
+      ColorFondoNombreClasificacion: '#ff9500',
+      UrlImagenPresentacion: '',
+      Estatus: 1,
+    };
+
+    this.menuPortadaServicio.Crear(menuPortadaDefecto).subscribe({
+      next: (response) => {
+        console.log('MenuPortada creado exitosamente:', response);
+        this.menuPortada = response.Entidad || response;
+        this.tituloPrincipal = this.menuPortada.TituloMenu || '';
+        this.servicioCompartido.setDatosClasificacion({
+          colorClasificacionFondo: this.menuPortada?.ColorFondoNombreClasificacion || '',
+          colorClasificacionTexto: this.menuPortada?.ColorNombreClasificacion || '',
+        });
+      },
+      error: (error) => {
+        console.error('Error al crear MenuPortada:', error);
+        // Usar datos por defecto para que la interfaz no se rompa
+        this.menuPortada = menuPortadaDefecto;
+        this.tituloPrincipal = menuPortadaDefecto.TituloMenu;
+      }
     });
   }
 
@@ -127,7 +158,6 @@ export class MenuCategoriaComponent implements OnInit {
     this.isLoading = true;
     this.clasificacionProductoServicio.Listado().subscribe({
       next: (data: any[]) => {
-        // Filtrar clasificaciones con nombres nulos o vacíos
         this.clasificaciones = data.filter(
           (item) =>
             item.NombreClasificacionProducto &&
@@ -135,7 +165,6 @@ export class MenuCategoriaComponent implements OnInit {
             item.CodigoClasificacionProducto !== 0
         );
         this.clasificacionesOriginales = [...this.clasificaciones];
-
         this.isLoading = false;
       },
       error: (err) => {
@@ -149,31 +178,71 @@ export class MenuCategoriaComponent implements OnInit {
   cargarDatosCarrusel(): void {
     this.carruselServicio.Listado().subscribe({
       next: (data) => {
-        this.carruselData = data[1] || [];
-        this.codigoCarrusel = this.carruselData.CodigoCarrusel;
-        this.titulo = this.carruselData.NombreCarrusel;
+        // Buscar carrusel en índice 1 o por ubicación 'MenuCategoria'
+        let carruselMenuCategoria = null;
+        
+        if (data && data.length > 1) {
+          carruselMenuCategoria = data[1];
+        } else if (data && data.length > 0) {
+          carruselMenuCategoria = data.find(c => c.Ubicacion === 'MenuCategoria');
+        }
 
-        // Ahora llamamos a ListadoCarrusel usando el código obtenido
-        if (this.carruselData?.CodigoCarrusel) {
-          this.carruselImagenServicio.ListadoCarrusel(this.carruselData.CodigoCarrusel).subscribe({
-            next: (data) => {
-              this.detallesCarrusel = data;
-              this.datosListos = true;
-            },
-            error: (err) => {
-              this.detallesCarrusel = [];
-              this.datosListos = true;
-              console.error('Error al obtener detalles del carrusel:', err);
-            }
-          });
+        if (carruselMenuCategoria) {
+          this.carruselData = carruselMenuCategoria;
+          this.codigoCarrusel = this.carruselData.CodigoCarrusel;
+          this.titulo = this.carruselData.NombreCarrusel;
+          this.cargarImagenesCarrusel();
+        } else {
+          this.crearCarruselPorDefecto();
         }
       },
       error: (err) => {
-        console.error('Error al obtener datos de la portada:', err);
-        this.error = true;
-        this.isLoading = false;
+        // this.crearCarruselPorDefecto();
       }
     });
+  }
+
+  // Crear Carrusel si no existe
+  private crearCarruselPorDefecto(): void {
+    const carruselDefecto = {
+      CodigoEmpresa: this.codigoEmpresa,
+      NombreCarrusel: 'Galería de Menú',
+      Descripcion: 'Carrusel de imágenes para la sección de categorías de menú',
+      Ubicacion: 'MenuCategoria',
+      Estatus: 1
+    };
+
+    this.carruselServicio.Crear(carruselDefecto).subscribe({
+      next: (response) => {
+        console.log('Carrusel creado exitosamente:', response);
+        this.carruselData = response.Entidad || response;
+        this.codigoCarrusel = this.carruselData.CodigoCarrusel;
+        this.titulo = this.carruselData.NombreCarrusel;
+        this.cargarImagenesCarrusel();
+      },
+      error: (error) => {
+        console.error('Error al crear carrusel:', error);
+        // Usar datos por defecto para que la interfaz no se rompa
+        this.carruselData = carruselDefecto;
+        this.detallesCarrusel = [];
+        this.datosListos = true;
+      }
+    });
+  }
+
+  private cargarImagenesCarrusel(): void {
+    if (this.carruselData?.CodigoCarrusel) {
+      this.carruselImagenServicio.ListadoCarrusel(this.carruselData.CodigoCarrusel).subscribe({
+        next: (data) => {
+          this.detallesCarrusel = data;
+          this.datosListos = true;
+        },
+        error: (err) => {
+          this.detallesCarrusel = [];
+          this.datosListos = true;
+        }
+      });
+    }
   }
 
   cargarDataEmpresa(): void {
@@ -192,79 +261,56 @@ export class MenuCategoriaComponent implements OnInit {
     this.modoEdicion = !this.modoEdicion;
     document.body.classList.toggle('modoEdicion', this.modoEdicion);
 
-    // Si salimos del modo edición, cerrar el panel de colores y resetear la nueva categoría
     if (!this.modoEdicion) {
       this.mostrarPanelColor = false;
       this.resetNuevaCategoria();
     }
   }
 
-  // Iniciar la edición del título principal
   iniciarEdicionTituloPrincipal() {
-    // Guarda el título original por si se cancela
     this.tituloPrincipalOriginal = this.tituloPrincipal;
-
-    // Activa el modo de edición para el título principal
     this.editandoTituloPrincipal = true;
-
-    // Inicializa el valor temporal con el valor actual
     this.tituloPrincipalTemporal = this.tituloPrincipal;
   }
 
-  // Actualiza el valor temporal mientras se edita
   onTituloPrincipalInput(evento: any) {
     this.tituloPrincipalTemporal = evento.target.textContent;
   }
 
-  // Guarda los cambios del título principal
   guardarTituloPrincipal() {
-    // Actualiza el valor del título principal
     this.tituloPrincipal = this.tituloPrincipalTemporal.trim();
 
-    // Actualiza el título en MenuPortada
     if (this.menuPortada) {
       this.menuPortada.TituloMenu = this.tituloPrincipal;
       this.actualizarMenuPortada();
     }
 
-    // Termina el modo de edición
     this.editandoTituloPrincipal = false;
-    console.log('Título principal guardado:', this.tituloPrincipal);
   }
 
-  // Cancela la edición y restaura el valor original
   cancelarEdicionTituloPrincipal() {
-    // Restaura el valor original
     this.tituloPrincipal = this.tituloPrincipalOriginal;
-
-    // Termina el modo de edición
     this.editandoTituloPrincipal = false;
     console.log('Edición del título principal cancelada');
   }
 
-  // Iniciar la edición de un título
   iniciarEdicionTitulo(clasificacion: any) {
     this.tituloOriginal = clasificacion.NombreClasificacionProducto;
     this.editandoTitulo = clasificacion.CodigoClasificacionProducto;
     this.tituloTemporal = clasificacion.NombreClasificacionProducto;
   }
 
-  // Actualiza el valor temporal mientras se edita
   onTituloInput(evento: any, clasificacion: any) {
     this.tituloTemporal = evento.target.textContent;
   }
 
-  // Guarda los cambios del título
   guardarTituloClasificacion(clasificacion: any) {
     clasificacion.NombreClasificacionProducto = this.tituloTemporal.trim();
-
     this.actualizarClasificacion(clasificacion);
-
     this.editandoTitulo = null;
     this.alertaServicio.MostrarExito('Título guardado correctamente', 'Éxito');
   }
 
-  // Cancela la edición y restaura el valor original
   cancelarEdicionTitulo(clasificacion: any) {
     clasificacion.NombreClasificacionProducto = this.tituloOriginal;
     const elements = document.querySelectorAll(
@@ -277,23 +323,19 @@ export class MenuCategoriaComponent implements OnInit {
     console.log('Edición cancelada');
   }
 
-  // Cambia la imagen de una clasificación
   cambiarImagen(evento: any, clasificacion: any) {
     const file = evento.target.files[0];
     if (file) {
-      // Mostrar preview (opcional)
       const reader = new FileReader();
       reader.onload = (e: any) => {
         clasificacion.imagenPreview = e.target.result;
       };
       reader.readAsDataURL(file);
 
-      // Subir imagen al servidor
       this.subirImagen(file, clasificacion);
     }
   }
 
-  // Selecciona imagen para nueva categoría
   seleccionarImagenNuevaCategoria(event: any) {
     const file = event.target.files[0];
     if (file) {
@@ -328,143 +370,121 @@ export class MenuCategoriaComponent implements OnInit {
     }
   }
 
-subirImagenDecorativo(file: File, campoDestino: string): void {
-  const formData = new FormData();
-  formData.append('Imagen', file);
-  formData.append('CarpetaPrincipal', this.NombreEmpresa);
-  formData.append('SubCarpeta', 'MenuPortada');
-  formData.append('CodigoVinculado', this.menuPortada.CodigoEmpresa);
-  formData.append('CodigoPropio', this.menuPortada.CodigoMenuPortada);
-  formData.append('CampoVinculado', 'CodigoEmpresa');
-  formData.append('CampoPropio', 'CodigoMenuPortada');
-  formData.append('NombreCampoImagen', campoDestino);
+  subirImagenDecorativo(file: File, campoDestino: string): void {
+    const formData = new FormData();
+    formData.append('Imagen', file);
+    formData.append('CarpetaPrincipal', this.NombreEmpresa);
+    formData.append('SubCarpeta', 'MenuPortada');
+    formData.append('CodigoVinculado', this.menuPortada.CodigoEmpresa);
+    formData.append('CodigoPropio', this.menuPortada.CodigoMenuPortada);
+    formData.append('CampoVinculado', 'CodigoEmpresa');
+    formData.append('CampoPropio', 'CodigoMenuPortada');
+    formData.append('NombreCampoImagen', campoDestino);
 
-  this.http.post(`${this.Url}subir-imagen`, formData)
-    .subscribe({
-      next: (response: any) => {
-        if (response && response.Entidad && response.Entidad[campoDestino]) {
-          this.menuPortada[campoDestino] = response.Entidad[campoDestino];
-          const {
-            UrlImagenNavbar,
-            UrlImagenPortadaIzquierdo,
-            UrlImagenPortadaDerecho,
-            UrlImagenMenu,
-            UrlImagenPresentacion,
-            ...datosActualizados
-          } = this.menuPortada;
+    this.http.post(`${this.Url}subir-imagen`, formData)
+      .subscribe({
+        next: (response: any) => {
+          if (response && response.Entidad && response.Entidad[campoDestino]) {
+            this.menuPortada[campoDestino] = response.Entidad[campoDestino];
+            
+            // EXCLUIR URLs de imágenes al actualizar
+            const {
+              UrlImagenNavbar,
+              UrlImagenPortadaIzquierdo,
+              UrlImagenPortadaDerecho,
+              UrlImagenMenu,
+              UrlImagenPresentacion,
+              ...datosActualizados
+            } = this.menuPortada;
 
-          this.menuPortadaServicio.Editar(datosActualizados).subscribe({
-            next: () => {
-              this.alertaServicio.MostrarExito('Imagen actualizada correctamente', 'Éxito');
-              this.modoEdicion = false;
-            },
-            error: () => {
-              this.alertaServicio.MostrarError('Error al actualizar la imagen');
-            }
-          });
+            this.menuPortadaServicio.Editar(datosActualizados).subscribe({
+              next: () => {
+                this.alertaServicio.MostrarExito('Imagen actualizada correctamente', 'Éxito');
+                this.modoEdicion = false;
+              },
+              error: () => {
+                this.alertaServicio.MostrarError('Error al actualizar la imagen');
+              }
+            });
+          }
+        },
+        error: () => {
+          this.alertaServicio.MostrarError('Error al subir la imagen');
         }
-      },
-      error: () => {
-        this.alertaServicio.MostrarError('Error al subir la imagen');
-      }
-    });
-}
+      });
+  }
 
-  // Crea una nueva categoría subiendo primero la imagen
   subirImagenNuevaCategoria() {
     if (this.nuevaCategoria.titulo && this.nuevaCategoria.imagenFile) {
-
       this.isLoadingCrear = true;
       const formData = new FormData();
       formData.append('Imagen', this.nuevaCategoria.imagenFile);
       formData.append('CarpetaPrincipal', this.NombreEmpresa);
       formData.append('SubCarpeta', 'ClasificacionProducto');
       formData.append('CodigoVinculado', this.codigoEmpresa.toString() || '1');
-      formData.append('CodigoPropio', ''); // Vacío para que el servidor cree uno nuevo
+      formData.append('CodigoPropio', '');
       formData.append('CampoVinculado', 'CodigoEmpresa');
       formData.append('CampoPropio', 'CodigoClasificacionProducto');
       formData.append('NombreCampoImagen', 'UrlImagen');
 
-      // alert('Creando nueva categoría...');
-
       this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
         next: (response: any) => {
-
           if (response && response.Entidad) {
-            // Actualizar con el nombre de la categoría
             const nuevaClasificacion = {
-              CodigoClasificacionProducto:
-                response.Entidad.CodigoClasificacionProducto,
-              CodigoEmpresa: 8,
+              CodigoClasificacionProducto: response.Entidad.CodigoClasificacionProducto,
+              CodigoEmpresa: this.codigoEmpresa,
               NombreClasificacionProducto: this.nuevaCategoria.titulo,
               UrlImagen: response.Entidad.UrlImagen || '',
               Estatus: 1,
             };
 
-            this.clasificacionProductoServicio
-              .Editar(nuevaClasificacion)
-              .subscribe({
-                next: (updateResponse) => {
-                  this.isLoadingCrear = false;
-                  this.alertaServicio.MostrarExito('Nueva categoría creada correctamente', 'Éxito');
-
-                  // Recargar clasificaciones
-                  this.cargarClasificaciones();
-
-                  // Resetear formulario
-                  this.resetNuevaCategoria();
-                },
-                error: (updateError) => {
-                  this.isLoadingCrear = false;
-                  this.alertaServicio.MostrarError(updateError, 'Error al crear la categoría');
-
-                  // Recargar clasificaciones de todos modos
-                  this.cargarClasificaciones();
-                },
-              });
+            this.clasificacionProductoServicio.Editar(nuevaClasificacion).subscribe({
+              next: (updateResponse) => {
+                this.isLoadingCrear = false;
+                this.alertaServicio.MostrarExito('Nueva categoría creada correctamente', 'Éxito');
+                this.cargarClasificaciones();
+                this.resetNuevaCategoria();
+              },
+              error: (updateError) => {
+                this.isLoadingCrear = false;
+                this.alertaServicio.MostrarError('Error al crear la categoría');
+                this.cargarClasificaciones();
+              },
+            });
           } else {
             this.isLoadingCrear = false;
-            this.alertaServicio.MostrarError('Error al procesar la respuesta del servidor', 'Error');
+            this.alertaServicio.MostrarError('Error al procesar la respuesta del servidor');
           }
         },
         error: (error) => {
           this.isLoadingCrear = false;
-          this.alertaServicio.MostrarError(error, 'Error al subir la imagen. Por favor, intente de nuevo.');
+          this.alertaServicio.MostrarError('Error al subir la imagen. Por favor, intente de nuevo.');
         },
       });
     }
   }
 
-  // Sube una imagen y actualiza la clasificación
   subirImagen(file: File, clasificacion: any): void {
     const formData = new FormData();
     formData.append('Imagen', file);
     formData.append('CarpetaPrincipal', this.NombreEmpresa);
     formData.append('SubCarpeta', 'ClasificacionProducto');
     formData.append('CodigoVinculado', clasificacion.CodigoEmpresa.toString());
-    formData.append(
-      'CodigoPropio',
-      clasificacion.CodigoClasificacionProducto.toString()
-    );
+    formData.append('CodigoPropio', clasificacion.CodigoClasificacionProducto.toString());
     formData.append('CampoVinculado', 'CodigoEmpresa');
     formData.append('CampoPropio', 'CodigoClasificacionProducto');
     formData.append('NombreCampoImagen', 'UrlImagen');
-
-    alert('Actualizando imagen...');
 
     this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
       next: (response: any) => {
         console.log('Imagen subida correctamente', response);
 
         if (response && response.Entidad && response.Entidad.UrlImagen) {
-          // Actualizar la URL de la imagen en la clasificación
           clasificacion.UrlImagen = response.Entidad.UrlImagen;
-          alert('Imagen actualizada correctamente');
+          this.alertaServicio.MostrarExito('Imagen actualizada correctamente', 'Éxito');
         } else {
-          alert('Error al procesar la respuesta del servidor');
+          this.alertaServicio.MostrarError('No se pudo obtener la URL de la imagen');
           console.warn('No se pudo obtener la URL de la imagen', response);
-
-          // Recargar clasificaciones para obtener la imagen actualizada
           this.cargarClasificaciones();
         }
       },
@@ -475,17 +495,18 @@ subirImagenDecorativo(file: File, campoDestino: string): void {
     });
   }
 
-  // Actualiza una clasificación en el servidor
   actualizarClasificacion(clasificacion: any): void {
+    delete clasificacion.UrlImagen;
     this.clasificacionProductoServicio.Editar(clasificacion).subscribe({
       next: (response) => {
+        console.log('Clasificación actualizada');
       },
       error: (error) => {
+        console.error('Error al actualizar clasificación:', error);
       },
     });
   }
 
-  // Elimina una clasificación
   eliminarCategoria(clasificacion: any): void {
     this.alertaServicio.Confirmacion(
       '¿Estás seguro de que deseas eliminar esta categoría?',
@@ -498,10 +519,8 @@ subirImagenDecorativo(file: File, campoDestino: string): void {
             next: (response) => {
               this.alertaServicio.MostrarExito('Categoría eliminada correctamente');
 
-              // Eliminar de la lista local
               const index = this.clasificaciones.findIndex(
-                (c) =>
-                  c.CodigoClasificacionProducto === clasificacion.CodigoClasificacionProducto
+                (c) => c.CodigoClasificacionProducto === clasificacion.CodigoClasificacionProducto
               );
 
               if (index !== -1) {
@@ -509,14 +528,13 @@ subirImagenDecorativo(file: File, campoDestino: string): void {
               }
             },
             error: (error) => {
-              this.alertaServicio.MostrarError(error, 'Error al eliminar la categoría');
+              this.alertaServicio.MostrarError('Error al eliminar la categoría');
             },
           });
       }
     });
   }
 
-  // Resetea el formulario de nueva categoría
   resetNuevaCategoria() {
     this.nuevaCategoria = {
       titulo: '',
@@ -525,35 +543,38 @@ subirImagenDecorativo(file: File, campoDestino: string): void {
     };
   }
 
-  // Actualiza los datos de MenuPortada en el servidor
+  // EXCLUIR URLs de imágenes en todas las actualizaciones
   actualizarMenuPortada(): void {
     if (this.menuPortada) {
-      // Si el registro tiene CodigoMenuPortada = 0, significa que es nuevo y hay que crearlo
+      const {
+        UrlImagenNavbar,
+        UrlImagenPortadaIzquierdo,
+        UrlImagenPortadaDerecho,
+        UrlImagenMenu,
+        UrlImagenPresentacion,
+        ...datosActualizados
+      } = this.menuPortada;
+
       if (this.menuPortada.CodigoMenuPortada === 0) {
-        this.menuPortadaServicio.Crear(this.menuPortada).subscribe({
+        this.menuPortadaServicio.Crear(datosActualizados).subscribe({
           next: (response) => {
             console.log('MenuPortada creado correctamente', response);
-            // Actualizar el objeto local con el ID asignado por el servidor
             if (response && response.Entidad) {
-              // this.menuPortada.CodigoMenuPortada = response.Entidad.CodigoMenuPortada;
+              this.menuPortada.CodigoMenuPortada = response.Entidad.CodigoMenuPortada;
             }
           },
           error: (error) => {
             console.error('Error al crear MenuPortada', error);
-            // Intentar con CrearEditar como alternativa
             this.crearEditarMenuPortada();
           },
         });
       } else {
-        // Si ya tiene ID, actualizar
-        this.menuPortadaServicio.Editar(this.menuPortada).subscribe({
+        this.menuPortadaServicio.Editar(datosActualizados).subscribe({
           next: (response) => {
             console.log('MenuPortada actualizado correctamente', response);
-            this.cargarMenuPortada();
           },
           error: (error) => {
             console.error('Error al actualizar MenuPortada', error);
-            // Intentar con CrearEditar como alternativa
             this.crearEditarMenuPortada();
           },
         });
@@ -561,25 +582,32 @@ subirImagenDecorativo(file: File, campoDestino: string): void {
     }
   }
 
-  // Usar CrearEditar como alternativa si Crear o Editar fallan
   crearEditarMenuPortada(): void {
     if (this.menuPortada) {
-      this.menuPortadaServicio.CrearEditar(this.menuPortada).subscribe({
+      const {
+        UrlImagenNavbar,
+        UrlImagenPortadaIzquierdo,
+        UrlImagenPortadaDerecho,
+        UrlImagenMenu,
+        UrlImagenPresentacion,
+        ...datosActualizados
+      } = this.menuPortada;
+
+      this.menuPortadaServicio.CrearEditar(datosActualizados).subscribe({
         next: (response) => {
           console.log('MenuPortada creado/actualizado correctamente', response);
           if (response && response.Entidad) {
-            // this.menuPortada.CodigoMenuPortada = response.Entidad.CodigoMenuPortada;
+            this.menuPortada.CodigoMenuPortada = response.Entidad.CodigoMenuPortada;
           }
         },
         error: (error) => {
           console.error('Error al crear/actualizar MenuPortada', error);
-          alert('Error al actualizar la configuración de la portada');
+          this.alertaServicio.MostrarError('Error al actualizar la configuración de la portada');
         },
       });
     }
   }
 
-  // Cambia el color del contorno de las imágenes
   cambiarColorContorno(color: string): void {
     if (this.menuPortada) {
       this.menuPortada.ColorContornoImagenClasificacion = color;
@@ -587,7 +615,6 @@ subirImagenDecorativo(file: File, campoDestino: string): void {
     }
   }
 
-  // Cambia el color del fondo de los botones
   cambiarColorFondoBoton(color: string): void {
     if (this.menuPortada) {
       this.menuPortada.ColorFondoNombreClasificacion = color;
@@ -595,7 +622,6 @@ subirImagenDecorativo(file: File, campoDestino: string): void {
     }
   }
 
-  // Cambia el color del texto de los botones
   cambiarColorTextoBoton(color: string): void {
     if (this.menuPortada) {
       this.menuPortada.ColorNombreClasificacion = color;
@@ -603,32 +629,10 @@ subirImagenDecorativo(file: File, campoDestino: string): void {
     }
   }
 
-  // Cambia el color del título principal
   cambiarColorTitulo(color: string): void {
     if (this.menuPortada) {
       this.menuPortada.ColorTituloMenu = color;
       this.actualizarMenuPortada();
-    }
-  }
-
-  // Inicializar MenuPortada si no existe
-  private inicializarMenuPortadaSiNoExiste(): void {
-    if (!this.menuPortada) {
-      this.menuPortada = {
-        CodigoMenuPortada: 0,
-        CodigoEmpresa: 8,
-        UrlImagenNavbar: '',
-        UrlImagenPortadaIzquierdo: '',
-        UrlImagenPortadaDerecho: '',
-        TituloMenu: this.tituloPrincipal,
-        ColorTituloMenu: '#ff9500',
-        UrlImagenMenu: '',
-        ColorContornoImagenClasificacion: '#ff9500',
-        ColorNombreClasificacion: '#000000',
-        ColorFondoNombreClasificacion: '#ff9500',
-        UrlImagenPresentacion: '',
-        Estatus: 1,
-      };
     }
   }
 

@@ -10,7 +10,7 @@ import { AlertaServicio } from '../../Servicios/Alerta-Servicio';
 import { PermisoServicio } from '../../Autorizacion/AutorizacionPermiso';
 import { ReporteRedSocialServicio } from '../../Servicios/ReporteRedSocialServicio';
 import { RedSocialImagenServicio } from '../../Servicios/RedSocialImagenServicio';
-
+import { EmpresaServicio } from '../../Servicios/EmpresaServicio';
 
 @Component({
   selector: 'app-footer',
@@ -28,6 +28,7 @@ export class FooterComponent implements OnInit {
   modoEdicion: boolean = false;
   datosOriginales: any = null;
   RedSocial: any = [];
+  codigoEmpresa: number | null = null;
 
   constructor(
     private footerServicio: FooterServicio,
@@ -37,12 +38,31 @@ export class FooterComponent implements OnInit {
     public Permiso: PermisoServicio,
     private alertaServicio: AlertaServicio,
     private redSocialImagenServicio: RedSocialImagenServicio,
-    private ReporteRedSocialServicio: ReporteRedSocialServicio
+    private ReporteRedSocialServicio: ReporteRedSocialServicio,
+    private EmpresaServicio: EmpresaServicio
   ) { }
 
   ngOnInit(): void {
-    this.cargarDatosFooter();
-    this.cargarRedesSociales();
+    this.obtenerCodigoEmpresa().then(() => {
+      this.cargarDatosFooter();
+      this.cargarRedesSociales();
+    });
+  }
+
+  // Nuevo método para obtener el código de empresa
+  private async obtenerCodigoEmpresa(): Promise<void> {
+    try {
+      const empresa = await this.EmpresaServicio.ConseguirPrimeraEmpresa().toPromise();
+      if (empresa && empresa.CodigoEmpresa) {
+        this.codigoEmpresa = empresa.CodigoEmpresa;
+      } else {
+        console.warn('No se encontró información de empresa');
+        this.alertaServicio.MostrarError('No se pudo obtener la información de la empresa');
+      }
+    } catch (error) {
+      console.error('Error al obtener código de empresa:', error);
+      this.alertaServicio.MostrarError('Error al cargar información de empresa');
+    }
   }
 
   ReportarRedSocial(codigo: number | undefined): void {
@@ -79,25 +99,93 @@ export class FooterComponent implements OnInit {
   }
 
   cargarRedesSociales(): void {
-  this.redSocialServicio.Listado('Footer').subscribe({
-    next: (data) => {
-      this.RedSocial = data.filter((red: any) => red.Estatus === 1);
-    },
-    error: (error) => {
-    }
-  });
-}
+    this.redSocialServicio.Listado('Footer').subscribe({
+      next: (data) => {
+        this.RedSocial = data.filter((red: any) => red.Estatus === 1);
+      },
+      error: (error) => {
+        console.error('Error al cargar redes sociales:', error);
+      }
+    });
+  }
 
+  // Modificar el método cargarDatosFooter para crear footer si no existe
   cargarDatosFooter(): void {
-    // ID 2 quemado como solicitaste
     this.footerServicio.Listado().subscribe({
       next: (data) => {
-        this.footerData = data[0];
-        this.servicioCompartido.setColorFooter(this.footerData?.ColorFooter);
-        this.isLoading = false;
+        if (data && data.length > 0) {
+          // Existe el footer, usar datos existentes
+          this.footerData = data[0];
+          this.servicioCompartido.setColorFooter(this.footerData?.ColorFooter);
+          this.isLoading = false;
+        } else {
+          // No existe footer, crear uno nuevo con valores por defecto
+          this.crearFooterPorDefecto();
+        }
       },
       error: (err) => {
         console.error('Error al obtener datos del footer:', err);
+        // En caso de error, intentar crear footer por defecto
+        // this.crearFooterPorDefecto();
+      }
+    });
+  }
+
+  // Nuevo método para crear footer con valores por defecto
+  private crearFooterPorDefecto(): void {
+    if (!this.codigoEmpresa) {
+      this.alertaServicio.MostrarError('No se puede crear el footer sin información de empresa');
+      this.error = true;
+      this.isLoading = false;
+      return;
+    }
+
+    const footerDefecto = {
+      CodigoEmpresa: this.codigoEmpresa,
+      TextoInicio: 'Nosotros',
+      ColorTextoInicio: '#000000',
+      TextoMenu: 'Menú',
+      ColorTextoMenu: '#000000',
+      TextoContacto: 'Contacto',
+      ColorTextoContacto: '#000000',
+      TextoOtro: 'Otro',
+      ColorTextoOtro: '#000000',
+      TextoTelefonoOficina: 'Teléfono de Oficina 54545454',
+      ColorTextoTelefonoOficina: '#000000',
+      ColorNoCelular: '#000000',
+      TextoSuscripcion: 'Suscríbete...',
+      ColorTextoSuscripcion: '#000000',
+      TextoRedesSociales: 'Síguenos en redes sociales',
+      ColorTextoRedesSociales: '#000000',
+      TextoCorreo: 'Correo electrónico',
+      ColorTextoCorreo: '#000000',
+      TextoBotonSuscribirte: 'Suscribirse',
+      ColorTextoBotonSuscribirte: '#ffffff',
+      ColorBotonSuscribirte: '#007bff',
+      DerechoDeAutor: '© 2024 Todos los derechos reservados',
+      ColorDerechosDeAutor: '#666666',
+      ColorFooter: '#f8f9fa',
+      UrlLogo: '',
+      Estatus: 1
+    };
+
+    this.footerServicio.Crear(footerDefecto).subscribe({
+      next: (response) => {
+        console.log('Footer creado exitosamente:', response);
+        this.alertaServicio.MostrarExito('Configuración de footer creada correctamente');
+
+        // Asignar los datos del footer creado
+        this.footerData = response.Entidad || response;
+        this.servicioCompartido.setColorFooter(this.footerData?.ColorFooter);
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error al crear footer por defecto:', error);
+        this.alertaServicio.MostrarError('Error al crear la configuración del footer');
+
+        // Como fallback, usar datos temporales para que la interfaz no se rompa
+        this.footerData = footerDefecto;
+        this.servicioCompartido.setColorFooter(this.footerData?.ColorFooter);
         this.error = true;
         this.isLoading = false;
       }
@@ -106,17 +194,14 @@ export class FooterComponent implements OnInit {
 
   toggleModoEdicion(): void {
     if (!this.modoEdicion) {
-      // Hacer una copia profunda de los datos antes de entrar en modo edición
       this.datosOriginales = JSON.parse(JSON.stringify(this.footerData));
       this.modoEdicion = true;
       document.body.classList.add('modoEdicion');
     } else {
-      // Preguntar si desea guardar los cambios
       this.alertaServicio.Confirmacion('¿Desea guardar los cambios?').then((confirmado) => {
         if (confirmado) {
           this.guardarCambios();
         } else {
-          // Restaurar datos originales si cancela
           this.footerData = JSON.parse(JSON.stringify(this.datosOriginales));
           this.servicioCompartido.setColorFooter(this.footerData?.ColorFooter);
         }
@@ -130,6 +215,9 @@ export class FooterComponent implements OnInit {
     if (this.footerData) {
       const datosActualizados = { ...this.footerData };
 
+      // EXCLUIR la URL del logo para evitar problemas en el backend
+      delete datosActualizados.UrlLogo;
+
       this.footerServicio.Editar(datosActualizados).subscribe({
         next: (response) => {
           this.alertaServicio.MostrarExito('Cambios guardados correctamente');
@@ -138,6 +226,7 @@ export class FooterComponent implements OnInit {
           this.datosOriginales = null;
         },
         error: (error) => {
+          console.error('Error al guardar los cambios:', error);
           this.alertaServicio.MostrarError('Error al guardar los cambios');
         }
       });
@@ -159,8 +248,38 @@ export class FooterComponent implements OnInit {
     }
   }
 
+  // Modificar el método subirImagen para manejar la creación si no existe CodigoFooter
   subirImagen(file: File, campoDestino: string): void {
-    const formData = new FormData();
+    if (!this.footerData) {
+      this.alertaServicio.MostrarError('No hay datos de footer disponibles');
+      return;
+    }
+
+    // Si no existe CodigoFooter, primero crear el footer
+    if (!this.footerData.CodigoFooter) {
+      this.alertaServicio.MostrarAlerta('Creando configuración de footer...', 'Por favor, espere');
+
+      // Crear el footer primero y luego subir la imagen
+      this.footerServicio.Crear(this.footerData).subscribe({
+        next: (response) => {
+          this.footerData = response.Entidad || response;
+          // Ahora que tenemos el CodigoFooter, proceder a subir la imagen
+          this.ejecutarSubidaImagen(file, campoDestino);
+        },
+        error: (error) => {
+          console.error('Error al crear footer antes de subir imagen:', error);
+          this.alertaServicio.MostrarError('Error al crear la configuración del footer');
+        }
+      });
+    } else {
+      // Ya existe el footer, proceder directamente a subir la imagen
+      this.ejecutarSubidaImagen(file, campoDestino);
+    }
+  }
+
+  // Nuevo método para ejecutar la subida de imagen
+  private ejecutarSubidaImagen(file: File, campoDestino: string): void {
+        const formData = new FormData();
     formData.append('Imagen', file);
     formData.append('CarpetaPrincipal', this.NombreEmpresa);
     formData.append('SubCarpeta', 'Footer');
@@ -177,7 +296,7 @@ export class FooterComponent implements OnInit {
           if (response && response.Entidad && response.Entidad[campoDestino]) {
             this.footerData[campoDestino] = response.Entidad[campoDestino];
 
-            const datosActualizados = { ...this.footerData };
+            const {UrlLogo, ...datosActualizados} = { ...this.footerData };
 
             this.footerServicio.Editar(datosActualizados).subscribe({
               next: (updateResponse) => {
@@ -203,167 +322,146 @@ export class FooterComponent implements OnInit {
         error: (error) => {
           this.alertaServicio.MostrarError('Error al subir la imagen');
         }
-      });
+      });    
   }
 
   // Método para actualizar imagen de red social
-actualizarImagenRedSocial(event: any, codigoRedSocial: number): void {
-  const file = event.target.files[0];
-  if (!file) {
-    return;
-  }
-
-  if (!codigoRedSocial) {
-    this.alertaServicio.MostrarError('No se pudo identificar la red social');
-    return;
-  }
-
-  // Buscar la red social específica
-  const redSocial = this.RedSocial.find((red: any) => red.CodigoRedSocial === codigoRedSocial);
-  if (!redSocial) {
-    this.alertaServicio.MostrarError('Red social no encontrada');
-    return;
-  }
-
-  // Mostrar preview inmediato
-  const reader = new FileReader();
-  reader.onload = (e: any) => {
-    // Si ya tiene imágenes, actualizar la primera
-    if (redSocial.Imagenes && redSocial.Imagenes.length > 0) {
-      redSocial.Imagenes[0].UrlImagen = e.target.result;
-    } else {
-      // Si no tiene imágenes, crear el array y agregar una imagen temporal
-      redSocial.Imagenes = [{
-        CodigoRedSocialImagen: null,
-        UrlImagen: e.target.result,
-        Ubicacion: 'Footer'
-      }];
+  actualizarImagenRedSocial(event: any, codigoRedSocial: number): void {
+    const file = event.target.files[0];
+    if (!file) {
+      return;
     }
-  };
-  reader.readAsDataURL(file);
 
-  // Subir la imagen al servidor
-  this.subirImagenRedSocial(file, codigoRedSocial, redSocial);
-}
+    if (!codigoRedSocial) {
+      this.alertaServicio.MostrarError('No se pudo identificar la red social');
+      return;
+    }
 
-subirImagenRedSocial(file: File, codigoRedSocial: number, redSocial: any): void {
-  const formData = new FormData();
-  formData.append('Imagen', file);
-  formData.append('CarpetaPrincipal', this.NombreEmpresa);
-  formData.append('SubCarpeta', 'RedSocialImagen');
-  formData.append('CodigoVinculado', codigoRedSocial.toString());
-  
-  // Verificar si ya existe una imagen para esta red social en Footer
-  const imagenExistente = redSocial.Imagenes?.find((img: any) => img.Ubicacion === 'Footer');
-  const tieneImagenValida = imagenExistente && imagenExistente.CodigoRedSocialImagen;
+    const redSocial = this.RedSocial.find((red: any) => red.CodigoRedSocial === codigoRedSocial);
+    if (!redSocial) {
+      this.alertaServicio.MostrarError('Red social no encontrada');
+      return;
+    }
 
-  if (tieneImagenValida) {
-    // Si ya existe con código válido, usar para actualización
-    formData.append('CodigoPropio', imagenExistente.CodigoRedSocialImagen.toString());
-  } else {
-    // Si no existe o no tiene código, dejar vacío para creación
-    formData.append('CodigoPropio', '');
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      if (redSocial.Imagenes && redSocial.Imagenes.length > 0) {
+        redSocial.Imagenes[0].UrlImagen = e.target.result;
+      } else {
+        redSocial.Imagenes = [{
+          CodigoRedSocialImagen: null,
+          UrlImagen: e.target.result,
+          Ubicacion: 'Footer'
+        }];
+      }
+    };
+    reader.readAsDataURL(file);
+
+    this.subirImagenRedSocial(file, codigoRedSocial, redSocial);
   }
 
-  formData.append('CampoVinculado', 'CodigoRedSocial');
-  formData.append('CampoPropio', 'CodigoRedSocialImagen');
-  formData.append('NombreCampoImagen', 'UrlImagen');
+  subirImagenRedSocial(file: File, codigoRedSocial: number, redSocial: any): void {
+    const formData = new FormData();
+    formData.append('Imagen', file);
+    formData.append('CarpetaPrincipal', this.NombreEmpresa);
+    formData.append('SubCarpeta', 'RedSocialImagen');
+    formData.append('CodigoVinculado', codigoRedSocial.toString());
+    
+    const imagenExistente = redSocial.Imagenes?.find((img: any) => img.Ubicacion === 'Footer');
+    const tieneImagenValida = imagenExistente && imagenExistente.CodigoRedSocialImagen;
 
-  this.http.post(`${this.Url}subir-imagen`, formData)
-    .subscribe({
-      next: (response: any) => {
-        if (response && response.Entidad && response.Entidad.UrlImagen) {
-          // Procesar la respuesta según si se creó o actualizó
-          this.procesarRespuestaImagen(codigoRedSocial, response, redSocial);
-        } else {
-          // Manejar respuesta alternativa
-          const imageUrl = response.UrlImagenPortada || 
-                          response.url || 
-                          (response.Entidad ? response.Entidad.UrlImagenPortada : null);
+    if (tieneImagenValida) {
+      formData.append('CodigoPropio', imagenExistente.CodigoRedSocialImagen.toString());
+    } else {
+      formData.append('CodigoPropio', '');
+    }
 
-          if (imageUrl) {
-            this.procesarRespuestaImagen(codigoRedSocial, { Entidad: { UrlImagen: imageUrl } }, redSocial);
+    formData.append('CampoVinculado', 'CodigoRedSocial');
+    formData.append('CampoPropio', 'CodigoRedSocialImagen');
+    formData.append('NombreCampoImagen', 'UrlImagen');
+
+    this.http.post(`${this.Url}subir-imagen`, formData)
+      .subscribe({
+        next: (response: any) => {
+          if (response && response.Entidad && response.Entidad.UrlImagen) {
+            this.procesarRespuestaImagen(codigoRedSocial, response, redSocial);
           } else {
-            this.alertaServicio.MostrarError('Error al obtener la URL de la imagen');
+            const imageUrl = response.UrlImagenPortada ||
+              response.url ||
+              (response.Entidad ? response.Entidad.UrlImagenPortada : null);
+
+            if (imageUrl) {
+              this.procesarRespuestaImagen(codigoRedSocial, { Entidad: { UrlImagen: imageUrl } }, redSocial);
+            } else {
+              this.alertaServicio.MostrarError('Error al obtener la URL de la imagen');
+            }
           }
+        },
+        error: (error) => {
+          this.alertaServicio.MostrarError('Error al subir la imagen');
+          this.cargarRedesSociales();
         }
+      });
+  }
+
+  procesarRespuestaImagen(codigoRedSocial: number, response: any, redSocial: any): void {
+    const urlImagen = response.Entidad.UrlImagen;
+    
+    const imagenExistente = redSocial.Imagenes?.find((img: any) => img.Ubicacion === 'Footer');
+
+    if (imagenExistente && imagenExistente.CodigoRedSocialImagen) {
+      this.actualizarRegistroRedSocialImagen(imagenExistente.CodigoRedSocialImagen, urlImagen);
+    } else {
+      const codigoImagenCreada = response.Entidad.CodigoRedSocialImagen;
+      
+      if (codigoImagenCreada) {
+        this.actualizarRegistroRedSocialImagen(codigoImagenCreada, urlImagen);
+      } else {
+        this.crearRegistroRedSocialImagen(codigoRedSocial, urlImagen);
+      }
+    }
+  }
+
+  crearRegistroRedSocialImagen(codigoRedSocial: number, urlImagen: string): void {
+    const datosNuevos = {
+      CodigoRedSocial: codigoRedSocial,
+      UrlImagen: urlImagen,
+      Ubicacion: 'Footer',
+      Estatus: 1
+    };
+
+    this.redSocialImagenServicio.Crear(datosNuevos).subscribe({
+      next: (response) => {
+        this.alertaServicio.MostrarExito('Imagen de red social creada correctamente');
+        this.cargarRedesSociales();
       },
       error: (error) => {
-        this.alertaServicio.MostrarError('Error al subir la imagen');
-        // Recargar las redes sociales para revertir el preview
+        this.alertaServicio.MostrarError('Error al crear la imagen de la red social');
         this.cargarRedesSociales();
       }
     });
-}
-
-procesarRespuestaImagen(codigoRedSocial: number, response: any, redSocial: any): void {
-  const urlImagen = response.Entidad.UrlImagen;
-  
-  // Verificar si ya existe una imagen para esta red social en Footer
-  const imagenExistente = redSocial.Imagenes?.find((img: any) => img.Ubicacion === 'Footer');
-
-  if (imagenExistente && imagenExistente.CodigoRedSocialImagen) {
-    // ACTUALIZAR: Ya existe una imagen con código válido en Footer
-    this.actualizarRegistroRedSocialImagen(imagenExistente.CodigoRedSocialImagen, urlImagen);
-  } else {
-    // ACTUALIZAR EL REGISTRO CREADO AUTOMÁTICAMENTE: 
-    // El endpoint subir-imagen ya creó un registro, solo necesitamos actualizarlo con la Ubicacion
-    const codigoImagenCreada = response.Entidad.CodigoRedSocialImagen;
-    
-    if (codigoImagenCreada) {
-      this.actualizarRegistroRedSocialImagen(codigoImagenCreada, urlImagen);
-    } else {
-      // Fallback: crear manualmente solo si no se creó automáticamente
-      this.crearRegistroRedSocialImagen(codigoRedSocial, urlImagen);
-    }
   }
-}
 
-crearRegistroRedSocialImagen(codigoRedSocial: number, urlImagen: string): void {
-  const datosNuevos = {
-    CodigoRedSocial: codigoRedSocial,
-    UrlImagen: urlImagen,
-    Ubicacion: 'Footer', // Valor quemado como solicitaste
-    Estatus: 1 // Agregar estatus activo
-  };
+  actualizarRegistroRedSocialImagen(codigoRedSocialImagen: number, urlImagen: string): void {
+    const datosActualizados = {
+      CodigoRedSocialImagen: codigoRedSocialImagen,
+      UrlImagen: urlImagen,
+      Ubicacion: 'Footer',
+      Estatus: 1
+    };
 
-  this.redSocialImagenServicio.Crear(datosNuevos).subscribe({
-    next: (response) => {
-      this.alertaServicio.MostrarExito('Imagen de red social creada correctamente');
-      // Recargar las redes sociales para obtener los datos actualizados
-      this.cargarRedesSociales();
-    },
-    error: (error) => {
-      this.alertaServicio.MostrarError('Error al crear la imagen de la red social');
-      // Recargar las redes sociales para revertir cambios
-      this.cargarRedesSociales();
-    }
-  });
-}
+    this.redSocialImagenServicio.Editar(datosActualizados).subscribe({
+      next: (response) => {
+        this.alertaServicio.MostrarExito('Imagen de red social actualizada correctamente');
+        setTimeout(() => this.cargarRedesSociales(), 500);
+      },
+      error: (error) => {
+        this.alertaServicio.MostrarError('Error al actualizar la imagen de la red social');
+        this.cargarRedesSociales();
+      }
+    });
+  }
 
-
-actualizarRegistroRedSocialImagen(codigoRedSocialImagen: number, urlImagen: string): void {
-  const datosActualizados = {
-    CodigoRedSocialImagen: codigoRedSocialImagen,
-    UrlImagen: urlImagen,
-    Ubicacion: 'Footer', // Valor quemado como solicitaste
-    Estatus: 1 // Mantener estatus activo
-  };
-
-  this.redSocialImagenServicio.Editar(datosActualizados).subscribe({
-    next: (response) => {
-      this.alertaServicio.MostrarExito('Imagen de red social actualizada correctamente');
-      
-      // Recargar las redes sociales para obtener los datos actualizados
-      setTimeout(() => this.cargarRedesSociales(), 500);
-    },
-    error: (error) => {
-      this.alertaServicio.MostrarError('Error al actualizar la imagen de la red social');
-      // Recargar las redes sociales para revertir cambios
-      this.cargarRedesSociales();
-    }
-  });
-}
   sincronizarColoresTexto(): void {
     if (this.footerData) {
       const colorSeleccionado = this.footerData.ColorTextoInicio;
@@ -375,7 +473,22 @@ actualizarRegistroRedSocialImagen(codigoRedSocialImagen: number, urlImagen: stri
 
   onColorChange(color: string) {
     this.footerData.ColorFooter = color;
-    this.servicioCompartido.setColorFooter(color);//Comentario
+    this.servicioCompartido.setColorFooter(color);
+    
+    // Enviar solo el cambio de color, sin las URLs de imágenes
+    if (this.footerData && this.footerData.CodigoFooter) {
+      const actualizacionColor = {
+        CodigoFooter: this.footerData.CodigoFooter,
+        CodigoEmpresa: this.footerData.CodigoEmpresa,
+        ColorFooter: color
+      };
+      
+      this.footerServicio.Editar(actualizacionColor).subscribe({
+        next: (response) => {
+        },
+        error: (error) => {
+        }
+      });
+    }
   }
-
 }

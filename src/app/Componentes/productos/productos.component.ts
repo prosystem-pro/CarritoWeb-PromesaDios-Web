@@ -396,6 +396,8 @@ export class ProductosComponent implements OnInit, OnDestroy {
       return;
     }
 
+    delete producto.UrlImagen;
+
     // Actualizar el nombre en el modelo
     producto.NombreProducto = this.nombreTemporal;
 
@@ -466,6 +468,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
       return;
     }
 
+    delete producto.UrlImagen;
     // Actualizar el producto
     producto.Moneda = this.precioTemp.moneda;
     producto.Precio = this.precioTemp.valor;

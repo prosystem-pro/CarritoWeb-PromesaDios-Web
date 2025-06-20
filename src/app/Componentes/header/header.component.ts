@@ -105,7 +105,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Error al cargar los datos del navbar:', error);
         // En caso de error, intentar crear navbar por defecto
-        this.crearNavbarPorDefecto();
+        // this.crearNavbarPorDefecto();
       },
     });
   }
@@ -287,7 +287,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   @HostListener('window:resize', ['$event'])
@@ -499,6 +499,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
   guardarCambios(): void {
     if (this.Datos) {
       const datosActualizados = { ...this.Datos };
+
+      delete datosActualizados.UrlImagenBuscador;
+      delete datosActualizados.UrlImagenCarrito;
+      delete datosActualizados.UrlLogo;
 
       datosActualizados.ColorTextoMenu = datosActualizados.ColorTextoInicio;
       datosActualizados.ColorTextoContacto = datosActualizados.ColorTextoInicio;

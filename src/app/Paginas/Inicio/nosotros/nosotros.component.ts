@@ -12,7 +12,7 @@ import { ServicioCompartido } from '../../../Servicios/ServicioCompartido';
 import { PermisoServicio } from '../../../Autorizacion/AutorizacionPermiso';
 import { AlertaServicio } from '../../../Servicios/Alerta-Servicio';
 import { ElementRef, ViewChild, AfterViewInit } from '@angular/core';
-
+import { EmpresaServicio } from '../../../Servicios/EmpresaServicio';
 
 @Component({
   selector: 'app-nosotros',
@@ -22,7 +22,6 @@ import { ElementRef, ViewChild, AfterViewInit } from '@angular/core';
   standalone: true,
 })
 export class NosotrosComponent implements OnInit {
-
 
   @ViewChild('videoPlayer', { static: false }) videoPlayer!: ElementRef<HTMLVideoElement>;
   private VolumenVideo = false;
@@ -43,6 +42,8 @@ export class NosotrosComponent implements OnInit {
   datosOriginales: any = null;
   colorFooter: string = '';
   datosListos: boolean = false;
+  codigoEmpresa: number | null = null;
+  
   private Url = `${Entorno.ApiUrl}`;
   private NombreEmpresa = `${Entorno.NombreEmpresa}`;
 
@@ -54,96 +55,229 @@ export class NosotrosComponent implements OnInit {
     private http: HttpClient,
     public Permiso: PermisoServicio,
     private alertaServicio: AlertaServicio,
-    private servicioCompartido: ServicioCompartido
+    private servicioCompartido: ServicioCompartido,
+    private EmpresaServicio: EmpresaServicio
   ) { }
 
-
   ngOnInit(): void {
-    // this.checkScreenSize();
-    this.setSanitizedUrl();
-    this.cargarDatosPortada();
-    this.cargarDatosCarrusel();
-    this.servicioCompartido.colorFooter$.subscribe((color) => {
-      this.colorFooter = color;
+    this.obtenerCodigoEmpresa().then(() => {
+      this.setSanitizedUrl();
+      this.cargarDatosPortada();
+      this.cargarDatosCarrusel();
+      this.servicioCompartido.colorFooter$.subscribe((color) => {
+        this.colorFooter = color;
+      });
+      document.body.addEventListener('touchstart', this.intentaReproducirVideo, { once: true });
+      document.body.addEventListener('click', this.reproducirVideo, { once: true });
+      document.body.addEventListener('scroll', this.reproducirVideo, { once: true });
     });
-    document.body.addEventListener('touchstart', this.intentaReproducirVideo, { once: true });
-    document.body.addEventListener('click', this.reproducirVideo, { once: true });
-    document.body.addEventListener('scroll', this.reproducirVideo, { once: true });
   }
 
+  // Nuevo método para obtener el código de empresa
+  private async obtenerCodigoEmpresa(): Promise<void> {
+    try {
+      const empresa = await this.EmpresaServicio.ConseguirPrimeraEmpresa().toPromise();
+      if (empresa && empresa.CodigoEmpresa) {
+        this.codigoEmpresa = empresa.CodigoEmpresa;
+      } else {
+        console.warn('No se encontró información de empresa');
+        this.alertaServicio.MostrarError('No se pudo obtener la información de la empresa');
+      }
+    } catch (error) {
+      console.error('Error al obtener código de empresa:', error);
+      this.alertaServicio.MostrarError('Error al cargar información de empresa');
+    }
+  }
+
+  // Modificar el método cargarDatosPortada para crear portada si no existe
   cargarDatosPortada(): void {
     this.empresaPortadaServicio.Listado().subscribe({
       next: (data) => {
-        this.portadaData = data[0];
-        this.isLoading = false;
+        if (data && data.length > 0) {
+          // Existe la portada, usar datos existentes
+          this.portadaData = data[0];
+          this.isLoading = false;
 
-        // Actualizar la URL del video si viene de la API
-        if (this.portadaData.Urlvideo) {
-          this.rawYoutubeUrl = this.portadaData.Urlvideo;
-
-          this.setSanitizedUrl();
+          // Actualizar la URL del video si viene de la API
+          if (this.portadaData.Urlvideo) {
+            this.rawYoutubeUrl = this.portadaData.Urlvideo;
+            this.setSanitizedUrl();
+          }
+        } else {
+          // No existe portada, crear una nueva con valores por defecto
+          this.crearPortadaPorDefecto();
         }
       },
       error: (err) => {
         console.error('Error al obtener datos de la portada:', err);
-        this.error = true;
-        this.isLoading = false;
+        // En caso de error, intentar crear portada por defecto
+        // this.crearPortadaPorDefecto();
       },
     });
   }
 
+  // Nuevo método para crear portada con valores por defecto
+  private crearPortadaPorDefecto(): void {
+    if (!this.codigoEmpresa) {
+      this.alertaServicio.MostrarError('No se puede crear la portada sin información de empresa');
+      this.error = true;
+      this.isLoading = false;
+      return;
+    }
+
+    const portadaDefecto = {
+      CodigoEmpresa: this.codigoEmpresa,
+      ColorNombreEmpresa: '#000000',
+      ColorFondoNombreEmpresa: '#ffffff',
+      UrlImagenPortada: '',
+      UrlImagenPortadaIzquierdo: '',
+      UrlImagenPortadaDerecho: '',
+      TitutloQuienesSomos: '¿Quiénes Somos?',
+      ColorTituloQuienesSomos: '#000000',
+      DescripcionQuienesSomos: 'Somos una empresa comprometida con la excelencia y la calidad en nuestros productos y servicios.',
+      ColorDescripcionQuienesSomos: '#666666',
+      TituloMision: 'Nuestra Misión',
+      ColorTituloMision: '#000000',
+      DescripcionMision: 'Brindar productos y servicios de calidad que superen las expectativas de nuestros clientes.',
+      ColorDescripcionMision: '#666666',
+      UrlImagenMision: '',
+      TituloVision: 'Nuestra Visión',
+      ColorTituloVision: '#000000',
+      DescripcionVision: 'Ser reconocidos como líderes en nuestro sector, innovando constantemente para un futuro mejor.',
+      ColordescripcionVision: '#666666',
+      UrlImagenVision: '',
+      ColorEslogan: '#000000',
+      Urlvideo: '',
+      Estatus: 1
+    };
+
+    this.empresaPortadaServicio.Crear(portadaDefecto).subscribe({
+      next: (response) => {
+        console.log('Portada creada exitosamente:', response);
+        this.alertaServicio.MostrarExito('Configuración de portada creada correctamente');
+
+        // Asignar los datos de la portada creada
+        this.portadaData = response.Entidad || response;
+        this.isLoading = false;
+
+        if (this.portadaData.Urlvideo) {
+          this.rawYoutubeUrl = this.portadaData.Urlvideo;
+          this.setSanitizedUrl();
+        }
+      },
+      error: (error) => {
+        console.error('Error al crear portada por defecto:', error);
+        this.alertaServicio.MostrarError('Error al crear la configuración de la portada');
+
+        // Como fallback, usar datos temporales para que la interfaz no se rompa
+        this.portadaData = portadaDefecto;
+        this.error = true;
+        this.isLoading = false;
+      }
+    });
+  }
+
+  // Modificar el método cargarDatosCarrusel para crear carrusel si no existe
   cargarDatosCarrusel(): void {
     this.carruselServicio.Listado().subscribe({
       next: (data) => {
-        this.carruselData = data[0] || [];
-        this.codigoCarrusel = this.carruselData.CodigoCarrusel;
-        this.titulo = this.carruselData.NombreCarrusel;
+        if (data && data.length > 0) {
+          // Existe el carrusel, usar datos existentes
+          this.carruselData = data[0];
+          this.codigoCarrusel = this.carruselData.CodigoCarrusel;
+          this.titulo = this.carruselData.NombreCarrusel;
 
-        // Ahora llamamos a ListadoCarrusel usando el código obtenido
-        if (this.carruselData?.CodigoCarrusel) {
-          this.carruselImagenServicio
-            .ListadoCarrusel(this.carruselData.CodigoCarrusel)
-            .subscribe({
-              next: (data) => {
-                this.detallesCarrusel = data;
-                this.datosListos = true;
-              },
-              error: (err) => {
-                this.detallesCarrusel = [];
-                this.datosListos = true;
-                console.error('Error al obtener detalles del carrusel:', err);
-              },
-            });
+          // Cargar imágenes del carrusel
+          this.cargarImagenesCarrusel();
+        } else {
+          // No existe carrusel, crear uno nuevo con valores por defecto
+          this.crearCarruselPorDefecto();
         }
       },
       error: (err) => {
-        console.error('Error al obtener datos de la portada:', err);
-        this.error = true;
-        this.isLoading = false;
+        console.error('Error al obtener datos del carrusel:', err);
+        // En caso de error, intentar crear carrusel por defecto
+        // this.crearCarruselPorDefecto();
       },
     });
+  }
+
+  // Nuevo método para crear carrusel con valores por defecto
+  private crearCarruselPorDefecto(): void {
+    if (!this.codigoEmpresa) {
+      this.alertaServicio.MostrarError('No se puede crear el carrusel sin información de empresa');
+      this.error = true;
+      this.isLoading = false;
+      return;
+    }
+
+    const carruselDefecto = {
+      CodigoEmpresa: this.codigoEmpresa,
+      NombreCarrusel: 'Galería Principal',
+      Descripcion: 'Carrusel de imágenes principal para la sección Nosotros',
+      Ubicacion: 'Nosotros',
+      Estatus: 1
+    };
+
+    this.carruselServicio.Crear(carruselDefecto).subscribe({
+      next: (response) => {
+        console.log('Carrusel creado exitosamente:', response);
+        this.alertaServicio.MostrarExito('Carrusel creado correctamente');
+
+        // Asignar los datos del carrusel creado
+        this.carruselData = response.Entidad || response;
+        this.codigoCarrusel = this.carruselData.CodigoCarrusel;
+        this.titulo = this.carruselData.NombreCarrusel;
+
+        // Cargar imágenes del carrusel (estará vacío inicialmente)
+        this.cargarImagenesCarrusel();
+      },
+      error: (error) => {
+        console.error('Error al crear carrusel por defecto:', error);
+        this.alertaServicio.MostrarError('Error al crear el carrusel');
+
+        // Como fallback, usar datos temporales
+        this.carruselData = carruselDefecto;
+        this.detallesCarrusel = [];
+        this.datosListos = true;
+      }
+    });
+  }
+
+  // Nuevo método para cargar imágenes del carrusel
+  private cargarImagenesCarrusel(): void {
+    if (this.carruselData?.CodigoCarrusel) {
+      this.carruselImagenServicio
+        .ListadoCarrusel(this.carruselData.CodigoCarrusel)
+        .subscribe({
+          next: (data) => {
+            this.detallesCarrusel = data;
+            this.datosListos = true;
+          },
+          error: (err) => {
+            this.detallesCarrusel = [];
+            this.datosListos = true;
+          },
+        });
+    }
   }
 
   // Método para activar/desactivar el modo edición
   toggleModoEdicion(): void {
     if (!this.modoEdicion) {
-      // Hacer una copia profunda de los datos antes de entrar en modo edición
       this.datosOriginales = JSON.parse(JSON.stringify(this.portadaData));
       this.modoEdicion = true;
       document.body.classList.add('modoEdicion');
     } else {
-      // Confirmar si desea guardar los cambios usando el servicio
       this.alertaServicio
         .Confirmacion('¿Desea guardar los cambios?')
         .then((confirmado) => {
           if (confirmado) {
             this.guardarCambios();
           } else {
-            // Restaurar datos originales si cancela
             this.portadaData = JSON.parse(JSON.stringify(this.datosOriginales));
           }
 
-          // Salir del modo edición solo después de decidir
           this.modoEdicion = false;
           document.body.classList.remove('modoEdicion');
         });
@@ -155,6 +289,13 @@ export class NosotrosComponent implements OnInit {
     if (this.portadaData) {
       const datosActualizados = { ...this.portadaData };
 
+      // EXCLUIR las URLs de imágenes para evitar problemas en el backend
+      delete datosActualizados.UrlImagenPortada;
+      delete datosActualizados.UrlImagenPortadaIzquierdo;
+      delete datosActualizados.UrlImagenPortadaDerecho;
+      delete datosActualizados.UrlImagenMision;
+      delete datosActualizados.UrlImagenVision;
+
       this.empresaPortadaServicio.Editar(datosActualizados).subscribe({
         next: (response) => {
           this.alertaServicio.MostrarExito('Cambios guardados correctamente');
@@ -163,7 +304,8 @@ export class NosotrosComponent implements OnInit {
           this.datosOriginales = null;
         },
         error: (error) => {
-          this.alertaServicio.MostrarError(error, 'Error al guardar los cambios. Por favor, intente de nuevo.');
+          console.error('Error al guardar los cambios:', error);
+          this.alertaServicio.MostrarError('Error al guardar los cambios. Por favor, intente de nuevo.');
         },
       });
     } else {
@@ -175,6 +317,12 @@ export class NosotrosComponent implements OnInit {
   actualizarImagenPortada(event: any): void {
     const file = event.target.files[0];
     if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.portadaData.UrlImagenPortada = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
       this.subirImagen(file, 'UrlImagenPortada');
     }
   }
@@ -182,6 +330,12 @@ export class NosotrosComponent implements OnInit {
   actualizarImagenPortadaIzquierda(event: any): void {
     const file = event.target.files[0];
     if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.portadaData.UrlImagenPortadaIzquierdo = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
       this.subirImagen(file, 'UrlImagenPortadaIzquierdo');
     }
   }
@@ -189,6 +343,12 @@ export class NosotrosComponent implements OnInit {
   actualizarImagenPortadaDerecha(event: any): void {
     const file = event.target.files[0];
     if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.portadaData.UrlImagenPortadaDerecho = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
       this.subirImagen(file, 'UrlImagenPortadaDerecho');
     }
   }
@@ -196,6 +356,12 @@ export class NosotrosComponent implements OnInit {
   actualizarImagenMision(event: any): void {
     const file = event.target.files[0];
     if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.portadaData.UrlImagenMision = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
       this.subirImagen(file, 'UrlImagenMision');
     }
   }
@@ -203,12 +369,47 @@ export class NosotrosComponent implements OnInit {
   actualizarImagenVision(event: any): void {
     const file = event.target.files[0];
     if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.portadaData.UrlImagenVision = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
       this.subirImagen(file, 'UrlImagenVision');
     }
   }
 
-  // Método general para subir imágenes
+  // Modificar el método subirImagen para manejar la creación si no existe CodigoEmpresaPortada
   subirImagen(file: File, campoDestino: string): void {
+    if (!this.portadaData) {
+      this.alertaServicio.MostrarError('No hay datos de portada disponibles');
+      return;
+    }
+
+    // Si no existe CodigoEmpresaPortada, primero crear la portada
+    if (!this.portadaData.CodigoEmpresaPortada) {
+      this.alertaServicio.MostrarAlerta('Creando configuración de portada...', 'Por favor, espere');
+
+      // Crear la portada primero y luego subir la imagen
+      this.empresaPortadaServicio.Crear(this.portadaData).subscribe({
+        next: (response) => {
+          this.portadaData = response.Entidad || response;
+          // Ahora que tenemos el CodigoEmpresaPortada, proceder a subir la imagen
+          this.ejecutarSubidaImagen(file, campoDestino);
+        },
+        error: (error) => {
+          console.error('Error al crear portada antes de subir imagen:', error);
+          this.alertaServicio.MostrarError('Error al crear la configuración de la portada');
+        }
+      });
+    } else {
+      // Ya existe la portada, proceder directamente a subir la imagen
+      this.ejecutarSubidaImagen(file, campoDestino);
+    }
+  }
+
+  // Nuevo método para ejecutar la subida de imagen
+  private ejecutarSubidaImagen(file: File, campoDestino: string): void {
     const formData = new FormData();
     formData.append('Imagen', file);
     formData.append('CarpetaPrincipal', this.NombreEmpresa);
@@ -256,30 +457,31 @@ export class NosotrosComponent implements OnInit {
     });
   }
 
-
   // Método para actualizar la URL del video
-// Método para actualizar la URL del video
-actualizarVideo(): void {
-  if (this.portadaData) {
-    this.portadaData.Urlvideo = this.rawYoutubeUrl;
-    this.setSanitizedUrl();
+  actualizarVideo(): void {
+    if (this.portadaData) {
+      this.portadaData.Urlvideo = this.rawYoutubeUrl;
+      this.setSanitizedUrl();
 
-    const datosVideo = {
-      CodigoEmpresaPortada: this.portadaData.CodigoEmpresaPortada,
-      Urlvideo: this.portadaData.Urlvideo
-    };
+      // Enviar solo el campo del video, sin las URLs de imágenes
+      const datosVideo = {
+        CodigoEmpresaPortada: this.portadaData.CodigoEmpresaPortada,
+        CodigoEmpresa: this.portadaData.CodigoEmpresa,
+        Urlvideo: this.portadaData.Urlvideo
+      };
 
-    this.empresaPortadaServicio.Editar(datosVideo).subscribe({
-      next: () => {
-        this.alertaServicio.MostrarExito('Video actualizado correctamente');
-        this.modoEdicion = false;
-      },
-      error: () => {
-        this.alertaServicio.MostrarError('Error al actualizar el video. Por favor, intente de nuevo.');
-      },
-    });
+      this.empresaPortadaServicio.Editar(datosVideo).subscribe({
+        next: () => {
+          this.alertaServicio.MostrarExito('Video actualizado correctamente');
+          this.modoEdicion = false;
+        },
+        error: (error) => {
+          console.error('Error al actualizar video:', error);
+          this.alertaServicio.MostrarError('Error al actualizar el video. Por favor, intente de nuevo.');
+        },
+      });
+    }
   }
-}
 
   setSanitizedUrl(): void {
     this.sanitizedVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.rawYoutubeUrl);
@@ -302,6 +504,7 @@ actualizarVideo(): void {
       this.mostrarOverlay = false;
     }
   }
+
   intentaReproducirVideo = () => {
     if (this.videoPlayer && !this.VolumenVideo) {
       const videoEl = this.videoPlayer.nativeElement;
@@ -343,5 +546,4 @@ actualizarVideo(): void {
       this.VolumenVideo = true;
     }
   }
-
 }
