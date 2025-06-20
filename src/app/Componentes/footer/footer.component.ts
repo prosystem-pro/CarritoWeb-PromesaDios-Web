@@ -397,7 +397,12 @@ subirImagenRedSocial(file: File, codigoRedSocial: number, redSocial: any): void 
 
   this.http.post(`${this.Url}subir-imagen`, formData)
     .subscribe({
-      next: (response: any) => {
+     next: (response: any) => {
+        if (response?.Alerta) {
+          this.alertaServicio.MostrarAlerta(response.Alerta, 'Atención');
+          return;
+        }
+
         if (response && response.Entidad && response.Entidad.UrlImagen) {
           // Procesar la respuesta según si se creó o actualizó
           this.procesarRespuestaImagen(codigoRedSocial, response, redSocial);
@@ -415,7 +420,11 @@ subirImagenRedSocial(file: File, codigoRedSocial: number, redSocial: any): void 
         }
       },
       error: (error) => {
-        this.alertaServicio.MostrarError('Error al subir la imagen');
+        if (error?.error?.Alerta) {
+          this.alertaServicio.MostrarAlerta(error.error.Alerta, 'Atención');
+        } else {
+          this.alertaServicio.MostrarError('Error al subir la imagen');
+        }
         // Recargar las redes sociales para revertir el preview
         this.cargarRedesSociales();
       }

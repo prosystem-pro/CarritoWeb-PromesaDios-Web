@@ -383,36 +383,49 @@ subirImagenDecorativo(file: File, campoDestino: string): void {
   formData.append('CampoPropio', 'CodigoMenuPortada');
   formData.append('NombreCampoImagen', campoDestino);
 
-  this.http.post(`${this.Url}subir-imagen`, formData)
-    .subscribe({
-      next: (response: any) => {
-        if (response && response.Entidad && response.Entidad[campoDestino]) {
-          this.menuPortada[campoDestino] = response.Entidad[campoDestino];
-          const {
-            UrlImagenNavbar,
-            UrlImagenPortadaIzquierdo,
-            UrlImagenPortadaDerecho,
-            UrlImagenMenu,
-            UrlImagenPresentacion,
-            ...datosActualizados
-          } = this.menuPortada;
+  this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
+    next: (response: any) => {
+      if (response?.Alerta) {
+        this.alertaServicio.MostrarAlerta(response.Alerta, 'Atención');
+        return;
+      }
 
-          this.menuPortadaServicio.Editar(datosActualizados).subscribe({
-            next: () => {
-              this.alertaServicio.MostrarExito('Imagen actualizada correctamente', 'Éxito');
-              this.modoEdicion = false;
-            },
-            error: () => {
+      if (response && response.Entidad && response.Entidad[campoDestino]) {
+        this.menuPortada[campoDestino] = response.Entidad[campoDestino];
+        const {
+          UrlImagenNavbar,
+          UrlImagenPortadaIzquierdo,
+          UrlImagenPortadaDerecho,
+          UrlImagenMenu,
+          UrlImagenPresentacion,
+          ...datosActualizados
+        } = this.menuPortada;
+
+        this.menuPortadaServicio.Editar(datosActualizados).subscribe({
+          next: () => {
+            this.alertaServicio.MostrarExito('Imagen actualizada correctamente', 'Éxito');
+            this.modoEdicion = false;
+          },
+          error: (error) => {
+            if (error?.error?.Alerta) {
+              this.alertaServicio.MostrarAlerta(error.error.Alerta, 'Atención');
+            } else {
               this.alertaServicio.MostrarError('Error al actualizar la imagen');
             }
-          });
-        }
-      },
-      error: () => {
+          }
+        });
+      }
+    },
+    error: (error) => {
+      if (error?.error?.Alerta) {
+        this.alertaServicio.MostrarAlerta(error.error.Alerta, 'Atención');
+      } else {
         this.alertaServicio.MostrarError('Error al subir la imagen');
       }
-    });
+    }
+  });
 }
+
 
   subirImagenNuevaCategoria() {
     if (this.nuevaCategoria.titulo && this.nuevaCategoria.imagenFile) {
@@ -431,52 +444,66 @@ subirImagenDecorativo(file: File, campoDestino: string): void {
       // alert('Creando nueva categoría...');
 
       this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
-        next: (response: any) => {
+       next: (response: any) => {
 
-          if (response && response.Entidad) {
-            // Actualizar con el nombre de la categoría
-            const nuevaClasificacion = {
-              CodigoClasificacionProducto:
-                response.Entidad.CodigoClasificacionProducto,
-              CodigoEmpresa: 8,
-              NombreClasificacionProducto: this.nuevaCategoria.titulo,
-              UrlImagen: response.Entidad.UrlImagen || '',
-              Estatus: 1,
-            };
-
-            this.clasificacionProductoServicio
-              .Editar(nuevaClasificacion)
-              .subscribe({
-                next: (updateResponse) => {
-                  this.isLoadingCrear = false;
-                  this.alertaServicio.MostrarExito('Nueva categoría creada correctamente', 'Éxito');
-
-                  // Recargar clasificaciones
-                  this.cargarClasificaciones();
-
-                  // Resetear formulario
-                  this.resetNuevaCategoria();
-                },
-                error: (updateError) => {
-                  this.isLoadingCrear = false;
-                  this.alertaServicio.MostrarError(updateError, 'Error al crear la categoría');
-
-                  // Recargar clasificaciones de todos modos
-                  this.cargarClasificaciones();
-                },
-              });
-          } else {
-            this.isLoadingCrear = false;
-            this.alertaServicio.MostrarError('Error al procesar la respuesta del servidor', 'Error');
-          }
-        },
-        error: (error) => {
+        if (response?.Alerta) {
           this.isLoadingCrear = false;
+          this.alertaServicio.MostrarAlerta(response.Alerta, 'Atención');
+          return;
+        }
+
+        if (response && response.Entidad) {
+          // Actualizar con el nombre de la categoría
+          const nuevaClasificacion = {
+            CodigoClasificacionProducto:
+              response.Entidad.CodigoClasificacionProducto,
+            CodigoEmpresa: 8,
+            NombreClasificacionProducto: this.nuevaCategoria.titulo,
+            UrlImagen: response.Entidad.UrlImagen || '',
+            Estatus: 1,
+          };
+
+          this.clasificacionProductoServicio.Editar(nuevaClasificacion).subscribe({
+            next: (updateResponse) => {
+              this.isLoadingCrear = false;
+              this.alertaServicio.MostrarExito('Nueva categoría creada correctamente', 'Éxito');
+
+              // Recargar clasificaciones
+              this.cargarClasificaciones();
+
+              // Resetear formulario
+              this.resetNuevaCategoria();
+            },
+            error: (updateError) => {
+              this.isLoadingCrear = false;
+
+              if (updateError?.error?.Alerta) {
+                this.alertaServicio.MostrarAlerta(updateError.error.Alerta, 'Atención');
+              } else {
+                this.alertaServicio.MostrarError(updateError, 'Error al crear la categoría');
+              }
+
+              // Recargar clasificaciones de todos modos
+              this.cargarClasificaciones();
+            },
+          });
+        } else {
+          this.isLoadingCrear = false;
+          this.alertaServicio.MostrarError('Error al procesar la respuesta del servidor', 'Error');
+        }
+      },
+      error: (error) => {
+        this.isLoadingCrear = false;
+
+        if (error?.error?.Alerta) {
+          this.alertaServicio.MostrarAlerta(error.error.Alerta, 'Atención');
+        } else {
           this.alertaServicio.MostrarError(error, 'Error al subir la imagen. Por favor, intente de nuevo.');
-        },
-      });
-    }
+        }
+      },
+    });
   }
+}
 
 
   subirImagen(file: File, clasificacion: any): void {
