@@ -208,49 +208,62 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
       next: (response: any) => {
-        this.AlertaServicio.MostrarAlerta('Cargando imagen...', 'Por favor, espere');
+      if (response?.Alerta) {
+        this.AlertaServicio.MostrarAlerta(response.Alerta, 'Atención');
+        return;
+      }
 
-        if (response && response.Entidad && response.Entidad[campoDestino]) {
-          this.Datos[campoDestino] = response.Entidad[campoDestino];
+      this.AlertaServicio.MostrarAlerta('Cargando imagen...', 'Por favor, espere');
 
-          if (campoDestino === 'UrlImagenBuscador') {
-            document.documentElement.style.setProperty(
-              '--url-imagen-buscador',
-              `url(${response.Entidad[campoDestino]})`
-            );
-          }
+      if (response && response.Entidad && response.Entidad[campoDestino]) {
+        this.Datos[campoDestino] = response.Entidad[campoDestino];
 
-          const { UrlImagenBuscador, UrlImagenCarrito, UrlLogo, ...datosLimpios } = this.Datos;
-
-          this.Servicio.Editar(datosLimpios).subscribe({
-            next: () => {
-              this.AlertaServicio.MostrarExito('Imagen actualizada correctamente');
-              this.modoEdicion = false;
-            },
-            error: () => {
-              this.AlertaServicio.MostrarError('Error al actualizar el campo de imagen');
-            },
-          });
-
-        } else {
-          const imageUrl =
-            response.UrlImagenPortada ||
-            response.url ||
-            (response.Entidad ? response.Entidad.UrlImagenPortada : null);
-
-          if (imageUrl) {
-            this.Datos[campoDestino] = imageUrl;
-            this.AlertaServicio.MostrarExito('Imagen subida correctamente');
-          } else {
-            this.AlertaServicio.MostrarAlerta('No se pudo obtener la URL de la imagen');
-          }
+        if (campoDestino === 'UrlImagenBuscador') {
+          document.documentElement.style.setProperty(
+            '--url-imagen-buscador',
+            `url(${response.Entidad[campoDestino]})`
+          );
         }
-      },
-      error: () => {
+
+        const { UrlImagenBuscador, UrlImagenCarrito, UrlLogo, ...datosLimpios } = this.Datos;
+
+        this.Servicio.Editar(datosLimpios).subscribe({
+          next: () => {
+            this.AlertaServicio.MostrarExito('Imagen actualizada correctamente');
+            this.modoEdicion = false;
+          },
+          error: (error) => {
+            if (error?.error?.Alerta) {
+              this.AlertaServicio.MostrarAlerta(error.error.Alerta, 'Atención');
+            } else {
+              this.AlertaServicio.MostrarError('Error al actualizar el campo de imagen');
+            }
+          },
+        });
+
+      } else {
+        const imageUrl =
+          response.UrlImagenPortada ||
+          response.url ||
+          (response.Entidad ? response.Entidad.UrlImagenPortada : null);
+
+        if (imageUrl) {
+          this.Datos[campoDestino] = imageUrl;
+          this.AlertaServicio.MostrarExito('Imagen subida correctamente');
+        } else {
+          this.AlertaServicio.MostrarAlerta('No se pudo obtener la URL de la imagen');
+        }
+      }
+    },
+    error: (error) => {
+      if (error?.error?.Alerta) {
+        this.AlertaServicio.MostrarAlerta(error.error.Alerta, 'Atención');
+      } else {
         this.AlertaServicio.MostrarError('Error al subir la imagen. Por favor, intente de nuevo.');
-      },
-    });
-  }
+      }
+    },
+  });
+}
 
   // Los demás métodos permanecen igual...
   ReportarRedSocial(codigo: number | undefined): void {
@@ -364,6 +377,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.http.post(`${this.Url}subir-imagen`, formData)
       .subscribe({
         next: (response: any) => {
+          if (response?.Alerta) {
+            this.AlertaServicio.MostrarAlerta(response.Alerta, 'Atención');
+            return;
+          }
+
           if (response && response.Entidad && response.Entidad.UrlImagen) {
             this.procesarRespuestaImagen(codigoRedSocial, response, redSocial);
           } else {
@@ -379,12 +397,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          this.AlertaServicio.MostrarError('Error al subir la imagen');
+          if (error?.error?.Alerta) {
+            this.AlertaServicio.MostrarAlerta(error.error.Alerta, 'Atención');
+          } else {
+            this.AlertaServicio.MostrarError('Error al subir la imagen');
+          }
           this.cargarRedesSociales();
         }
       });
   }
-
   procesarRespuestaImagen(codigoRedSocial: number, response: any, redSocial: any): void {
     const urlImagen = response.Entidad.UrlImagen;
 

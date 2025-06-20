@@ -421,41 +421,54 @@ export class NosotrosComponent implements OnInit {
     formData.append('NombreCampoImagen', campoDestino);
 
     this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
-      next: (response: any) => {
-        if (response && response.Entidad && response.Entidad[campoDestino]) {
-          this.portadaData[campoDestino] = response.Entidad[campoDestino];
+     next: (response: any) => {
+      if (response?.Alerta) {
+        this.alertaServicio.MostrarAlerta(response.Alerta, 'Atención');
+        return;
+      }
 
-          const {
-            UrlImagenPortada,
-            UrlImagenPortadaIzquierdo,
-            UrlImagenPortadaDerecho,
-            UrlImagenMision,
-            UrlImagenVision,
-            ...datosActualizados
-          } = this.portadaData;
+      if (response && response.Entidad && response.Entidad[campoDestino]) {
+        this.portadaData[campoDestino] = response.Entidad[campoDestino];
 
-          this.empresaPortadaServicio.Editar(datosActualizados).subscribe({
-            next: () => {
-              this.alertaServicio.MostrarExito(
-                'Campo de imagen actualizado correctamente'
-              );
-              this.modoEdicion = false;
-            },
-            error: () => {
+        const {
+          UrlImagenPortada,
+          UrlImagenPortadaIzquierdo,
+          UrlImagenPortadaDerecho,
+          UrlImagenMision,
+          UrlImagenVision,
+          ...datosActualizados
+        } = this.portadaData;
+
+        this.empresaPortadaServicio.Editar(datosActualizados).subscribe({
+          next: () => {
+            this.alertaServicio.MostrarExito(
+              'Campo de imagen actualizado correctamente'
+            );
+            this.modoEdicion = false;
+          },
+          error: (error) => {
+            if (error?.error?.Alerta) {
+              this.alertaServicio.MostrarAlerta(error.error.Alerta, 'Atención');
+            } else {
               this.alertaServicio.MostrarError(
                 'Error al actualizar el campo de imagen. Por favor, intente de nuevo.'
               );
-            },
-          });
-        }
-      },
-      error: () => {
+            }
+          },
+        });
+      }
+    },
+    error: (error) => {
+      if (error?.error?.Alerta) {
+        this.alertaServicio.MostrarAlerta(error.error.Alerta, 'Atención');
+      } else {
         this.alertaServicio.MostrarError(
           'Error al subir la imagen. Por favor, intente de nuevo.'
         );
-      },
-    });
-  }
+      }
+    },
+  });
+}
 
   // Método para actualizar la URL del video
   actualizarVideo(): void {

@@ -43,16 +43,16 @@ interface NuevaImagen {
 export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly Url = `${Entorno.ApiUrl}`;
   private readonly NombreEmpresa = `${Entorno.NombreEmpresa}`;
-  
+
   @Input() items: CarruselItem[] = [];
   @Input() codigoCarrusel: number = 0;
   @Input() title: string = '¡Los productos más destacados!';
   @Input() titleClass: string = 'cursive-font text-dark';
   @Input() autoplay: boolean = false;
   @Input() autoplayInterval: number = 2000;
-  
+
   @ViewChild('carouselContainer') carouselContainer!: ElementRef<HTMLElement>;
-  
+
   currentIndex = 0;
   totalItems = 0;
   itemsPerView = 1;
@@ -70,7 +70,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
   editandoTitulo: boolean = false;
   tituloTemporal: string = '';
   carruselActual: Carrusel | null = null;
-  
+
   // Propiedades para manejo de touch en iOS
   private touchStartX: number = 0;
   private touchStartY: number = 0;
@@ -92,7 +92,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
   };
 
   constructor(
-    private el: ElementRef, 
+    private el: ElementRef,
     private http: HttpClient,
     private carruselImagenServicio: CarruselImagenServicio,
     private cdr: ChangeDetectorRef,
@@ -103,7 +103,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
     // Detectar iOS al inicializar el componente
     this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   }
-  
+
   ngOnInit(): void {
     this.checkScreenSize();
     if (this.codigoCarrusel > 0) {
@@ -115,7 +115,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
     // Usar setTimeout para evitar ExpressionChangedAfterItHasBeenCheckedError
     setTimeout(() => {
       this.setupCarousel();
-      
+
       if (this.autoplay && !this.modoEdicion) {
         // this.startAutoplay();
       }
@@ -128,7 +128,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
         this.setupCarousel();
       }, 100);
     }
-    
+
     if (changes['autoplay'] && !changes['autoplay'].firstChange) {
       if (this.autoplay && !this.modoEdicion) {
         // this.startAutoplay();
@@ -154,7 +154,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleModoEdicion(): void {
     this.modoEdicion = !this.modoEdicion;
     this.cancelarEdicion();
-    
+
     // Pausar el autoplay cuando se entra en modo edición
     if (this.modoEdicion) {
       this.stopAutoplay();
@@ -162,7 +162,7 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (this.autoplay) {
       // this.startAutoplay();
     }
-    
+
     // Asegurar que el carrusel se actualice correctamente después de cambiar el modo
     setTimeout(() => {
       this.setupCarousel();
@@ -172,10 +172,10 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopAutoplay();
-    
+
     // Limpiar todas las suscripciones
     this.subscriptions.forEach(sub => sub.unsubscribe());
-    
+
     // Limpiar event listeners específicos de iOS
     const carousel = this.carouselContainer?.nativeElement;
     if (carousel) {
@@ -185,43 +185,43 @@ export class CarruselComponent implements OnInit, AfterViewInit, OnDestroy {
       carousel.removeEventListener('touchend', this.handleTouchEnd);
     }
   }
-  
+
   @HostListener('window:resize')
   onResize(): void {
     this.checkScreenSize();
     this.setupCarousel();
   }
-  
+
   checkScreenSize(): void {
     const prevIsMobile = this.isMobile;
     this.isMobile = window.innerWidth <= 768;
     this.itemWidth = this.isMobile ? 220 : 280;
     this.itemsPerView = Math.max(1, Math.floor((window.innerWidth - 30) / (this.itemWidth + this.gapWidth)));
-    
+
     // Si cambió el modo, actualizar el carrusel
     if (prevIsMobile !== this.isMobile) {
       setTimeout(() => this.setupCarousel(), 100);
     }
   }
 
-private applyIOSFixes(): void {
-  const carousel = this.carouselContainer?.nativeElement;
-  if (!carousel) return;
-  
-  // Aplicar estilos específicos para iOS usando cast a any
-  (carousel.style as any).webkitOverflowScrolling = 'touch';
-  (carousel.style as any).overscrollBehaviorX = 'contain';
-  carousel.style.touchAction = 'pan-x';
-  
-  // Aplicar transform3d para hardware acceleration
-  carousel.style.transform = 'translateZ(0)';
-  (carousel.style as any).webkitTransform = 'translateZ(0)';
-  
-  // Agregar event listeners específicos para iOS
-  carousel.addEventListener('touchstart', this.handleTouchStart, { passive: true });
-  // carousel.addEventListener('touchmove', this.handleTouchMove, { passive: false });
-  carousel.addEventListener('touchend', this.handleTouchEnd, { passive: true });
-}
+  private applyIOSFixes(): void {
+    const carousel = this.carouselContainer?.nativeElement;
+    if (!carousel) return;
+
+    // Aplicar estilos específicos para iOS usando cast a any
+    (carousel.style as any).webkitOverflowScrolling = 'touch';
+    (carousel.style as any).overscrollBehaviorX = 'contain';
+    carousel.style.touchAction = 'pan-x';
+
+    // Aplicar transform3d para hardware acceleration
+    carousel.style.transform = 'translateZ(0)';
+    (carousel.style as any).webkitTransform = 'translateZ(0)';
+
+    // Agregar event listeners específicos para iOS
+    carousel.addEventListener('touchstart', this.handleTouchStart, { passive: true });
+    // carousel.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+    carousel.addEventListener('touchend', this.handleTouchEnd, { passive: true });
+  }
 
   private handleTouchStart = (e: TouchEvent) => {
     this.touchStartX = e.touches[0].clientX;
@@ -231,17 +231,17 @@ private applyIOSFixes(): void {
 
   // private handleTouchMove = (e: TouchEvent) => {
   //   if (!this.touchStartX || !this.touchStartY) return;
-    
+
   //   const touchX = e.touches[0].clientX;
   //   const touchY = e.touches[0].clientY;
-    
+
   //   const diffX = Math.abs(touchX - this.touchStartX);
   //   const diffY = Math.abs(touchY - this.touchStartY);
-    
+
   //   // Determinar la dirección del scroll
   //   if (!this.isScrolling) {
   //     this.isScrolling = true;
-      
+
   //     // Si el movimiento es más horizontal que vertical, es scroll horizontal
   //     if (diffX > diffY) {
   //       // Permitir scroll horizontal, prevenir scroll vertical
@@ -258,61 +258,61 @@ private applyIOSFixes(): void {
     this.touchStartY = 0;
     this.isScrolling = false;
   };
-  
+
   setupCarousel(): void {
     const carousel = this.carouselContainer?.nativeElement;
     if (!carousel) return;
-    
+
     const leftArrow = this.el.nativeElement.querySelector('.arrow-left');
     const rightArrow = this.el.nativeElement.querySelector('.arrow-right');
-    
+
     // Obtener todos los elementos del carrusel (incluyendo el item de edición si está presente)
     const carouselItems = carousel.querySelectorAll('.product-card');
     this.totalItems = carouselItems.length;
-    
+
     if (carouselItems.length > 0) {
       const firstItem = carouselItems[0] as HTMLElement;
       if (firstItem.offsetWidth > 0) {
         this.itemWidth = firstItem.offsetWidth;
       }
     }
-    
+
     const totalCarouselWidth = this.totalItems * (this.itemWidth + this.gapWidth) - this.gapWidth;
     const containerWidth = carousel.clientWidth;
     this.shouldCenter = !this.isMobile && containerWidth >= totalCarouselWidth;
-    
+
     this.maxScrollPosition = Math.max(0, carousel.scrollWidth - carousel.clientWidth);
-    
+
     // Asegurarnos de que el índice actual sea válido
     this.currentIndex = Math.min(this.currentIndex, Math.max(0, this.totalItems - 1));
-    
+
     // Actualizar la visibilidad de las flechas
     this.updateArrowsVisibility(leftArrow, rightArrow);
-    
+
     // Distribuir los elementos según el modo de visualización
     this.distributeItems();
-    
+
     // Remover listeners existentes para evitar duplicados
     carousel.removeEventListener('scroll', this.handleScroll);
     carousel.removeEventListener('touchstart', this.handleTouchStart);
     // carousel.removeEventListener('touchmove', this.handleTouchMove);
     carousel.removeEventListener('touchend', this.handleTouchEnd);
-    
+
     // Añadir listener de scroll
     carousel.addEventListener('scroll', this.handleScroll, { passive: true });
-    
+
     // Aplicar fixes específicos para iOS
     if (this.isIOS) {
       this.applyIOSFixes();
       this.applyIOSImageFixes();
     }
   }
-  
+
   private handleScroll = () => {
     const carousel = this.carouselContainer?.nativeElement;
     if (carousel) {
       this.updateArrowsBasedOnScroll(carousel);
-      
+
       // Actualizar el índice actual basado en el scroll
       if (!this.shouldCenter && this.totalItems > 0) {
         const scrollStep = this.itemWidth + this.gapWidth;
@@ -322,11 +322,11 @@ private applyIOSFixes(): void {
       }
     }
   };
-  
+
   distributeItems(): void {
     const carousel = this.carouselContainer?.nativeElement;
     if (!carousel) return;
-    
+
     if (this.isMobile) {
       carousel.classList.add('mobile-view');
       carousel.classList.remove('desktop-view');
@@ -334,7 +334,7 @@ private applyIOSFixes(): void {
     } else {
       carousel.classList.add('desktop-view');
       carousel.classList.remove('mobile-view');
-      
+
       if (this.shouldCenter) {
         carousel.style.justifyContent = 'center';
       } else {
@@ -342,21 +342,21 @@ private applyIOSFixes(): void {
       }
     }
   }
-  
+
   scrollCarousel(direction: string): void {
     const carousel = this.carouselContainer?.nativeElement;
     if (!carousel || this.shouldCenter) return;
-    
+
     const scrollStep = this.itemWidth + this.gapWidth;
     let newScrollPosition = 0;
-    
+
     if (direction === 'left') {
       if (carousel.scrollLeft < scrollStep * 1.5) {
         newScrollPosition = 0;
       } else {
         newScrollPosition = carousel.scrollLeft - scrollStep;
       }
-      
+
       if (this.currentIndex > 0) {
         this.currentIndex--;
       }
@@ -366,12 +366,12 @@ private applyIOSFixes(): void {
       } else {
         newScrollPosition = carousel.scrollLeft + scrollStep;
       }
-      
+
       if (this.currentIndex < this.totalItems - 1) {
         this.currentIndex++;
       }
     }
-    
+
     // Usar requestAnimationFrame para un scroll más suave especialmente en iOS
     if (this.isIOS) {
       requestAnimationFrame(() => {
@@ -386,41 +386,41 @@ private applyIOSFixes(): void {
         behavior: 'smooth'
       });
     }
-    
+
     // Actualizar las flechas después del scroll
     setTimeout(() => {
       this.updateArrowsBasedOnScroll(carousel);
     }, 300);
   }
-  
+
   updateArrowsVisibility(leftArrow: Element | null, rightArrow: Element | null): void {
     // En modo móvil o si hay pocos elementos, ocultamos las flechas
     const shouldShowArrows = !this.shouldCenter && this.totalItems > this.itemsPerView;
-    
+
     if (leftArrow) {
       leftArrow.classList.toggle('d-none', !shouldShowArrows);
       if (shouldShowArrows) leftArrow.classList.remove('d-none');
     }
-    
+
     if (rightArrow) {
       rightArrow.classList.toggle('d-none', !shouldShowArrows);
       if (shouldShowArrows) rightArrow.classList.remove('d-none');
     }
   }
-  
+
   updateArrowsBasedOnScroll(carousel: HTMLElement): void {
     const leftArrow = this.el.nativeElement.querySelector('.arrow-left');
     const rightArrow = this.el.nativeElement.querySelector('.arrow-right');
-    
+
     if (leftArrow) {
       leftArrow.style.opacity = carousel.scrollLeft <= 10 ? '0.5' : '1';
     }
-    
+
     if (rightArrow) {
       rightArrow.style.opacity = carousel.scrollLeft >= this.maxScrollPosition - 10 ? '0.5' : '1';
     }
   }
-  
+
   startAutoplay(): void {
     this.stopAutoplay();
     this.autoplayIntervalId = window.setInterval(() => {
@@ -431,18 +431,18 @@ private applyIOSFixes(): void {
       }
     }, this.autoplayInterval);
   }
-  
+
   stopAutoplay(): void {
     if (this.autoplayIntervalId) {
       clearInterval(this.autoplayIntervalId);
       this.autoplayIntervalId = undefined;
     }
   }
-  
+
   resetToStart(): void {
     const carousel = this.carouselContainer?.nativeElement;
     if (!carousel) return;
-    
+
     if (this.isIOS) {
       requestAnimationFrame(() => {
         carousel.scrollTo({
@@ -456,22 +456,22 @@ private applyIOSFixes(): void {
         behavior: 'smooth'
       });
     }
-    
+
     this.currentIndex = 0;
     this.updateArrowsBasedOnScroll(carousel);
   }
-  
+
   getIndicatorClass(index: number): string {
     return this.currentIndex === index ? 'active' : '';
   }
-  
+
   goToSlide(index: number): void {
     const carousel = this.carouselContainer?.nativeElement;
     if (!carousel) return;
-    
+
     const scrollStep = this.itemWidth + this.gapWidth;
     const newScrollPosition = index * scrollStep;
-    
+
     // Usar requestAnimationFrame para mejor rendimiento especialmente en iOS
     if (this.isIOS) {
       requestAnimationFrame(() => {
@@ -486,9 +486,9 @@ private applyIOSFixes(): void {
         behavior: 'smooth'
       });
     }
-    
+
     this.currentIndex = index;
-    
+
     setTimeout(() => {
       this.updateArrowsBasedOnScroll(carousel);
     }, 300);
@@ -502,7 +502,7 @@ private applyIOSFixes(): void {
       imagenPreview: null
     };
   }
-  
+
   guardarNuevoImagen(): void {
     if (this.nuevaImagen.imagen && typeof this.nuevaImagen.imagen !== 'string') {
       this.subirImagenCarrusel();
@@ -543,50 +543,58 @@ private applyIOSFixes(): void {
     const subscription = this.http.post(`${this.Url}subir-imagen`, formData)
       .subscribe({
         next: (response: any) => {
+          if (response?.Alerta) {
+            this.alertaServicio.MostrarAlerta(response.Alerta, 'Atención');
+            this.cargandoImagen = false;
+            this.cdr.detectChanges();
+            return;
+          }
+
           this.alertaServicio.MostrarExito('Imagen subida correctamente');
           this.cargandoImagen = false;
 
-          // Crear un nuevo objeto para añadir al carrusel
           const nuevaImagenCarrusel: CarruselItem = {
             UrlImagen: response.Entidad?.UrlImagen || response.url,
             CodigoCarruselImagen: response.Entidad?.CodigoCarruselImagen || 0,
             CodigoCarrusel: this.items[0]?.CodigoCarrusel || this.codigoCarrusel
           };
 
-          // Añadir la nueva imagen al array de items
           this.items = [...this.items, nuevaImagenCarrusel];
-          
-          // Reiniciar el formulario de nueva imagen
           this.resetNuevaImagen();
-          
-          // Actualizar el carrusel
+
           setTimeout(() => {
             this.setupCarousel();
             this.cdr.detectChanges();
           }, 100);
         },
         error: (error) => {
-          this.alertaServicio.MostrarError('Error al subir la imagen. Por favor, intente de nuevo.');
           this.cargandoImagen = false;
+
+          if (error?.error?.Alerta) {
+            this.alertaServicio.MostrarAlerta(error.error.Alerta, 'Atención');
+          } else {
+            this.alertaServicio.MostrarError('Error al subir la imagen. Por favor, intente de nuevo.');
+          }
+
           this.cdr.detectChanges();
         }
       });
-    
+
     this.subscriptions.push(subscription);
   }
-  
+
   // ---- MÉTODOS PARA EDICIÓN Y ELIMINACIÓN ----
-  
+
   // Iniciar edición de una imagen existente
   iniciarEdicion(item: CarruselItem): void {
     // Evitar múltiples ediciones simultáneas
     if (this.itemEnEdicion !== null) {
       this.cancelarEdicion();
     }
-    
+
     // Guardar referencia al ítem en edición
     this.itemEnEdicion = item;
-    
+
     // Inicializar objeto de edición
     this.imagenEdicion = {
       CodigoCarruselImagen: item.CodigoCarruselImagen || 0,
@@ -596,7 +604,7 @@ private applyIOSFixes(): void {
       imagenPreview: item.UrlImagen || null,
     };
   }
-  
+
   // Cancelar la edición actual
   cancelarEdicion(): void {
     this.itemEnEdicion = null;
@@ -608,7 +616,7 @@ private applyIOSFixes(): void {
       imagenPreview: null,
     };
   }
-  
+
   // Seleccionar nueva imagen para edición
   seleccionarImagenEdicion(event: Event): void {
     const target = event.target as HTMLInputElement;
@@ -622,7 +630,7 @@ private applyIOSFixes(): void {
       reader.readAsDataURL(file);
     }
   }
-  
+
   // Guardar los cambios de edición
   guardarEdicion(): void {
     // Si hay una nueva imagen seleccionada, subirla
@@ -630,16 +638,16 @@ private applyIOSFixes(): void {
       this.actualizarImagenCarrusel();
     }
   }
-  
+
   // Actualizar imagen en el servidor
   actualizarImagenCarrusel(): void {
     if (!this.imagenEdicion.imagen) {
       this.alertaServicio.MostrarAlerta('No hay archivo para actualizar');
       return;
     }
-    
+
     this.cargandoImagen = true;
-    
+
     const formData = new FormData();
     formData.append('Imagen', this.imagenEdicion.imagen);
     formData.append('CarpetaPrincipal', this.NombreEmpresa);
@@ -649,40 +657,50 @@ private applyIOSFixes(): void {
     formData.append('CampoVinculado', 'CodigoCarrusel');
     formData.append('CampoPropio', 'CodigoCarruselImagen');
     formData.append('NombreCampoImagen', 'UrlImagen');
-    
+
     const subscription = this.http.post(`${this.Url}subir-imagen`, formData)
       .subscribe({
         next: (response: any) => {
+          if (response?.Alerta) {
+            this.alertaServicio.MostrarAlerta(response.Alerta, 'Atención');
+            this.cargandoImagen = false;
+            this.cdr.detectChanges();
+            return;
+          }
+
           this.alertaServicio.MostrarExito('Imagen actualizada correctamente');
           this.cargandoImagen = false;
-          
-          // Actualizar el ítem en el array
+
           if (this.itemEnEdicion) {
-            const index = this.items.findIndex((item: CarruselItem) => 
-              item.CodigoCarruselImagen === this.imagenEdicion.CodigoCarruselImagen);
-            
+            const index = this.items.findIndex((item: CarruselItem) =>
+              item.CodigoCarruselImagen === this.imagenEdicion.CodigoCarruselImagen
+            );
+
             if (index !== -1) {
-              // Actualizar URL de imagen y otros metadatos
               this.items[index].UrlImagen = response.Entidad?.UrlImagen || response.url;
-              // Crear un nuevo array para forzar la detección de cambios
               this.items = [...this.items];
             }
           }
-          
-          // Resetear edición
+
           this.cancelarEdicion();
           this.cdr.detectChanges();
         },
         error: (error) => {
-          this.alertaServicio.MostrarError('Error al actualizar la imagen. Por favor, intente de nuevo.');
           this.cargandoImagen = false;
+
+          if (error?.error?.Alerta) {
+            this.alertaServicio.MostrarAlerta(error.error.Alerta, 'Atención');
+          } else {
+            this.alertaServicio.MostrarError('Error al actualizar la imagen. Por favor, intente de nuevo.');
+          }
+
           this.cdr.detectChanges();
         }
       });
-    
+
     this.subscriptions.push(subscription);
   }
-    
+
   // Eliminar una imagen del carrusel
   eliminarImagen(item: CarruselItem): void {
     this.alertaServicio.Confirmacion(
@@ -734,7 +752,7 @@ private applyIOSFixes(): void {
     }
 
     this.carruselActual.NombreCarrusel = this.tituloTemporal;
-    
+
     this.carruselServicio.Editar(this.carruselActual)
       .subscribe({
         next: (response) => {
@@ -753,28 +771,28 @@ private applyIOSFixes(): void {
     this.tituloTemporal = '';
   }
 
-private applyIOSImageFixes(): void {
-  if (!this.isIOS) return;
-  
-  const carousel = this.carouselContainer?.nativeElement;
-  if (!carousel) return;
-  
-  // Aplicar estilos específicos a las imágenes en iOS
-  const images = carousel.querySelectorAll('.product-image');
-  images.forEach((img: any) => {
-    img.style.height = '165px';
-    img.style.width = '100%';
-    img.style.aspectRatio = '1/1';
-    img.style.objectFit = 'cover';
-  });
-  
-  // Aplicar estilos específicos a las tarjetas en iOS
-  const cards = carousel.querySelectorAll('.product-card');
-  cards.forEach((card: any) => {
-    card.style.width = '220px';
-    card.style.maxWidth = '220px';
-    card.style.minWidth = '220px';
-    card.style.flex = '0 0 220px';
-  });
-}
+  private applyIOSImageFixes(): void {
+    if (!this.isIOS) return;
+
+    const carousel = this.carouselContainer?.nativeElement;
+    if (!carousel) return;
+
+    // Aplicar estilos específicos a las imágenes en iOS
+    const images = carousel.querySelectorAll('.product-image');
+    images.forEach((img: any) => {
+      img.style.height = '165px';
+      img.style.width = '100%';
+      img.style.aspectRatio = '1/1';
+      img.style.objectFit = 'cover';
+    });
+
+    // Aplicar estilos específicos a las tarjetas en iOS
+    const cards = carousel.querySelectorAll('.product-card');
+    cards.forEach((card: any) => {
+      card.style.width = '220px';
+      card.style.maxWidth = '220px';
+      card.style.minWidth = '220px';
+      card.style.flex = '0 0 220px';
+    });
+  }
 }

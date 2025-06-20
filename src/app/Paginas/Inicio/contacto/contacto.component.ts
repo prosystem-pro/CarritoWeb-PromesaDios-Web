@@ -186,7 +186,7 @@ export class ContactoComponent implements OnInit {
       this.AlertaServicio.MostrarAlerta('No se seleccionó ningún archivo.');
     }
   }
-    ActualizarImagenHorario(event: any): void {
+  ActualizarImagenHorario(event: any): void {
     const file = event.target.files[0];
     if (file) {
       this.subirImagen(file, 'UrlImagenHorario');
@@ -218,17 +218,30 @@ export class ContactoComponent implements OnInit {
         formData.append('NombreCampoImagen', CampoDestino);
 
         this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
-          next: () => {
+          next: (response: any) => {
+            if (response?.Alerta) {
+              this.AlertaServicio.MostrarAlerta(response.Alerta, 'Atención');
+              return;
+            }
+
             this.AlertaServicio.MostrarExito('Imagen subida correctamente.');
             this.ObtenerContactanosPortada();
           },
           error: (err) => {
-            this.AlertaServicio.MostrarError(err, 'Error al subir la imagen');
+            if (err?.error?.Alerta) {
+              this.AlertaServicio.MostrarAlerta(err.error.Alerta, 'Atención');
+            } else {
+              this.AlertaServicio.MostrarError(err, 'Error al subir la imagen');
+            }
           }
         });
       },
       error: (err) => {
-        this.AlertaServicio.MostrarError(err, 'No se pudo obtener la empresa');
+        if (err?.error?.Alerta) {
+          this.AlertaServicio.MostrarAlerta(err.error.Alerta, 'Atención');
+        } else {
+          this.AlertaServicio.MostrarError(err, 'No se pudo obtener la empresa');
+        }
       }
     });
   }
@@ -402,6 +415,11 @@ export class ContactoComponent implements OnInit {
 
         this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
           next: (res: any) => {
+            if (res?.Alerta) {
+              this.AlertaServicio.MostrarAlerta(res.Alerta, 'Atención');
+              return;
+            }
+
             const entidad = res?.Entidad;
 
             if (entidad?.UrlImagen) {
@@ -432,13 +450,21 @@ export class ContactoComponent implements OnInit {
           },
           error: (err) => {
             console.error('Error al subir la imagen:', err);
-            this.AlertaServicio.MostrarError(err, 'Error al subir la imagen');
+            if (err?.error?.Alerta) {
+              this.AlertaServicio.MostrarAlerta(err.error.Alerta, 'Atención');
+            } else {
+              this.AlertaServicio.MostrarError(err, 'Error al subir la imagen');
+            }
           }
         });
       },
       error: (err) => {
         console.error('Error al obtener la empresa:', err);
-        this.AlertaServicio.MostrarError(err, 'Error al obtener la empresa');
+        if (err?.error?.Alerta) {
+          this.AlertaServicio.MostrarAlerta(err.error.Alerta, 'Atención');
+        } else {
+          this.AlertaServicio.MostrarError(err, 'Error al obtener la empresa');
+        }
       }
     });
   }
@@ -485,7 +511,7 @@ export class ContactoComponent implements OnInit {
     });
   }
 
-   ObtenerNavegador(): string {
+  ObtenerNavegador(): string {
     const AgenteUsuario = navigator.userAgent;
 
     if (AgenteUsuario.includes('Chrome') && !AgenteUsuario.includes('Edg')) {
@@ -501,12 +527,12 @@ export class ContactoComponent implements OnInit {
     }
   }
   OcultarRedSocialInactivos() {
-  if (this.Permiso.PermisoSuperAdmin()) {
-    return this.RedSocial;
-  } else {
-    return this.RedSocial.filter(red => red.Estatus === 1);
+    if (this.Permiso.PermisoSuperAdmin()) {
+      return this.RedSocial;
+    } else {
+      return this.RedSocial.filter(red => red.Estatus === 1);
+    }
   }
-}
 
 }
 

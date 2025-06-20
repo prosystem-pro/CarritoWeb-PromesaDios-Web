@@ -109,7 +109,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
     // Verificar si es una búsqueda global o por categoría
     this.route.url.subscribe(url => {
       const rutaActual = url.map(segment => segment.path).join('/');
-      
+
       if (rutaActual.includes('buscar')) {
         // Es una búsqueda global
         this.esBusquedaGlobal = true;
@@ -120,7 +120,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
             this.nombreClasificacion = `Búsqueda: "${this.textoBusquedaGlobal}"`;
             this.buscarProductosGlobalmente(this.textoBusquedaGlobal);
           }
-        }); 
+        });
       } else {
         // Es una búsqueda por categoría (comportamiento original)
         this.esBusquedaGlobal = false;
@@ -177,15 +177,15 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
     this.productoServicio.BuscarProductos(1, texto).subscribe({
       next: (data) => {
-      const esAdminOSuperAdmin = this.Permiso.PermisoAdminSuperAdmin();
+        const esAdminOSuperAdmin = this.Permiso.PermisoAdminSuperAdmin();
 
-      // Filtrar productos según el estatus y rol del usuario
-      const productosFiltrados = data.filter((producto: Producto) => {
-        return (
-          producto.Estatus === 1 ||
-          (producto.Estatus === 2 && esAdminOSuperAdmin)
-        );
-      });
+        // Filtrar productos según el estatus y rol del usuario
+        const productosFiltrados = data.filter((producto: Producto) => {
+          return (
+            producto.Estatus === 1 ||
+            (producto.Estatus === 2 && esAdminOSuperAdmin)
+          );
+        });
         // Agregar la propiedad cantidad a cada producto
         this.productos = productosFiltrados.map((producto: Producto) => ({
           ...producto,
@@ -194,7 +194,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
         this.productosOriginales = [...this.productos];
         this.busquedaActiva = true;
         this.cargando = false;
-        
+
         if (this.productos.length === 0) {
           this.error = `No se encontraron productos que coincidan con "${texto}"`;
         }
@@ -205,43 +205,43 @@ export class ProductosComponent implements OnInit, OnDestroy {
         } else {
           this.error = 'No se pudieron cargar los productos. Contacte al administrador.';
         }
-        
+
         this.cargando = false;
       },
     });
   }
 
   cargarProductos(codigo: number): void {
-  this.cargando = true;
-  this.error = null;
+    this.cargando = true;
+    this.error = null;
 
-  this.productoServicio.ListadoProductos(codigo).subscribe({
-    next: (data) => {
-      const esAdminOSuperAdmin = this.Permiso.PermisoAdminSuperAdmin();
+    this.productoServicio.ListadoProductos(codigo).subscribe({
+      next: (data) => {
+        const esAdminOSuperAdmin = this.Permiso.PermisoAdminSuperAdmin();
 
-      // Filtrar productos según el estatus y rol del usuario
-      const productosFiltrados = data.filter((producto: Producto) => {
-        return (
-          producto.Estatus === 1 ||
-          (producto.Estatus === 2 && esAdminOSuperAdmin)
-        );
-      });
+        // Filtrar productos según el estatus y rol del usuario
+        const productosFiltrados = data.filter((producto: Producto) => {
+          return (
+            producto.Estatus === 1 ||
+            (producto.Estatus === 2 && esAdminOSuperAdmin)
+          );
+        });
 
-      // Agregar cantidad y guardar
-      this.productos = productosFiltrados.map((producto: Producto) => ({
-        ...producto,
-        cantidad: 1,
-      }));
+        // Agregar cantidad y guardar
+        this.productos = productosFiltrados.map((producto: Producto) => ({
+          ...producto,
+          cantidad: 1,
+        }));
 
-      this.productosOriginales = [...this.productos]; // copia original
-      this.cargando = false;
-    },
-    error: (err) => {
-      this.error = 'No se pudieron cargar los productos. Contacte al administrador.';
-      this.cargando = false;
-    },
-  });
-}
+        this.productosOriginales = [...this.productos]; // copia original
+        this.cargando = false;
+      },
+      error: (err) => {
+        this.error = 'No se pudieron cargar los productos. Contacte al administrador.';
+        this.cargando = false;
+      },
+    });
+  }
   cargarClasificacion(codigo: number): void {
     this.clasificacionProductoServicio.ObtenerPorCodigo(codigo).subscribe({
       next: (data) => {
@@ -537,7 +537,11 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
     this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
       next: (response: any) => {
-        
+        if (response?.Alerta) {
+          this.alertaServicio.MostrarAlerta(response.Alerta, 'Atención');
+          return;
+        }
+
         if (response && response.Entidad && response.Entidad.UrlImagen) {
           // Actualizar la URL de la imagen en el producto
           producto.UrlImagen = response.Entidad.UrlImagen;
@@ -550,7 +554,11 @@ export class ProductosComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        this.alertaServicio.MostrarError(error, 'Error al subir imagen');
+        if (error?.error?.Alerta) {
+          this.alertaServicio.MostrarAlerta(error.error.Alerta, 'Atención');
+        } else {
+          this.alertaServicio.MostrarError(error, 'Error al subir imagen');
+        }
       },
     });
   }
@@ -659,12 +667,15 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
     this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
       next: (response: any) => {
+        if (response?.Alerta) {
+          this.isLoading = false;
+          this.alertaServicio.MostrarAlerta(response.Alerta, 'Atención');
+          return;
+        }
 
         if (response && response.Entidad && response.Entidad.CodigoProducto) {
-          // 2. Capturar el CodigoProducto generado
           const codigoProductoGenerado = response.Entidad.CodigoProducto;
 
-          // 3. Actualizar el producto con el nombre, precio y moneda
           const productoActualizado: Producto = {
             CodigoProducto: codigoProductoGenerado,
             CodigoClasificacionProducto: this.codigoClasificacion,
@@ -675,21 +686,16 @@ export class ProductosComponent implements OnInit, OnDestroy {
             Estatus: 1,
           };
 
-          // 4. Llamar al servicio para actualizar los datos
           this.productoServicio.Editar(productoActualizado).subscribe({
-            next: (editResponse) => {
+            next: () => {
               this.isLoading = false;
               this.alertaServicio.MostrarExito('Producto creado correctamente');
-
-              // 5. Recargar productos y cerrar formulario
               this.cargarProductos(this.codigoClasificacion);
               this.cancelarNuevoProducto();
             },
             error: (editError) => {
               this.isLoading = false;
               this.alertaServicio.MostrarError(editError, 'Error al actualizar datos del producto');
-
-              // Recargar de todas formas y cerrar formulario
               this.cargarProductos(this.codigoClasificacion);
               this.cancelarNuevoProducto();
             },
@@ -700,7 +706,12 @@ export class ProductosComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        this.alertaServicio.MostrarError(error, 'Error al subir imagen y crear producto');
+        this.isLoading = false;
+        if (error?.error?.Alerta) {
+          this.alertaServicio.MostrarAlerta(error.error.Alerta, 'Atención');
+        } else {
+          this.alertaServicio.MostrarError(error, 'Error al subir imagen y crear producto');
+        }
       },
     });
   }
@@ -719,32 +730,32 @@ export class ProductosComponent implements OnInit, OnDestroy {
   // ---- Eliminar producto ----
 
   eliminarProducto(producto: ProductoConCantidad): void {
-  if (!producto.CodigoProducto) {
-    this.alertaServicio.MostrarAlerta('El producto no tiene un código válido.');
-    return;
-  }
-
-  this.alertaServicio.Confirmacion(
-    `¿Está seguro que desea eliminar el producto "${producto.NombreProducto}"?`,
-    'Esta acción no se puede deshacer.'
-  ).then((confirmado) => {
-    if (confirmado) {
-      this.productoServicio.Eliminar(producto.CodigoProducto!).subscribe({
-        next: (response) => {
-          this.alertaServicio.MostrarExito('Producto eliminado correctamente');
-
-          // Eliminar de la lista local
-          this.productos = this.productos.filter(
-            (p) => p.CodigoProducto !== producto.CodigoProducto
-          );
-        },
-        error: (error) => {
-          this.alertaServicio.MostrarError(error, 'Error al eliminar el producto');
-        },
-      });
+    if (!producto.CodigoProducto) {
+      this.alertaServicio.MostrarAlerta('El producto no tiene un código válido.');
+      return;
     }
-  });
-}
+
+    this.alertaServicio.Confirmacion(
+      `¿Está seguro que desea eliminar el producto "${producto.NombreProducto}"?`,
+      'Esta acción no se puede deshacer.'
+    ).then((confirmado) => {
+      if (confirmado) {
+        this.productoServicio.Eliminar(producto.CodigoProducto!).subscribe({
+          next: (response) => {
+            this.alertaServicio.MostrarExito('Producto eliminado correctamente');
+
+            // Eliminar de la lista local
+            this.productos = this.productos.filter(
+              (p) => p.CodigoProducto !== producto.CodigoProducto
+            );
+          },
+          error: (error) => {
+            this.alertaServicio.MostrarError(error, 'Error al eliminar el producto');
+          },
+        });
+      }
+    });
+  }
 
   // Método modificado para manejar ambos tipos de búsqueda
   buscar(): void {
@@ -812,28 +823,28 @@ export class ProductosComponent implements OnInit, OnDestroy {
   }
 
   toggleEstadoProducto(producto: Producto): void {
-  const nuevoEstado = producto.Estatus === 1 ? 2 : 1;
+    const nuevoEstado = producto.Estatus === 1 ? 2 : 1;
 
-  const productoActualizado: Producto = {
-    ...producto,
-    Estatus: nuevoEstado
-  };
+    const productoActualizado: Producto = {
+      ...producto,
+      Estatus: nuevoEstado
+    };
 
-  this.productoServicio.Editar(productoActualizado).subscribe({
-    next: () => {
-      producto.Estatus = nuevoEstado; // Actualiza el estado local
-      this.alertaServicio.MostrarExito(
-        `Producto ${nuevoEstado === 1 ? 'activado' : 'desactivado'} correctamente` 
-      );
-    },
-    error: (err) => {
-      this.alertaServicio.MostrarError(err, 'Error al cambiar el estado del producto');
-    }
-  });
-}
+    this.productoServicio.Editar(productoActualizado).subscribe({
+      next: () => {
+        producto.Estatus = nuevoEstado; // Actualiza el estado local
+        this.alertaServicio.MostrarExito(
+          `Producto ${nuevoEstado === 1 ? 'activado' : 'desactivado'} correctamente`
+        );
+      },
+      error: (err) => {
+        this.alertaServicio.MostrarError(err, 'Error al cambiar el estado del producto');
+      }
+    });
+  }
 
-getProductosActivos() {
+  getProductosActivos() {
     return this.productos.filter(producto => producto.Estatus !== 2);
-}
+  }
 
 }
