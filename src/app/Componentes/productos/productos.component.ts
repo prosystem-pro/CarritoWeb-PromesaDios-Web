@@ -404,6 +404,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
     // Llamar al servicio para actualizar en la base de datos
     this.productoServicio.Editar(producto).subscribe({
       next: (response) => {
+        this.cargarProductos(this.codigoClasificacion);
         this.alertaServicio.MostrarExito('Nombre del producto actualizado correctamente');
         this.editandoNombre = null;
       },
@@ -477,12 +478,13 @@ export class ProductosComponent implements OnInit, OnDestroy {
     this.productoServicio.Editar(producto).subscribe({
       next: (response) => {
         console.log('Precio actualizado correctamente', response);
+        this.cargarProductos(this.codigoClasificacion);
         this.alertaServicio.MostrarExito('Precio del producto actualizado correctamente');
         this.editandoPrecio = null;
       },
       error: (error) => {
         this.alertaServicio.MostrarError(error, 'Error al actualizar precio');
-
+        this.cargarProductos(this.codigoClasificacion);
         // Restaurar valores originales
         const partes = this.precioOriginal.match(/([^\d]*)(\d+(?:\.\d+)?)/);
         if (partes) {
@@ -537,6 +539,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
     this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
       next: (response: any) => {
+        console.log('📦 Respuesta completa del backend al subir imagen:', response);
         if (response?.Alerta) {
           this.alertaServicio.MostrarAlerta(response.Alerta, 'Atención');
           return;
