@@ -227,7 +227,6 @@ export class SidebarRedSocialComponent implements OnInit {
   ): void {
     const datosNuevos = {
       CodigoRedSocial: codigoRedSocial,
-      UrlImagen: urlImagen,
       Ubicacion: 'SocialSidebar', // Valor quemado como solicitaste
       Estatus: 1, // Agregar estatus activo
     };
@@ -256,7 +255,6 @@ export class SidebarRedSocialComponent implements OnInit {
   ): void {
     const datosActualizados = {
       CodigoRedSocialImagen: codigoRedSocialImagen,
-      UrlImagen: urlImagen,
       Ubicacion: 'SocialSidebar', // Valor quemado como solicitaste
       Estatus: 1, // Mantener estatus activo
     };
