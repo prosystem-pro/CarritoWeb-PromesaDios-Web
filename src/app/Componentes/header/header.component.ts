@@ -427,7 +427,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   crearRegistroRedSocialImagen(codigoRedSocial: number, urlImagen: string): void {
     const datosNuevos = {
       CodigoRedSocial: codigoRedSocial,
-      UrlImagen: urlImagen,
       Ubicacion: 'Navbar',
       Estatus: 1
     };
@@ -447,7 +446,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   actualizarRegistroRedSocialImagen(codigoRedSocialImagen: number, urlImagen: string): void {
     const datosActualizados = {
       CodigoRedSocialImagen: codigoRedSocialImagen,
-      UrlImagen: urlImagen,
       Ubicacion: 'Navbar',
       Estatus: 1
     };
