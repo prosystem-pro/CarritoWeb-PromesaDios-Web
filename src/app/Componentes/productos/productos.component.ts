@@ -682,7 +682,6 @@ export class ProductosComponent implements OnInit, OnDestroy {
             NombreProducto: this.nuevoProducto.NombreProducto,
             Moneda: this.nuevoProducto.Moneda || '',
             Precio: this.nuevoProducto.Precio || 0,
-            UrlImagen: response.Entidad.UrlImagen || '',
             Estatus: 1,
           };
 
