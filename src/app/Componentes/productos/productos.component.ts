@@ -546,6 +546,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
           // Actualizar la URL de la imagen en el producto
           producto.UrlImagen = response.Entidad.UrlImagen;
           this.alertaServicio.MostrarExito('Imagen actualizada correctamente');
+          this.cargarProductos(this.codigoClasificacion);
         } else {
           this.alertaServicio.MostrarAlerta('Error al procesar la respuesta del servidor');
 
