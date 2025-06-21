@@ -833,6 +833,8 @@ export class ProductosComponent implements OnInit, OnDestroy {
       Estatus: nuevoEstado
     };
 
+    delete productoActualizado.UrlImagen;
+
     this.productoServicio.Editar(productoActualizado).subscribe({
       next: () => {
         producto.Estatus = nuevoEstado; // Actualiza el estado local

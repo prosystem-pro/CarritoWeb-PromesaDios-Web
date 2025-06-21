@@ -177,32 +177,30 @@ export class MenuCategoriaComponent implements OnInit {
     });
   }
 
-  cargarDatosCarrusel(): void {
-    this.carruselServicio.Listado().subscribe({
-      next: (data) => {
-        // Buscar carrusel en índice 1 o por ubicación 'MenuCategoria'
-        let carruselMenuCategoria = null;
-        
-        if (data && data.length > 1) {
-          carruselMenuCategoria = data[1];
-        } else if (data && data.length > 0) {
-          carruselMenuCategoria = data.find(c => c.Ubicacion === 'MenuCategoria');
-        }
-
-        if (carruselMenuCategoria) {
-          this.carruselData = carruselMenuCategoria;
-          this.codigoCarrusel = this.carruselData.CodigoCarrusel;
-          this.titulo = this.carruselData.NombreCarrusel;
-          this.cargarImagenesCarrusel();
-        } else {
-          this.crearCarruselPorDefecto();
-        }
-      },
-      error: (err) => {
-        // this.crearCarruselPorDefecto();
+cargarDatosCarrusel(): void {
+  this.carruselServicio.Listado().subscribe({
+    next: (data) => {
+      // Buscar carrusel únicamente por ubicación 'MenuCategoria'
+      let carruselMenuCategoria = null;
+      
+      if (data && data.length > 0) {
+        carruselMenuCategoria = data.find(c => c.Ubicacion === 'MenuCategoria');
       }
-    });
-  }
+
+      if (carruselMenuCategoria) {
+        this.carruselData = carruselMenuCategoria;
+        this.codigoCarrusel = this.carruselData.CodigoCarrusel;
+        this.titulo = this.carruselData.NombreCarrusel;
+        this.cargarImagenesCarrusel();
+      } else {
+        this.crearCarruselPorDefecto();
+      }
+    },
+    error: (err) => {
+      // this.crearCarruselPorDefecto();
+    }
+  });
+}
 
   // Crear Carrusel si no existe
   private crearCarruselPorDefecto(): void {

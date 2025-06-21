@@ -181,24 +181,25 @@ export class NosotrosComponent implements OnInit {
   cargarDatosCarrusel(): void {
     this.carruselServicio.Listado().subscribe({
       next: (data) => {
+        // Buscar carrusel específicamente por ubicación 'Nosotros'
+        let carruselNosotros = null;
+        
         if (data && data.length > 0) {
-          // Existe el carrusel, usar datos existentes
-          this.carruselData = data[0];
+          carruselNosotros = data.find(c => c.Ubicacion === 'Nosotros');
+        }
+
+        if (carruselNosotros) {
+          this.carruselData = carruselNosotros;
           this.codigoCarrusel = this.carruselData.CodigoCarrusel;
           this.titulo = this.carruselData.NombreCarrusel;
-
-          // Cargar imágenes del carrusel
           this.cargarImagenesCarrusel();
         } else {
-          // No existe carrusel, crear uno nuevo con valores por defecto
           this.crearCarruselPorDefecto();
         }
       },
       error: (err) => {
-        console.error('Error al obtener datos del carrusel:', err);
-        // En caso de error, intentar crear carrusel por defecto
         // this.crearCarruselPorDefecto();
-      },
+      }
     });
   }
 
@@ -229,6 +230,7 @@ export class NosotrosComponent implements OnInit {
         this.codigoCarrusel = this.carruselData.CodigoCarrusel;
         this.titulo = this.carruselData.NombreCarrusel;
 
+        this.cargarDatosCarrusel();
         // Cargar imágenes del carrusel (estará vacío inicialmente)
         this.cargarImagenesCarrusel();
       },
