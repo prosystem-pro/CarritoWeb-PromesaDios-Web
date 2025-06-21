@@ -457,7 +457,6 @@ procesarRespuestaImagen(codigoRedSocial: number, response: any, redSocial: any):
 crearRegistroRedSocialImagen(codigoRedSocial: number, urlImagen: string): void {
   const datosNuevos = {
     CodigoRedSocial: codigoRedSocial,
-    UrlImagen: urlImagen,
     Ubicacion: 'Footer', // Valor quemado como solicitaste
     Estatus: 1 // Agregar estatus activo
   };
@@ -480,7 +479,6 @@ crearRegistroRedSocialImagen(codigoRedSocial: number, urlImagen: string): void {
 actualizarRegistroRedSocialImagen(codigoRedSocialImagen: number, urlImagen: string): void {
   const datosActualizados = {
     CodigoRedSocialImagen: codigoRedSocialImagen,
-    UrlImagen: urlImagen,
     Ubicacion: 'Footer', // Valor quemado como solicitaste
     Estatus: 1 // Mantener estatus activo
   };
