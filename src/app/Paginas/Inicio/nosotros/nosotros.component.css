@@ -245,12 +245,12 @@
 
 @media (min-width: 768px) and (max-width: 1024px) {
   .trigo-izquierda {
-    width: 85px;
+    width: 150px;
     top: 50%; /* Ajuste para móviles */
   }
 
   .trigo-derecho {
-    width: 100px;
+    width: 150px;
     bottom: 55%; /* Ajuste para móviles */
   }
 
@@ -304,12 +304,12 @@
 
   .trigo-izquierda {
     width: 85px;
-    top: 56%; /* Ajuste para móviles */
+    top: 62%; /* Ajuste para móviles */
   }
 
   .trigo-derecho {
     width: 100px;
-    bottom: 50%; /* Ajuste para móviles */
+    bottom: 62%; /* Ajuste para móviles */
   }
 
   .reproductor {
