@@ -143,6 +143,7 @@ export class ContactoComponent implements OnInit {
     }
 
     delete this.ContactanosPortada.UrlImagenContactanosPortada;
+    delete this.ContactanosPortada.UrlImagenHorario;
 
     Object.keys(this.ContactanosPortada).forEach(key => {
       const valor = (this.ContactanosPortada as any)[key];
@@ -152,7 +153,6 @@ export class ContactoComponent implements OnInit {
     });
 
     const esEdicion = this.ContactanosPortada.CodigoContactanosPortada;
-
     if (esEdicion) {
       this.ServicioContactanosPortada.Editar(this.ContactanosPortada).subscribe({
         next: () => {

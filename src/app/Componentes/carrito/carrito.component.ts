@@ -2,7 +2,9 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ServicioCompartido } from '../../Servicios/ServicioCompartido';
 import { EmpresaServicio } from '../../Servicios/EmpresaServicio';
+import { RedSocialServicio } from '../../Servicios/RedSocialServicio';
 import { ReporteProductoServicio } from '../../Servicios/ReporteProductoServicio';
+import { AlertaServicio } from '../../Servicios/Alerta-Servicio';
 
 interface ProductoConCantidad {
   CodigoProducto: number;
@@ -28,8 +30,8 @@ export class CarritoComponent implements OnInit {
   colorNavbarEIcono: string = '';
   colorTextoNavbar: string = '';
 
-  constructor(private carritoService: ServicioCompartido, private empresaServicio: EmpresaServicio,
-    private ReporteProductoServicio: ReporteProductoServicio
+  constructor(private carritoService: ServicioCompartido, private empresaServicio: EmpresaServicio, private RedSocialServicio: RedSocialServicio,
+    private ReporteProductoServicio: ReporteProductoServicio, private AlertaServicio: AlertaServicio
   ) { }
 
   ngOnInit(): void {
@@ -91,25 +93,25 @@ export class CarritoComponent implements OnInit {
   cerrar(): void {
     this.cerrarCarrito.emit();
   }
-ReportarProductosVendidos(): void {
-  const productosValidos = this.productosCarrito
-    .filter(producto => producto.CodigoProducto && producto.cantidad)
-    .map(producto => ({
-      CodigoProducto: producto.CodigoProducto,
-      CantidadVendida: producto.cantidad,
-      Navegador: this.ObtenerNavegador()
-    }));
+  ReportarProductosVendidos(): void {
+    const productosValidos = this.productosCarrito
+      .filter(producto => producto.CodigoProducto && producto.cantidad)
+      .map(producto => ({
+        CodigoProducto: producto.CodigoProducto,
+        CantidadVendida: producto.cantidad,
+        Navegador: this.ObtenerNavegador()
+      }));
 
-  if (productosValidos.length === 0) {
-    console.warn('No hay productos válidos para reportar.');
-    return;
+    if (productosValidos.length === 0) {
+      console.warn('No hay productos válidos para reportar.');
+      return;
+    }
+
+    this.ReporteProductoServicio.Crear(productosValidos).subscribe({
+      next: (respuesta) => console.log('Productos reportados correctamente', respuesta),
+      error: (error) => console.error('Error al reportar productos', error)
+    });
   }
-
-  this.ReporteProductoServicio.Crear(productosValidos).subscribe({
-    next: (respuesta) => console.log('Productos reportados correctamente', respuesta),
-    error: (error) => console.error('Error al reportar productos', error)
-  });
-}
 
   ObtenerNavegador(): string {
     const AgenteUsuario = navigator.userAgent;
@@ -139,6 +141,52 @@ ReportarProductosVendidos(): void {
     return /Android/i.test(navigator.userAgent);
   }
 
+  // realizarPedido(): void {
+  //   this.ReportarProductosVendidos();
+
+  //   const esIOS = this.isIOS() && this.isSafari();
+  //   const esAndroid = this.isAndroid();
+
+  //   let nuevaVentana: Window | null = null;
+
+  //   if (esIOS) {
+  //     nuevaVentana = window.open('', '_blank');
+  //     if (!nuevaVentana) {
+  //       console.error('El navegador bloqueó la ventana emergente.');
+  //       return;
+  //     }
+  //   }
+
+  //   this.empresaServicio.Listado().subscribe({
+  //     next: (data: any) => {
+  //       this.datosEmpresa = data[0];
+
+  //       const numTelefono = this.datosEmpresa?.Celular;
+  //       if (!numTelefono) {
+  //         if (esIOS && nuevaVentana) nuevaVentana.close();
+  //         return;
+  //       }
+
+  //       const mensaje = `Hola, me gustaría ordenar:\n${this.productosCarrito.map(producto =>
+  //         `- ${producto.cantidad}x ${producto.NombreProducto} (${producto.Moneda} ${producto.Precio} c/u)`).join('\n')}\n\nTotal: ${this.productosCarrito[0].Moneda} ${this.total}`;
+
+  //       const mensajeCodificado = encodeURIComponent(mensaje);
+  //       const url = `https://wa.me/${numTelefono}?text=${mensajeCodificado}`;
+
+  //       if (esIOS && nuevaVentana) {
+  //         nuevaVentana.location.href = url; // Safari
+  //       } else {
+  //         window.open(url, '_blank'); // Android y demás
+  //       }
+
+  //       this.vaciarCarrito();
+  //     },
+  //     error: (error: any) => {
+  //       if (esIOS && nuevaVentana) nuevaVentana.close();
+  //     }
+  //   });
+  // }
+
   realizarPedido(): void {
     this.ReportarProductosVendidos();
 
@@ -155,13 +203,26 @@ ReportarProductosVendidos(): void {
       }
     }
 
-    this.empresaServicio.Listado().subscribe({
-      next: (data: any) => {
-        this.datosEmpresa = data[0];
+    this.RedSocialServicio.Listado().subscribe({
+      next: (data: any[]) => {
+        // Buscar el link que sea de WhatsApp y tenga número válido
+        const redWhatsapp = data.find(red =>
+          typeof red.Link === 'string' && /https:\/\/wa\.me\/\d{8}/.test(red.Link)
+        );
 
-        const numTelefono = this.datosEmpresa?.Celular;
-        if (!numTelefono) {
+        if (!redWhatsapp) {
           if (esIOS && nuevaVentana) nuevaVentana.close();
+          this.AlertaServicio.MostrarAlerta('No se encontró un número de WhatsApp válido.');
+          return;
+        }
+
+        // Extraer la URL o el número directamente
+        const urlBase = redWhatsapp.Link.match(/https:\/\/wa\.me\/(\d{8})/)?.[0];
+        const numTelefono = redWhatsapp.Link.match(/wa\.me\/(\d{8})/)?.[1];
+
+        if (!urlBase || !numTelefono) {
+          if (esIOS && nuevaVentana) nuevaVentana.close();
+          this.AlertaServicio.MostrarAlerta('El formato del número de WhatsApp no es válido.');
           return;
         }
 
@@ -169,7 +230,7 @@ ReportarProductosVendidos(): void {
           `- ${producto.cantidad}x ${producto.NombreProducto} (${producto.Moneda} ${producto.Precio} c/u)`).join('\n')}\n\nTotal: ${this.productosCarrito[0].Moneda} ${this.total}`;
 
         const mensajeCodificado = encodeURIComponent(mensaje);
-        const url = `https://wa.me/${numTelefono}?text=${mensajeCodificado}`;
+        const url = `${urlBase}?text=${mensajeCodificado}`;
 
         if (esIOS && nuevaVentana) {
           nuevaVentana.location.href = url; // Safari
@@ -181,7 +242,9 @@ ReportarProductosVendidos(): void {
       },
       error: (error: any) => {
         if (esIOS && nuevaVentana) nuevaVentana.close();
+        this.AlertaServicio.MostrarError(error, 'Error al obtener el número de WhatsApp');
       }
     });
   }
+
 }
