@@ -25,6 +25,7 @@ export class NosotrosComponent implements OnInit {
 
   @ViewChild('videoPlayer', { static: false }) videoPlayer!: ElementRef<HTMLVideoElement>;
   private VolumenVideo = false;
+  private videoInicializado = false;
   rawYoutubeUrl: string = '';
   sanitizedVideoUrl!: SafeResourceUrl;
   isVideoPlaying = false;
@@ -67,9 +68,9 @@ export class NosotrosComponent implements OnInit {
       this.servicioCompartido.colorFooter$.subscribe((color) => {
         this.colorFooter = color;
       });
-      document.body.addEventListener('touchstart', this.intentaReproducirVideo, { once: true });
-      document.body.addEventListener('click', this.reproducirVideo, { once: true });
-      document.body.addEventListener('scroll', this.reproducirVideo, { once: true });
+      // document.body.addEventListener('touchstart', this.intentaReproducirVideo, { once: true });
+      // document.body.addEventListener('click', this.reproducirVideo, { once: true });
+      // document.body.addEventListener('scroll', this.reproducirVideo, { once: true });
     });
   }
 
@@ -512,7 +513,7 @@ export class NosotrosComponent implements OnInit {
   activarSonido() {
     if (this.videoPlayer) {
       const videoEl = this.videoPlayer.nativeElement;
-      videoEl.muted = true;
+      videoEl.muted = false;
       videoEl.volume = 1;
       videoEl.play().catch(err => console.warn('Error play:', err));
 
@@ -537,28 +538,27 @@ export class NosotrosComponent implements OnInit {
 
   ngAfterViewInit(): void {
     setTimeout(() => {
-      this.reproducirVideo();
+      this.inicializarVideoMuted();
     }, 300);
   }
 
-  reproducirVideo() {
+  private inicializarVideoMuted(): void {
     const videoEl = this.videoPlayer?.nativeElement;
 
-    if (videoEl && this.sanitizedVideoUrl && !this.VolumenVideo) {
+    if (videoEl && this.sanitizedVideoUrl && !this.videoInicializado) {
+      // CRUCIAL: Asegurar que esté muted ANTES de intentar reproducir
       videoEl.muted = true;
       videoEl.volume = 0;
 
       videoEl.play()
         .then(() => {
-          console.log(' Reproducción automática en PC lograda');
+          console.log('Video reproduciéndose automáticamente SIN sonido');
+          this.videoInicializado = true;
         })
         .catch((err) => {
-          console.warn(' PC sigue bloqueando autoplay:', err);
-
-          this.mostrarOverlay = true;
+          console.warn('Autoplay bloqueado por el navegador:', err);
+          this.videoInicializado = true;
         });
-
-      this.VolumenVideo = true;
     }
   }
 }
