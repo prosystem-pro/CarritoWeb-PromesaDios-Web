@@ -303,8 +303,8 @@
                     <!-- Redes sociales -->
                     <div class="mb-4">
                         <div class="d-flex justify-content-center position-relative gap-1">
-                            <a *ngFor="let red of RedSocial" [href]="'https://' + red.Link" target="_blank"
-                                rel="noopener noreferrer" class="position-relative d-inline-block">
+                            <a *ngFor="let red of RedSocial" [href]="red.Link" target="_blank" rel="noopener noreferrer"
+                                class="position-relative d-inline-block">
                                 <img [src]="red.Imagenes[0]?.UrlImagen || ''" [alt]="red.NombreRedSocial" width="25"
                                     height="25" />
                                 <!-- Botón cámara -->
