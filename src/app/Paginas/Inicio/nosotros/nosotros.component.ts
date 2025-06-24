@@ -68,9 +68,9 @@ export class NosotrosComponent implements OnInit {
       this.servicioCompartido.colorFooter$.subscribe((color) => {
         this.colorFooter = color;
       });
-      // document.body.addEventListener('touchstart', this.intentaReproducirVideo, { once: true });
-      // document.body.addEventListener('click', this.reproducirVideo, { once: true });
-      // document.body.addEventListener('scroll', this.reproducirVideo, { once: true });
+      document.body.addEventListener('touchstart', this.intentaReproducirVideo, { once: true });
+      document.body.addEventListener('click', this.intentaReproducirVideo, { once: true });
+      document.body.addEventListener('scroll', this.intentaReproducirVideo, { once: true });
     });
   }
 
@@ -522,17 +522,21 @@ export class NosotrosComponent implements OnInit {
   }
 
   intentaReproducirVideo = () => {
-    if (this.videoPlayer && !this.VolumenVideo) {
+    if (this.videoPlayer && !this.videoInicializado) {
       const videoEl = this.videoPlayer.nativeElement;
 
-      videoEl.volume = 0;
       videoEl.muted = true;
+      videoEl.volume = 0;
 
       videoEl.play()
-        .then(() => console.log('Reproducción tras interacción'))
-        .catch(err => console.warn('Error tras interacción:', err));
-
-      this.VolumenVideo = true;
+        .then(() => {
+          console.log('Video reproduciéndose tras interacción (MUTED)');
+          this.videoInicializado = true;
+          this.VolumenVideo = true;
+        })
+        .catch(err => {
+          console.warn('Error al reproducir tras interacción:', err);
+        });
     }
   }
 
