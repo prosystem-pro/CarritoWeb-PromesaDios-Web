@@ -19,7 +19,9 @@ export class LoginServicio {
     return new Observable(observer => {
       this.http.post(url, Datos, { headers }).subscribe({
         next: (Respuesta: any) => {
-          if (Respuesta?.Token) this.GuardarToken(Respuesta.Token);
+          if (Respuesta) {
+            this.GuardarToken('authToken', Respuesta.Token);
+          }
           observer.next(Respuesta);
           observer.complete();
         },
@@ -32,8 +34,8 @@ export class LoginServicio {
     return localStorage.getItem('authToken');
   }
 
-  GuardarToken(token: string): void {
-    localStorage.setItem('authToken', token);
+  GuardarToken(variable: string, valor: string): void {
+    localStorage.setItem(variable, valor);
   }
 
   EliminarToken(): void {

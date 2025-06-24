@@ -1,7 +1,8 @@
 export interface ReporteVista {
-  CodigoReporteVista: number;
-  CodigoEmpresa: number;
-  Cantidad: number;
-  NombreDiagrama: string;
-  Estatus: any;
+  CodigoReporteVista?: number;
+  NombreDiagrama?: string;
+  DireccionIp?: string;
+  Navegador?: string;
+  Fecha?: Date;
+  Estatus?: any;
 }

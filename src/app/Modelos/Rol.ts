@@ -1,5 +1,5 @@
 export interface Rol {
-  CodigoRol: number;
-  NombreRol: string;
-  Estatus: any;
+  CodigoRol?: number;
+  NombreRol?: string;
+  Estatus?: any;
 }
