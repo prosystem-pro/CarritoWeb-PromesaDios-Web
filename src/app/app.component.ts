@@ -24,7 +24,7 @@ export class AppComponent implements OnInit {
   private intervaloEnvio: any;
   private tiempoAcumuladoMs: number = 0;
   private temporizadorInactividad: any;
-  private tiempoMaxInactividadMs = 1 * 60 * 1000;
+  private tiempoMaxInactividadMs = 15 * 60 * 1000;
   carritoAbierto = false;
 
   constructor(
