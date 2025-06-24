@@ -23,6 +23,8 @@ export class AppComponent implements OnInit {
   private horaEntrada: number = 0;
   private intervaloEnvio: any;
   private tiempoAcumuladoMs: number = 0;
+  private temporizadorInactividad: any;
+  private tiempoMaxInactividadMs = 1 * 60 * 1000;
   carritoAbierto = false;
 
   constructor(
@@ -32,11 +34,11 @@ export class AppComponent implements OnInit {
     private carritoEstadoService: CarritoEstadoService,
     public permisoServicio: PermisoServicio
   ) {
-        // Suscribirse al estado del carrito
+    // Suscribirse al estado del carrito
     this.carritoEstadoService.carritoAbierto$.subscribe(
       estado => this.carritoAbierto = estado
     );
-   }
+  }
 
   ngOnInit(): void {
     this.horaEntrada = Date.now();
@@ -54,72 +56,61 @@ export class AppComponent implements OnInit {
     if (EsRecarga || EsAccesoDirecto) {
       this.ReportarVista();
     }
-  //     setTimeout(() => {
-  //   this.probarEnvioBeacon();
-  // }, 5000); // 5 segundos
+    //     setTimeout(() => {
+    //   this.probarEnvioBeacon();
+    // }, 5000); // 5 segundos
+    this.reiniciarTemporizadorInactividad();
+  }
+  @HostListener('window:mousemove')
+  @HostListener('window:keydown')
+  @HostListener('window:click')
+  reiniciarInactividad(): void {
+    this.reiniciarTemporizadorInactividad();
+  }
+
+  reiniciarTemporizadorInactividad(): void {
+    clearTimeout(this.temporizadorInactividad);
+
+    this.temporizadorInactividad = setTimeout(() => {
+      console.warn('Usuario inactivo. Cerrando sesión automáticamente...');
+      this.cerrarSesion();
+    }, this.tiempoMaxInactividadMs);
+  }
+
+  cerrarSesion(): void {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('colorClasificacion');
+    localStorage.removeItem('colorClasificacionTexto');
+    this.router.navigate(['/login']);
   }
 
   @HostListener('window:beforeunload', ['$event'])
-  // registrarSalida(event: Event): void {
-  //   const horaSalida = Date.now();
-  //   const tiempoMs = horaSalida - this.horaEntrada;
-  //   const tiempoFormateado = this.formatearTiempo(tiempoMs);
-  //   this.RegistrarTiempoPagina(tiempoFormateado);
-  // }
-//   probarEnvioBeacon(): void {
-//   const horaSalida = Date.now();
-//   const tiempoMs = horaSalida - this.horaEntrada;
-//   const tiempoFormateado = this.formatearTiempo(tiempoMs);
+  registrarSalida(event: Event): void {
+    const horaSalida = Date.now();
+    const tiempoMs = horaSalida - this.horaEntrada;
+    const tiempoFormateado = this.formatearTiempo(tiempoMs);
 
-//   const datos = {
-//     TiempoPromedio: tiempoFormateado,
-//     Navegador: this.ObtenerNavegador()
-//   };
+    const datos = {
+      TiempoPromedio: tiempoFormateado,
+      Navegador: this.ObtenerNavegador()
+    };
 
-//   console.log('🧪 [TEST] Probando envío con sendBeacon');
-//   console.log('Datos a enviar:', datos);
+    console.log('⏳ Registrando salida...');
+    console.log('Datos a enviar:', datos);
 
-//   const blob = new Blob([JSON.stringify(datos)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(datos)], { type: 'application/json' });
 
-//   const exito = navigator.sendBeacon(
-//     'https://carritoweb-promesadios-api.onrender.com/api/reportetiempopagina/crear',
-//         // 'http://localhost:1433/api/reportetiempopagina/crear',
-//     blob
-//   );
+    const exito = navigator.sendBeacon(
+      'https://carritoweb-promesadios-api.onrender.com/api/reportetiempopagina/crear',
+      blob
+    );
 
-//   if (exito) {
-//     console.log('✅ [TEST] Beacon enviado correctamente.');
-//   } else {
-//     console.warn('⚠️ [TEST] Beacon NO se pudo enviar.');
-//   }
-// }
-
-registrarSalida(event: Event): void {
-  const horaSalida = Date.now();
-  const tiempoMs = horaSalida - this.horaEntrada;
-  const tiempoFormateado = this.formatearTiempo(tiempoMs);
-
-  const datos = {
-    TiempoPromedio: tiempoFormateado,
-    Navegador: this.ObtenerNavegador()
-  };
-
-  console.log('⏳ Registrando salida...');
-  console.log('Datos a enviar:', datos);
-
-  const blob = new Blob([JSON.stringify(datos)], { type: 'application/json' });
-
-  const exito = navigator.sendBeacon(
-    'https://carritoweb-promesadios-api.onrender.com/api/reportetiempopagina/crear',
-    blob
-  );
-
-  if (exito) {
-    console.log('✅ Beacon enviado correctamente.');
-  } else {
-    console.warn('⚠️ Beacon NO se pudo enviar.');
+    if (exito) {
+      console.log('✅ Beacon enviado correctamente.');
+    } else {
+      console.warn('⚠️ Beacon NO se pudo enviar.');
+    }
   }
-}
 
 
   RegistrarTiempoPagina(tiempoFormateado: string): void {
@@ -204,7 +195,7 @@ registrarSalida(event: Event): void {
 
   mostrarSidebar(): boolean {
     if (this.permisoServicio.PermisoAdminSuperAdmin() && this.router.url.startsWith('/reporte')) {
-        return false;
+      return false;
     }
 
     return true;
