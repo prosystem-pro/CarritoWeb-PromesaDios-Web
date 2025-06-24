@@ -542,7 +542,7 @@ export class NosotrosComponent implements OnInit {
 
   ngAfterViewInit(): void {
     setTimeout(() => {
-      this.inicializarVideoMuted();
+      this.intentaReproducirVideo();
     }, 300);
   }
 
