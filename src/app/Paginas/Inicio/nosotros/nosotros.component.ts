@@ -21,10 +21,10 @@ import { EmpresaServicio } from '../../../Servicios/EmpresaServicio';
   styleUrls: ['./nosotros.component.css'],
   standalone: true,
 })
-export class NosotrosComponent implements OnInit {
+export class NosotrosComponent implements OnInit, AfterViewInit {
 
   @ViewChild('videoPlayer', { static: false }) videoPlayer!: ElementRef<HTMLVideoElement>;
-  private VolumenVideo = false;
+  private VolumenVideo = false; // Inicialmente sin volumen
   private videoInicializado = false;
   rawYoutubeUrl: string = '';
   sanitizedVideoUrl!: SafeResourceUrl;
@@ -48,6 +48,9 @@ export class NosotrosComponent implements OnInit {
   private Url = `${Entorno.ApiUrl}`;
   private NombreEmpresa = `${Entorno.NombreEmpresa}`;
 
+  // Variable para controlar el overlay de sonido
+  mostrarOverlay = true;
+
   constructor(
     private sanitizer: DomSanitizer,
     private empresaPortadaServicio: EmpresaPortadaServicio,
@@ -68,10 +71,118 @@ export class NosotrosComponent implements OnInit {
       this.servicioCompartido.colorFooter$.subscribe((color) => {
         this.colorFooter = color;
       });
+      
+      // Listeners para intentar reproducir el video en la primera interacción
       document.body.addEventListener('touchstart', this.intentaReproducirVideo, { once: true });
       document.body.addEventListener('click', this.intentaReproducirVideo, { once: true });
       document.body.addEventListener('scroll', this.intentaReproducirVideo, { once: true });
     });
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.configurarVideoSinSonido();
+      this.intentaReproducirVideo();
+    }, 500); // Aumentar el timeout para dar más tiempo
+  }
+
+  // Nuevo método para configurar el video sin sonido desde el inicio
+  private configurarVideoSinSonido(): void {
+    if (this.videoPlayer?.nativeElement) {
+      const videoEl = this.videoPlayer.nativeElement;
+      
+      // Configuración exhaustiva para asegurar que inicie sin sonido
+      videoEl.muted = true;
+      videoEl.defaultMuted = true;
+      videoEl.volume = 0;
+      
+      // Establecer atributos HTML directamente
+      videoEl.setAttribute('muted', 'true');
+      videoEl.setAttribute('defaultmuted', 'true');
+      videoEl.setAttribute('playsinline', 'true');
+      
+      // Listener para cuando se carga el video
+      videoEl.addEventListener('loadeddata', () => {
+        videoEl.muted = true;
+        videoEl.volume = 0;
+      });
+      
+      // Listener para cuando el video está listo para reproducir
+      videoEl.addEventListener('canplay', () => {
+        videoEl.muted = true;
+        videoEl.volume = 0;
+      });
+    }
+  }
+
+  // Método mejorado para intentar reproducir el video
+  intentaReproducirVideo = () => {
+    if (this.videoPlayer && !this.videoInicializado) {
+      const videoEl = this.videoPlayer.nativeElement;
+
+      // CRUCIAL: Forzar configuración sin sonido antes de cada intento de reproducción
+      videoEl.muted = true;
+      videoEl.defaultMuted = true;
+      videoEl.volume = 0;
+      
+      // Asegurar atributos HTML
+      videoEl.setAttribute('muted', 'true');
+      videoEl.setAttribute('defaultmuted', 'true');
+
+      // Intentar reproducir
+      const playPromise = videoEl.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log('Video reproduciéndose automáticamente SIN sonido');
+            this.videoInicializado = true;
+            this.VolumenVideo = false;
+            
+            // Verificar que realmente esté sin sonido después de reproducir
+            setTimeout(() => {
+              if (videoEl.volume > 0 || !videoEl.muted) {
+                videoEl.muted = true;
+                videoEl.volume = 0;
+              }
+            }, 100);
+          })
+          .catch((err) => {
+            this.videoInicializado = true;
+          });
+      }
+    }
+  }
+
+  // Método para activar el sonido solo cuando el usuario haga clic
+  activarSonido(): void {
+    if (this.videoPlayer?.nativeElement) {
+      const videoEl = this.videoPlayer.nativeElement;
+      
+      // Activar sonido
+      videoEl.muted = false;
+      videoEl.volume = 1;
+      videoEl.removeAttribute('muted');
+      
+      // Asegurar que siga reproduciéndose
+      videoEl.play().catch(err => console.warn('Error al activar sonido:', err));
+
+      this.mostrarOverlay = false;
+      this.VolumenVideo = true;
+    } else {
+    }
+  }
+
+  // Método mejorado para configurar la URL sanitizada
+  setSanitizedUrl(): void {
+    if (this.rawYoutubeUrl) {
+      this.sanitizedVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.rawYoutubeUrl);
+      
+      // Después de establecer la URL, configurar el video sin sonido
+      setTimeout(() => {
+        this.configurarVideoSinSonido();
+      }, 100);
+    }
   }
 
   // Nuevo método para obtener el código de empresa
@@ -499,70 +610,8 @@ export class NosotrosComponent implements OnInit {
     }
   }
 
-  setSanitizedUrl(): void {
-    this.sanitizedVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.rawYoutubeUrl);
-  }
-
   playVideo(): void {
     this.isVideoPlaying = true;
     this.setSanitizedUrl();
-  }
-
-  mostrarOverlay = true;
-
-  activarSonido() {
-    if (this.videoPlayer) {
-      const videoEl = this.videoPlayer.nativeElement;
-      videoEl.muted = false;
-      videoEl.volume = 1;
-      videoEl.play().catch(err => console.warn('Error play:', err));
-
-      this.mostrarOverlay = false;
-    }
-  }
-
-  intentaReproducirVideo = () => {
-    if (this.videoPlayer && !this.videoInicializado) {
-      const videoEl = this.videoPlayer.nativeElement;
-
-      videoEl.muted = true;
-      videoEl.volume = 0;
-
-      videoEl.play()
-        .then(() => {
-          console.log('Video reproduciéndose tras interacción (MUTED)');
-          this.videoInicializado = true;
-          this.VolumenVideo = true;
-        })
-        .catch(err => {
-          console.warn('Error al reproducir tras interacción:', err);
-        });
-    }
-  }
-
-  ngAfterViewInit(): void {
-    setTimeout(() => {
-      this.intentaReproducirVideo();
-    }, 300);
-  }
-
-  private inicializarVideoMuted(): void {
-    const videoEl = this.videoPlayer?.nativeElement;
-
-    if (videoEl && this.sanitizedVideoUrl && !this.videoInicializado) {
-      // CRUCIAL: Asegurar que esté muted ANTES de intentar reproducir
-      videoEl.muted = true;
-      videoEl.volume = 0;
-
-      videoEl.play()
-        .then(() => {
-          console.log('Video reproduciéndose automáticamente SIN sonido');
-          this.videoInicializado = true;
-        })
-        .catch((err) => {
-          console.warn('Autoplay bloqueado por el navegador:', err);
-          this.videoInicializado = true;
-        });
-    }
   }
 }
