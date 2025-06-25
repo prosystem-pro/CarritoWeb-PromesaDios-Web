@@ -78,6 +78,7 @@ export class ContactoComponent implements OnInit {
   ObtenerContactanosPortada(): void {
     this.ServicioContactanosPortada.Listado().subscribe({
       next: (data) => {
+        console.log('PRUEBA',data)
         if (data && data.length > 0) {
           this.ContactanosPortada = data[0];
           this.ContactanosPortada.NombreContactanosPortada = this.ContactanosPortada.NombreContactanosPortada || 'Nombre por defecto';
