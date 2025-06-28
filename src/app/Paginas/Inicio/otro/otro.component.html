@@ -191,7 +191,7 @@
 <!-- Botón de agregar centrado y circular -->
 <div *ngIf="!MostrarAgregarOtro && Permiso.PermisoSuperAdmin()" class="d-flex justify-content-center my-4">
   <button class="btn btn-light rounded-circle shadow" style="width: 60px; height: 60px;"
-    (click)="MostrarAgregarOtro = true; UrlImagenTemporal = ''">
+    (click)="MostrarAgregarOtro = true; UrlImagenTemporal = ''; UrlImagenTemporal2=''; CodigoTemporal=''">
     <i class="bi bi-plus-lg fs-4"></i>
   </button>
 </div>

@@ -143,6 +143,7 @@ export class OtroComponent {
     this.OtroServicio.Listado().subscribe({
       next: (data: Otro[]) => {
         if (data && data.length > 0) {
+          console.log('estos son los datos obtenidos de otro', data)
           this.Otro = data.map(item => ({
             ...item,
             MostrarOtro: false
@@ -187,6 +188,7 @@ export class OtroComponent {
     }
 
     delete item.UrlImagen;
+    delete item.UrlImagen2
 
     if (index !== null || (this.CodigoTemporal && this.CodigoTemporal !== '')) {
       this.OtroServicio.Editar(item).subscribe({
@@ -253,53 +255,51 @@ export class OtroComponent {
         const formData = new FormData();
         const CodigoOtro = index != null ? String(this.Otro[index]?.CodigoOtro ?? '') : '';
         const CodigoPropio = String(this.CodigoTemporal || CodigoOtro || '');
-        
+
         formData.append('Imagen', file);
         formData.append('CarpetaPrincipal', nombreEmpresa);
         formData.append('SubCarpeta', 'Otro');
         formData.append('CodigoVinculado', empresa.CodigoEmpresa.toString());
-        formData.append('CodigoPropio', CodigoPropio);
+        formData.append('CodigoPropio', CodigoPropio || CodigoOtro);
         formData.append('CampoVinculado', 'CodigoEmpresa');
         formData.append('CampoPropio', 'CodigoOtro');
         formData.append('NombreCampoImagen', CampoDestino);
-
         this.http.post(`${this.Url}subir-imagen`, formData).subscribe({
-       next: (res: any) => {
-          if (res?.Alerta) {
-            this.AlertaServicio.MostrarAlerta(res.Alerta, 'Atención');
-            return;
-          }
+          next: (res: any) => {
+            if (res?.Alerta) {
+              this.AlertaServicio.MostrarAlerta(res.Alerta, 'Atención');
+              return;
+            }
+            this.AlertaServicio.MostrarAlerta('El registro se actualizó correctamente.');
 
-          this.AlertaServicio.MostrarAlerta('El registro se actualizó correctamente.');
+            this.UrlImagenTemporal = res?.Entidad?.UrlImagen || this.UrlImagenTemporal;
+            this.UrlImagenTemporal2 = res?.Entidad?.UrlImagen2 || this.UrlImagenTemporal2;
+            this.CodigoTemporal = res?.Entidad?.CodigoOtro || this.CodigoTemporal;
 
-          this.UrlImagenTemporal = res?.Entidad?.UrlImagen || this.UrlImagenTemporal;
-          this.UrlImagenTemporal2 = res?.Entidad?.UrlImagen2 || this.UrlImagenTemporal2;
-          this.CodigoTemporal = res?.Entidad?.CodigoOtro || this.CodigoTemporal;
-
-          if (!permiso) {
-            this.ObtenerOtro();
+            if (!permiso) {
+              this.ObtenerOtro();
+            }
+          },
+          error: (err) => {
+            console.error('Error al subir la imagen:', err);
+            if (err?.error?.Alerta) {
+              this.AlertaServicio.MostrarAlerta(err.error.Alerta, 'Atención');
+            } else {
+              this.AlertaServicio.MostrarAlerta('Hubo un error al procesar la solicitud. Intente de nuevo.');
+            }
           }
-        },
-        error: (err) => {
-          console.error('Error al subir la imagen:', err);
-          if (err?.error?.Alerta) {
-            this.AlertaServicio.MostrarAlerta(err.error.Alerta, 'Atención');
-          } else {
-            this.AlertaServicio.MostrarAlerta('Hubo un error al procesar la solicitud. Intente de nuevo.');
-          }
+        });
+      },
+      error: (err) => {
+        console.error('Error al obtener empresa:', err);
+        if (err?.error?.Alerta) {
+          this.AlertaServicio.MostrarAlerta(err.error.Alerta, 'Atención');
+        } else {
+          this.AlertaServicio.MostrarAlerta('No se pudo obtener el dato solicitado. Intente nuevamente.');
         }
-      });
-    },
-    error: (err) => {
-      console.error('Error al obtener empresa:', err);
-      if (err?.error?.Alerta) {
-        this.AlertaServicio.MostrarAlerta(err.error.Alerta, 'Atención');
-      } else {
-        this.AlertaServicio.MostrarAlerta('No se pudo obtener el dato solicitado. Intente nuevamente.');
       }
-    }
-  });
-}
+    });
+  }
 
   EliminarOtro(index: number): void {
     const item = this.Otro[index];
